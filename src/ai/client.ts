@@ -1,5 +1,6 @@
 import { envConfig } from "@/lib/constants/env";
 import { GoogleGenAI } from "@google/genai";
+import { loadPrompt } from "./promptLoader";
 
 export class AIClient {
     private model = "gemini-3.5-flash";
@@ -7,7 +8,7 @@ export class AIClient {
     private apiKey = envConfig.GeminiApiKey;
     private maxOutputTokens = 2048;
     private temperature = 0.7;
-    private systemInstruction = "You are a helpful assistant that provides accurate and concise information based on the user's query. Always provide relevant and informative responses, and avoid unnecessary details. If you don't know the answer, say you don't know instead of making up information.";
+    private systemInstruction = loadPrompt("rootPrompt.prompt") || "You are a helpful assistant that provides accurate and concise information based on the user's query. Always provide relevant and informative responses, and avoid unnecessary details. If you don't know the answer, say you don't know instead of making up information.";
 
     private client: GoogleGenAI;
 
