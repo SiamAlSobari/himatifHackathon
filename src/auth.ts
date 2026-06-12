@@ -4,6 +4,7 @@ import Credentials from "next-auth/providers/credentials"
 import Google from "next-auth/providers/google"
 import bcrypt from "bcrypt"
 import { db } from "@/lib/db"
+import { envConfig } from "./lib/constants/env"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
@@ -12,11 +13,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: "/login",
   },
   providers: [
-    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+    ...(envConfig.GoogleClientId && envConfig.GoogleClientSecret
       ? [
           Google({
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            clientId: envConfig.GoogleClientId!,
+            clientSecret: envConfig.GoogleClientSecret!,
           }),
         ]
       : []),
