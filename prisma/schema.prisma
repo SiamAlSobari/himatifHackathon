@@ -14,15 +14,16 @@ model User {
   emailVerified DateTime?
   image         String?
   passwordHash  String?
-  nama          String?
   usia          Int?
   jenisKelamin  String?
   kontakDarurat String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts Account[]
-  sessions Session[]
+  accounts     Account[]
+  sessions     Session[]
+  screenings   Screening[]
+  chatSessions ChatSession[]
 }
 
 model Account {
@@ -45,7 +46,7 @@ model Account {
 }
 
 model Session {
-  id           String   @id
+  id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
@@ -58,4 +59,63 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// Focused Features
+model Screening {
+  id     String @id @default(cuid())
+  userId String
+
+  score  Int
+  type   ScreeningType @default(ONBOARDING)
+  answer String        @db.Text
+
+  //  Relasi 1 -> M dengan User
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ScreeningType {
+  ONBOARDING
+  DAILY
+}
+
+model ChatSession {
+  id     String            @id @default(cuid())
+  userId String
+  status ChatSessionStatus @default(ACTIVE)
+
+  // Relasi 1 -> M dengan User
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  chatMessages ChatMessage[]
+}
+
+enum ChatSessionStatus {
+  ACTIVE
+  SEALED
+  COMPLETED
+}
+
+model ChatMessage {
+  id          String          @id @default(cuid())
+  sessionId   String
+  role        ChatMessageRole @default(USER)
+  content     String          @db.Text
+  // Untuk menyimpan informasi tambahan utk mengubah tema tampilan
+  metaData    Json?
+  // Relasi M -> 1 dengan ChatSession
+  chatSession ChatSession     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ChatMessageRole {
+  USER
+  ASSISTANT
 }
