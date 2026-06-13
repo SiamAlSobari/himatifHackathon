@@ -1,5 +1,6 @@
 import { ScreeningRequest, ScreeningResult } from "@/lib/types/screening";
 import { AppThemeEnum } from "@/lib/types/theme";
+import screeningRepository from "@/repositories/screening.repository";
 
 export class ScreeningService {
     constructor() { }
@@ -45,8 +46,27 @@ export class ScreeningService {
             theme,
         };
     }
+
+    async saveScreeningResult(userId: string, result: ScreeningResult) {
+        try {
+            const { type, score, answers } = result;
+            const createdResult = await screeningRepository.createScreeningResult(
+                userId,
+                type,
+                score,
+                JSON.stringify(answers)
+            );
+            if (!createdResult) {
+                throw new Error("Failed to create screening result");
+            }
+
+            return createdResult;
+        } catch (error) {
+            console.error("Error saving screening result:", error);
+            throw new Error("Failed to save screening result");
+        }
+    }
 }
 
 const screeningService = new ScreeningService();
-
 export default screeningService;

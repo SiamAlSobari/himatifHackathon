@@ -14,6 +14,6 @@ export async function POST(request: Request) {
         return successResponse(200, "AI response generated successfully", result);
     }
     catch (error) {
-        return errorResponse(500, "Failed to generate AI response: " + (error instanceof Error ? error.message : "Unknown error"));
+        return errorResponse(500, "Internal Server Error :" + (error instanceof Error ? error.message : "Unknown error"));
     }
 }

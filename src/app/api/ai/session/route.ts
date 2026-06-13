@@ -10,7 +10,7 @@ export async function POST(request: Request) {
 
     try {
         const createdChatSession = await chatSessionService.createChatSession(session.user?.id);
-        return successResponse(201, "AI response generated successfully", createdChatSession);
+        return successResponse(201, "Session created successfully", createdChatSession);
     } catch (error) {
         console.error("Error in chat session route:", error);
         return errorResponse(500, "Internal Server Error" + (error instanceof Error ? `: ${error.message}` : ""));

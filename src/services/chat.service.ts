@@ -5,6 +5,7 @@ import aiService from "./ai.service";
 import { AIChatResponse } from "@/lib/types/ai";
 import screeningService from "./screening.service";
 import screeningRepository from "@/repositories/screening.repository";
+import chatSessionRepository from "@/repositories/chatSessionRepository";
 
 export class ChatService {
     private async formatChatHistories(sessionId: string) {
@@ -29,12 +30,17 @@ export class ChatService {
 
     async sendMessage(userId: string, sessionId: string, message: string) {
         try {
+            // Cek apakah ada session dengan sessionId tersebut, kalau tidak ada berarti ada yang salah karena seharusnya session sudah dibuat sebelum user bisa mengirim pesan
+            const existingSession = await chatSessionRepository.getById(sessionId);
+            if (!existingSession) {
+                throw new Error("Chat session not found, cannot send message.");
+            }
+
+            // Format history
             const formattedHistory = await this.formatChatHistories(sessionId);
-            console.log("Formatted Chat History:\n", formattedHistory);
-            
-            let userPrompt = message;
-            
+
             // Jika ini adalah pesan pertama, kita perlu menentukan prompt awal berdasarkan hasil screening terakhir pengguna
+            let userPrompt = message;
             const isFirstMessage = formattedHistory.length === 0;
             if (isFirstMessage) {
                 // Mendapatkan hasil screening terakhir
