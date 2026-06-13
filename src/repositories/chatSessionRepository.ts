@@ -22,6 +22,12 @@ export class ChatSessionRepository {
         })
     }
 
+    async getById(sessionId: string) {
+        return await db.chatSession.findUnique({
+            where: { id: sessionId },
+        })
+    }
+
     async getActiveSessionByUserId(userId: string) {
         return await db.chatSession.findFirst({
             where: { userId, status: "ACTIVE" },
