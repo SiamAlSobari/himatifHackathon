@@ -1,13 +1,18 @@
+import { errorResponse, successResponse } from "@/lib/response";
 import { ScreeningRequest } from "@/lib/types/screening";
 import screeningService from "@/services/screening.service";
 
 export async function POST(request: Request) {
-    const { type, answers } = await request.json() as ScreeningRequest;
+    try {
+        const { type, answers } = await request.json() as ScreeningRequest;
+        const result = await screeningService.calculateScreeningScore({ type, answers });
+        if (!result) {
+            return errorResponse(500, "Failed to calculate screening");
+        }
 
-    const result = await screeningService.calculateScreeningScore({ type, answers });
-    return new Response(JSON.stringify(result), {
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
+        return successResponse(200, "Screening calculated successfully", result);
+    } catch (error) {
+        console.error("Error in Screening route:", error);
+        return errorResponse(500, "Failed to calculate screening");
+    }
 }
