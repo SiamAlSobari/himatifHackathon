@@ -4,6 +4,21 @@ import { AppThemeEnum } from "@/lib/types/theme";
 export class ScreeningService {
     constructor() { }
 
+    async getScreeningResultByScore(score: number): Promise<AppThemeEnum> {
+        let theme = AppThemeEnum.CALM_BLUE;
+        if (score >= 0 && score <= 3) {
+            theme = AppThemeEnum.CALM_BLUE;
+        } else if (score >= 4 && score <= 6) {
+            theme = AppThemeEnum.WARM_YELLOW;
+        } else if (score >= 7 && score <= 9) {
+            theme = AppThemeEnum.ALERT_ORANGE;
+        } else if (score >= 10 && score <= 12) {
+            theme = AppThemeEnum.DEEP_PURPLE;
+        }
+
+        return theme;
+    }
+
     async calculateScreeningScore(data: ScreeningRequest): Promise<ScreeningResult> {
         const { type, answers } = data;
         let totalScore = 0;

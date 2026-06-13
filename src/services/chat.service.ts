@@ -3,6 +3,8 @@ import { AIResponseFormatter } from "@/lib/utils";
 import chatMessageRepository from "@/repositories/chatMessage.repository";
 import aiService from "./ai.service";
 import { AIChatResponse } from "@/lib/types/ai";
+import screeningService from "./screening.service";
+import screeningRepository from "@/repositories/screening.repository";
 
 export class ChatService {
     private async formatChatHistories(sessionId: string) {
@@ -25,21 +27,35 @@ export class ChatService {
         return pairedHistory.map((chat, index) => `--- Turn ${index + 1} ---\nAI: ${chat.AI}\nUser: ${chat.User}`).join('\n\n');
     }
 
-    async sendMessage(sessionId: string, message: string) {
+    async sendMessage(userId: string, sessionId: string, message: string) {
         try {
             const formattedHistory = await this.formatChatHistories(sessionId);
             console.log("Formatted Chat History:\n", formattedHistory);
+            
             let userPrompt = message;
+            
+            // Jika ini adalah pesan pertama, kita perlu menentukan prompt awal berdasarkan hasil screening terakhir pengguna
             const isFirstMessage = formattedHistory.length === 0;
             if (isFirstMessage) {
-                userPrompt = loadPrompt("trigger.prompt");
+                // Mendapatkan hasil screening terakhir
+                const latestScreening = await screeningRepository.getLatestScreeningResult(userId);
+                if (!latestScreening) {
+                    throw new Error("No screening result found for user, cannot determine AI response theme.");
+                }
+
+                // Menentukan prompt awal berdasarkan hasil screening
+                const screeningResult = await screeningService.getScreeningResultByScore(latestScreening?.score || 0);
+                userPrompt = loadPrompt("trigger.prompt").replace("{{ui_theme}}", screeningResult);
             } else {
+                // Kalau bukan pesan pertama, simpan dulu pesannya ke database sebelum dikirim ke AI
                 await chatMessageRepository.createMessage(sessionId, "USER", message);
             }
 
+            // Kirim pesan ke AI dan dapatkan responsenya
             const response = await aiService.sendChatMessage(formattedHistory, userPrompt);
             const formattedResponse = AIResponseFormatter<AIChatResponse>(response);
 
+            // Simpan response dari AI ke database
             const createdAssistantMessage = await chatMessageRepository.createMessage(sessionId, "ASSISTANT", formattedResponse.suggestion);
             if (!createdAssistantMessage) {
                 throw new Error("Failed to save AI response to the database.");
