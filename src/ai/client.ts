@@ -10,21 +10,25 @@ export class AIClient {
     private temperature = 0.7;
     private systemInstruction = loadPrompt("rootPrompt.prompt") || "You are a helpful assistant that provides accurate and concise information based on the user's query. Always provide relevant and informative responses, and avoid unnecessary details. If you don't know the answer, say you don't know instead of making up information.";
 
-    private client: GoogleGenAI;
+    private client: GoogleGenAI | null = null;
 
-    constructor() {
-        if (!this.apiKey) {
-            throw new Error("AIClient Error: GeminiApiKey tidak ditemukan di envConfig!");
+    private getClient(): GoogleGenAI {
+        if (!this.client) {
+            if (!this.apiKey) {
+                throw new Error("AIClient Error: GeminiApiKey tidak ditemukan di envConfig!");
+            }
+
+            this.client = new GoogleGenAI({
+                apiKey: this.apiKey,
+            });
         }
-
-        this.client = new GoogleGenAI({
-            apiKey: this.apiKey,
-        });
+        return this.client;
     }
 
     async generateContent(prompt: string) {
         try {
-            const response = await this.client?.models.generateContent({
+            const client = this.getClient();
+            const response = await client.models.generateContent({
                 model: this.model,
                 contents: prompt,
                 config: {
@@ -43,7 +47,8 @@ export class AIClient {
 
     async generateContentWithFallback(prompt: string, originalError: any) {
         try {
-            const response = await this.client?.models.generateContent({
+            const client = this.getClient();
+            const response = await client.models.generateContent({
                 model: this.fallbackModel,
                 contents: prompt,
                 config: {
