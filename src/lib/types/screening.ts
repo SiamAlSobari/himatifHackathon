@@ -1,12 +1,13 @@
+import { ScreeningType } from "../../../generated/prisma/enums"
 import { AppThemeEnum } from "./theme"
 
 export type ScreeningRequest = {
-    type: "ONBOARDING" | "DAILY",
+    type: ScreeningType,
     answers: ScreeningAnswer[],
 }
 
 export type ScreeningResult = {
-    type: "ONBOARDING" | "DAILY",
+    type: ScreeningType,
     score: number,
     answers: ScreeningAnswer[],
     theme: AppThemeEnum
