@@ -1,49 +1,51 @@
-import { aiClient } from "@/ai/client";
 import { loadPrompt } from "@/ai/loader";
 import { AIResponseFormatter } from "@/lib/utils";
+import chatMessageRepository from "@/repositories/chatMessage.repository";
+import aiService from "./ai.service";
+import { AIChatResponse } from "@/lib/types/ai";
 
 export class ChatService {
-    async sendMessage(userId: string, message: string) {
-        try {
-            const userHistories = [
-                {
-                    number: 1,
-                    AI: "Hai! Dari skor yang kamu isi barusan, sepertinya hari ini rasanya lagi lumayan berat ya. Ada yang mau diceritain pelan-pelan ke aku?",
-                    User: "Iya nih, tugas bikin REST API pakai Golang numpuk banget buat project TEFA. Udah gitu ada bug di fungsi relative time format yang dari kemarin nggak beres-beres. Rasanya capek banget."
-                },
-                {
-                    number: 2,
-                    AI: "Pasti capek banget ya menatap layar terus-terusan, pikiran juga pasti lagi penuh banget karena harus nyari letak error-nya di tengah deadline. Wajar kok kalau kamu merasa burnout. Kalau lagi mentok begini, apa hal kecil yang biasanya bisa bikin kepalamu agak dingin?",
-                    User: "Biasanya aku baca manga bentar sih, baca 'Kill Blue' gitu buat refreshing. Tapi kalau sekarang mau buka komik aja malah ngerasa bersalah karena tugasnya belum kelar."
-                },
-                {
-                    number: 3,
-                    AI: "Rasa bersalah itu muncul karena kamu orang yang sangat bertanggung jawab sama tugasmu. Tapi ingat, istirahat itu bukan lari dari tanggung jawab, lho. Kadang otak kita butuh jeda supaya bisa ngelihat letak error-nya dengan lebih jernih. Mau coba kasih waktu buat dirimu sendiri 15 menit aja tanpa mikirin kode?",
-                    User: "Bener juga sih. Kayaknya aku emang terlalu maksa sampai kurang tidur. Ya udah, aku coba rehat bentar deh."
+    private async formatChatHistories(sessionId: string) {
+        const rawHistories = await chatMessageRepository.getSessionChats(sessionId);
+        const pairedHistory = rawHistories.reduce((acc, currentMsg) => {
+            if (currentMsg.role === 'ASSISTANT') {
+                acc.push({ AI: currentMsg.content, User: "" });
+            } else if (currentMsg.role === 'USER') {
+                // Kalau User yang ngomong, masukin ke "Turn" terakhir yang dibikin AI
+                if (acc.length > 0) {
+                    acc[acc.length - 1].User = currentMsg.content;
+                } else {
+                    acc.push({ AI: "", User: currentMsg.content });
                 }
-            ];
+            }
 
-            // Opsional: Cara cepat mengubahnya menjadi string untuk di-inject ke prompt
-            const formattedHistory = userHistories
-                .map(chat => `--- Turn ${chat.number} ---\nAI: ${chat.AI}\nUser: ${chat.User}`)
-                .join('\n\n');
+            return acc;
+        }, [] as { AI: string; User: string }[]);
 
-            console.log(formattedHistory);
+        return pairedHistory.map((chat, index) => `--- Turn ${index + 1} ---\nAI: ${chat.AI}\nUser: ${chat.User}`).join('\n\n');
+    }
+
+    async sendMessage(sessionId: string, message: string) {
+        try {
+            const formattedHistory = await this.formatChatHistories(sessionId);
+            console.log("Formatted Chat History:\n", formattedHistory);
             let userPrompt = message;
-            const isFirstMessage = userHistories.length === 0;
+            const isFirstMessage = formattedHistory.length === 0;
             if (isFirstMessage) {
                 userPrompt = loadPrompt("trigger.prompt");
+            } else {
+                await chatMessageRepository.createMessage(sessionId, "USER", message);
             }
 
-            const raw = loadPrompt("chat.prompt");
-            const prompt = raw.replace("{{user_history}}", formattedHistory).replace("{{user_message}}", message);
+            const response = await aiService.sendChatMessage(formattedHistory, userPrompt);
+            const formattedResponse = AIResponseFormatter<AIChatResponse>(response);
 
-            const response = await aiClient.generateContent(prompt);
-            if (!response) {
-                throw new Error("No response from AI");
+            const createdAssistantMessage = await chatMessageRepository.createMessage(sessionId, "ASSISTANT", formattedResponse.suggestion);
+            if (!createdAssistantMessage) {
+                throw new Error("Failed to save AI response to the database.");
             }
 
-            return AIResponseFormatter(response);
+            return { created: createdAssistantMessage, response: formattedResponse };
         } catch (error) {
             console.error("Error sending message:", error);
             throw error;
@@ -52,5 +54,4 @@ export class ChatService {
 }
 
 const chatService = new ChatService();
-
 export default chatService;

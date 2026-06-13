@@ -83,8 +83,9 @@ enum ScreeningType {
 }
 
 model ChatSession {
-  id     String            @id @default(cuid())
+  id     String @id @default(cuid())
   userId String
+
   status ChatSessionStatus @default(ACTIVE)
 
   // Relasi 1 -> M dengan User
