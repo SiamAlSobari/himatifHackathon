@@ -1,12 +1,18 @@
+"use client";
+
 import { Bell } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+const navItems = [
+  { label: "Home", href: "/dashboard" },
+  { label: "Kenali", href: "/screening" },
+  { label: "Validasi", href: "/chat" }
+];
 
 export default function Navbar() {
-  const navItems = [
-    { label: "Home", active: false },
-    { label: "Kenali", active: true },
-    { label: "Validasi", active: false },
-    { label: "Arahkan", active: false },
-  ];
+  const pathname = usePathname();
 
   return (
     <header className="w-full border-b border-slate-200 bg-white">
@@ -14,19 +20,23 @@ export default function Navbar() {
         <span className="text-lg font-bold text-teal-900">Jembatan Aman</span>
 
         <nav className="hidden items-center gap-8 md:flex">
-          {navItems.map((item) => (
-            <a
-              key={item.label}
-              href="#"
-              className={`text-sm font-medium transition-colors ${
-                item.active
-                  ? "text-teal-700"
-                  : "text-slate-600 hover:text-teal-700"
-              }`}
-            >
-              {item.label}
-            </a>
-          ))}
+          {navItems.map((item) => {
+            const isActive = pathname.startsWith(item.href);
+
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={`text-sm font-medium transition-colors ${
+                  isActive
+                    ? "text-teal-700"
+                    : "text-slate-600 hover:text-teal-700"
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-4">
@@ -37,9 +47,11 @@ export default function Navbar() {
           >
             <Bell className="h-5 w-5" />
           </button>
-          <img
+          <Image
             src="https://i.pravatar.cc/40?img=12"
             alt="Foto profil pengguna"
+            width={36}
+            height={36}
             className="h-9 w-9 rounded-full object-cover"
           />
         </div>
