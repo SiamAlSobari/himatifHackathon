@@ -1,9 +1,9 @@
 import { envConfig } from "@/lib/constants/env";
 import { GoogleGenAI } from "@google/genai";
-import { loadPrompt } from "./promptLoader";
+import { loadPrompt } from "./loader";
 
 export class AIClient {
-    private model = "gemini-3.5-flash";
+    private model = "gemini-3.1-flash-lite";
     private fallbackModel = "gemini-2.5-flash";
     private apiKey = envConfig.GeminiApiKey;
     private maxOutputTokens = 2048;
