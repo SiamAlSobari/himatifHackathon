@@ -1,5 +1,6 @@
 import { aiClient } from "@/ai/client";
 import { loadPrompt } from "@/ai/loader";
+import { AIResponseFormatter } from "@/lib/utils";
 
 export class ChatService {
     async sendMessage(userId: string, message: string) {
@@ -42,7 +43,7 @@ export class ChatService {
                 throw new Error("No response from AI");
             }
 
-            return response;
+            return AIResponseFormatter(response);
         } catch (error) {
             console.error("Error sending message:", error);
             throw error;
