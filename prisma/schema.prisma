@@ -85,7 +85,6 @@ enum ScreeningType {
 model ChatSession {
   id     String @id @default(cuid())
   userId String
-  name   String
 
   status ChatSessionStatus @default(ACTIVE)
 

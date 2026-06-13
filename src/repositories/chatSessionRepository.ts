@@ -13,12 +13,29 @@ export class ChatSessionRepository {
         })
     }
 
-    async createSession(userId: string, name: string) {
+    async createSession(userId: string) {
         return await db.chatSession.create({
             data: {
                 userId,
                 status: "ACTIVE",
-                name
+            }
+        })
+    }
+
+    async getActiveSessionByUserId(userId: string) {
+        return await db.chatSession.findFirst({
+            where: { userId, status: "ACTIVE" },
+            orderBy: { createdAt: "desc" },
+            include: {
+                user: {
+                    select: {
+                        name: true,
+                        image: true,
+                    }
+                },
+                chatMessages: {
+                    orderBy: { createdAt: "asc" }
+                }
             }
         })
     }

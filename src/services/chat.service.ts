@@ -2,6 +2,7 @@ import { loadPrompt } from "@/ai/loader";
 import { AIResponseFormatter } from "@/lib/utils";
 import chatMessageRepository from "@/repositories/chatMessage.repository";
 import aiService from "./ai.service";
+import { AIChatResponse } from "@/lib/types/ai";
 
 export class ChatService {
     private async formatChatHistories(sessionId: string) {
@@ -27,6 +28,7 @@ export class ChatService {
     async sendMessage(sessionId: string, message: string) {
         try {
             const formattedHistory = await this.formatChatHistories(sessionId);
+            console.log("Formatted Chat History:\n", formattedHistory);
             let userPrompt = message;
             const isFirstMessage = formattedHistory.length === 0;
             if (isFirstMessage) {
@@ -36,11 +38,14 @@ export class ChatService {
             }
 
             const response = await aiService.sendChatMessage(formattedHistory, userPrompt);
-            if (response !== null) {
-                await chatMessageRepository.createMessage(sessionId, "ASSISTANT", response);
+            const formattedResponse = AIResponseFormatter<AIChatResponse>(response);
+
+            const createdAssistantMessage = await chatMessageRepository.createMessage(sessionId, "ASSISTANT", formattedResponse.suggestion);
+            if (!createdAssistantMessage) {
+                throw new Error("Failed to save AI response to the database.");
             }
 
-            return AIResponseFormatter(response);
+            return { created: createdAssistantMessage, response: formattedResponse };
         } catch (error) {
             console.error("Error sending message:", error);
             throw error;
