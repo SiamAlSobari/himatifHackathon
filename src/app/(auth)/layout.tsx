@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { Users, Sparkles } from "lucide-react"
 import BrandingPanel from "@/components/auth/BrandingPanel"
 
 export default function AuthLayout({
@@ -33,8 +34,23 @@ export default function AuthLayout({
             </Link>
           </div>
 
-          <div className="w-full max-w-md flex-1 flex items-center justify-center lg:flex-none lg:block">
+          <div className="w-full max-w-md flex-1 flex flex-col items-center justify-center lg:flex-none lg:justify-center">
             {children}
+
+            <div className="hidden lg:flex items-center gap-2 mt-5 text-[11px] text-[#2D3748]/60">
+              <div className="flex -space-x-1.5">
+                <div className="h-5 w-5 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 border-2 border-white" />
+                <div className="h-5 w-5 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-white" />
+                <div className="h-5 w-5 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 border-2 border-white" />
+                <div className="h-5 w-5 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 border-2 border-white" />
+              </div>
+              <Users className="h-3 w-3 text-[#1A8A7A]" />
+              <span>
+                <span className="font-bold text-[#0D1B2A]">1,200+</span> yang
+                udah mulai spill hari ini
+              </span>
+              <Sparkles className="h-3 w-3 text-[#FFD700]" />
+            </div>
           </div>
 
           <div className="lg:hidden mt-3 text-center text-[10px] text-[#2D3748]/50 max-w-xs leading-relaxed shrink-0">
