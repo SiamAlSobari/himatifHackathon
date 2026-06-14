@@ -35,7 +35,15 @@ export function LoginForm() {
       return
     }
 
-    router.push("/dashboard")
+    // Tentukan tujuan setelah login (onboarding / screening / dashboard)
+    try {
+      const destRes = await fetch("/api/auth/destination", { method: "POST" })
+      const destJson = await destRes.json()
+      const dest = destJson?.destination || "/dashboard"
+      router.push(dest)
+    } catch {
+      router.push("/dashboard")
+    }
     router.refresh()
   }
 

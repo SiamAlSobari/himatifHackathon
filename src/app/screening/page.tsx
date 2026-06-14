@@ -1,41 +1,29 @@
-"use client";
+import { redirect } from "next/navigation"
+import { auth } from "@/auth"
+import { db } from "@/lib/db"
+import ScreeningClient from "./screening-client"
 
-import Navbar from "@/components/ui/Navbar";
-import ProgressHeader from "@/components/screening/Progressheader";
-import MoodSelector from "@/components/screening/MoodSelector";
-import InfoSidebar from "@/components/screening/InfoSidebar";
+export const metadata = {
+  title: "Screening • Jembatan Aman",
+  description:
+    "Kenali kondisi emosionalmu. Screening singkat ± 60 detik, 100% privat.",
+}
 
-export default function ScreeningPage() {
-  const handleContinue = (selectedId: string | null) => {
-    if (!selectedId) {
-      alert("Silakan pilih salah satu perasaan Anda terlebih dahulu.");
-      return;
-    }
-    console.log("Lanjutkan dengan pilihan:", selectedId);
-  };
+export default async function ScreeningPage() {
+  const session = await auth()
+  if (!session?.user?.id) {
+    redirect("/login?callbackUrl=/screening")
+  }
 
-  const handleSaveForLater = () => {
-    console.log("Disimpan untuk nanti");
-  };
+  // Guard: harus sudah onboarding
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { usia: true, jenisKelamin: true },
+  })
 
-  return (
-    <div className="min-h-screen bg-slate-50">
-      <Navbar />
+  if (!user?.usia || !user?.jenisKelamin) {
+    redirect("/onboarding")
+  }
 
-      <main className="mx-auto max-w-7xl px-6 py-10">
-        <ProgressHeader step={1} totalSteps={4} category="Kesehatan Mental" />
-
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <MoodSelector
-              onContinue={handleContinue}
-              onSaveForLater={handleSaveForLater}
-            />
-          </div>
-
-          <InfoSidebar />
-        </div>
-      </main>
-    </div>
-  );
+  return <ScreeningClient />
 }
