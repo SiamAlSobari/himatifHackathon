@@ -1,6 +1,13 @@
 import { db } from "@/lib/db";
+import { ChatSessionStatus } from "../../generated/prisma/enums";
 
 export class ChatSessionRepository {
+    async updateStatus(sessionId: string, status: ChatSessionStatus) {
+        return await db.chatSession.update({
+            where: { id: sessionId },
+            data: { status }
+        })
+    }
     async getByUserId(userId: string) {
         return await db.chatSession.findMany({
             where: { userId },
@@ -25,6 +32,11 @@ export class ChatSessionRepository {
     async getById(sessionId: string) {
         return await db.chatSession.findUnique({
             where: { id: sessionId },
+            include: {
+                chatMessages: {
+                    orderBy: { createdAt: "asc" }
+                }
+            }
         })
     }
 
@@ -43,6 +55,13 @@ export class ChatSessionRepository {
                     orderBy: { createdAt: "asc" }
                 }
             }
+        })
+    }
+
+    async getLatestCompletedSession(userId: string) {
+        return await db.chatSession.findFirst({
+            where: { userId, status: "COMPLETED" },
+            orderBy: { updatedAt: "desc" }
         })
     }
 }

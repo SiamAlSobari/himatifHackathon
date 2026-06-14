@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { LogOut } from "lucide-react"
+import { signOut } from "next-auth/react"
 
 import {
   ONBOARDING_STEPS,
@@ -108,7 +109,6 @@ export default function OnboardingForm({
         usia: formData.usia!,
         jenisKelamin: formData.jenisKelamin!,
         kontakDarurat: formData.kontakDarurat?.trim() || null,
-        tujuan: formData.tujuan,
       })
 
       if (!result.success) {
@@ -234,20 +234,13 @@ export default function OnboardingForm({
             </span>
           </div>
 
-          <form
-            action={async () => {
-              const { signOut } = await import("@/auth")
-              await signOut({ redirectTo: "/" })
-            }}
+          <button
+            onClick={() => signOut({ redirectTo: "/" })}
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-[#2D3748]/70 transition-colors hover:bg-black/5 hover:text-[#0D1B2A] cursor-pointer"
           >
-            <button
-              type="submit"
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-[#2D3748]/70 transition-colors hover:bg-black/5 hover:text-[#0D1B2A] cursor-pointer"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Keluar</span>
-            </button>
-          </form>
+            <LogOut className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Keluar</span>
+          </button>
         </nav>
 
         <div className="flex flex-1 items-center justify-center px-5 py-8 md:px-10">
