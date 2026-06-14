@@ -1,51 +1,73 @@
 import Image from "next/image";
-import { Bot } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 interface ChatBubbleProps {
   sender: "ai" | "user";
   message: string;
   time: string;
+  isTyping?: boolean;
 }
 
-export default function ChatBubble({ sender, message, time }: ChatBubbleProps) {
+export default function ChatBubble({
+  sender,
+  message,
+  time,
+  isTyping = false,
+}: ChatBubbleProps) {
   const isAi = sender === "ai";
 
   return (
     <div
-      className={`flex items-end gap-2 ${
+      className={`flex items-start gap-3 ${
         isAi ? "justify-start" : "justify-end"
       }`}
     >
       {isAi && (
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-teal-900 text-white">
-          <Bot className="h-3.5 w-3.5" />
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0A5C61] text-white shadow-sm transition-transform hover:scale-105">
+          <Sparkles className="h-4 w-4" />
         </div>
       )}
 
       <div
-        className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+        className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm transition-all duration-300 ${
           isAi
-            ? "bg-teal-800 text-white"
-            : "bg-slate-100 text-slate-700"
+            ? "bg-[#0A5C61] text-white rounded-tl-sm"
+            : "bg-white border border-slate-200 text-slate-800 rounded-tr-sm"
         }`}
       >
-        <p className="whitespace-pre-line">{message}</p>
-        <p
-          className={`mt-1.5 text-right text-[11px] ${
-            isAi ? "text-teal-200/80" : "text-slate-400"
-          }`}
-        >
-          {time}
-        </p>
+        {isTyping ? (
+          <div className="flex items-center gap-2.5 py-1.5 px-1">
+            <div className="flex gap-1">
+              <span className="h-2 w-2 animate-bounce rounded-full bg-white" style={{ animationDelay: "0ms" }} />
+              <span className="h-2 w-2 animate-bounce rounded-full bg-white" style={{ animationDelay: "150ms" }} />
+              <span className="h-2 w-2 animate-bounce rounded-full bg-white" style={{ animationDelay: "300ms" }} />
+            </div>
+            <span className="text-xs font-medium text-teal-100/90 animate-pulse">
+              Lombut AI sedang berpikir...
+            </span>
+          </div>
+        ) : (
+          <p className="whitespace-pre-line">{message}</p>
+        )}
+        
+        {!isTyping && (
+          <p
+            className={`mt-1.5 text-right text-[10px] font-medium tracking-wide ${
+              isAi ? "text-teal-200/80" : "text-slate-400"
+            }`}
+          >
+            {time}
+          </p>
+        )}
       </div>
 
       {!isAi && (
         <Image
           src="https://i.pravatar.cc/40?img=12"
           alt="Foto profil pengguna"
-          width={28}
-          height={28}
-          className="h-7 w-7 shrink-0 rounded-full object-cover"
+          width={32}
+          height={32}
+          className="h-8 w-8 shrink-0 rounded-full object-cover border border-slate-200 shadow-sm transition-transform hover:scale-105"
         />
       )}
     </div>

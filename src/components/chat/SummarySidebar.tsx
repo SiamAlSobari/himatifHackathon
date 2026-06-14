@@ -3,10 +3,95 @@ import WellbeingScoreCard from "./Wellbeingscorecard";
 import SymptomAnalysis from "./Symptomanalysis";
 import AiSuggestionCard from "./AiSuggestionCard";
 import EmergencyHelpSection from "./Emergencyhelpsection";
+import { ChatMessage, Screening } from "@/lib/types/chat";
 
-export default function SummarySidebar() {
+interface SummarySidebarProps {
+  latestAssistantMessage: ChatMessage | null;
+  latestScreening: Screening | null;
+}
+
+export default function SummarySidebar({
+  latestAssistantMessage,
+  latestScreening,
+}: SummarySidebarProps) {
+  // Wellbeing score calculation based on screening score (out of 12)
+  const score = latestScreening
+    ? Math.max(0, Math.round(((12 - latestScreening.score) / 12) * 100))
+    : 100;
+
+  // Dynamic description for wellbeing score
+  const getDescription = (scoreVal: number) => {
+    if (!latestScreening) {
+      return "Lakukan screening kesehatan mental terlebih dahulu untuk mendapatkan skor kesejahteraan.";
+    }
+    if (latestScreening.score <= 3) {
+      return "Kondisi emosional Anda stabil. Pertahankan kebiasaan baik Anda.";
+    }
+    if (latestScreening.score <= 6) {
+      return "Ada sedikit tanda kelelahan atau stres. Luangkan waktu untuk istirahat.";
+    }
+    if (latestScreening.score <= 9) {
+      return "Membutuhkan perhatian pada manajemen stres dan kualitas tidur.";
+    }
+    return "Tingkat stres/kecemasan tinggi. Pertimbangkan untuk berbicara dengan profesional.";
+  };
+
+  const description = getDescription(score);
+
+  // Default levels derived from screening score if assistant hasn't sent any messages
+  const getDefaultsFromScore = (scoreVal?: number) => {
+    if (scoreVal === undefined || scoreVal === null) {
+      return {
+        anxiety: "Rendah" as const,
+        depression: "Rendah" as const,
+        insomnia: "Rendah" as const,
+      };
+    }
+    if (scoreVal <= 3) {
+      return {
+        anxiety: "Rendah" as const,
+        depression: "Rendah" as const,
+        insomnia: "Rendah" as const,
+      };
+    }
+    if (scoreVal <= 6) {
+      return {
+        anxiety: "Sedang" as const,
+        depression: "Rendah" as const,
+        insomnia: "Rendah" as const,
+      };
+    }
+    if (scoreVal <= 9) {
+      return {
+        anxiety: "Sedang" as const,
+        depression: "Sedang" as const,
+        insomnia: "Sedang" as const,
+      };
+    }
+    return {
+      anxiety: "Tinggi" as const,
+      depression: "Tinggi" as const,
+      insomnia: "Tinggi" as const,
+    };
+  };
+
+  const defaults = getDefaultsFromScore(latestScreening?.score);
+
+  // Extracted levels from assistant metadata
+  const anxietyLevel =
+    latestAssistantMessage?.metaData?.analysis?.anxietyLevel || defaults.anxiety;
+  const insomniaLevel =
+    latestAssistantMessage?.metaData?.analysis?.insomniaLevel || defaults.insomnia;
+  const depressionLevel =
+    latestAssistantMessage?.metaData?.analysis?.depressionLevel || defaults.depression;
+
+  // AI Suggestion
+  const aiSuggestion =
+    latestAssistantMessage?.metaData?.analysis?.aiValidationAdvice ||
+    "Ceritakan perasaanmu untuk mendapatkan saran validasi AI.";
+
   return (
-    <aside className="flex h-full flex-col gap-4 overflow-y-auto rounded-xl border border-slate-200 bg-white p-5">
+    <aside className="flex h-full flex-col gap-4 overflow-y-auto rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-center gap-2">
         <LayoutGrid className="h-5 w-5 text-teal-800" />
         <h2 className="text-base font-semibold text-slate-800">
@@ -15,17 +100,18 @@ export default function SummarySidebar() {
       </div>
 
       <WellbeingScoreCard
-        score={64}
+        score={score}
         maxScore={100}
-        description="Membutuhkan perhatian pada manajemen stres dan kualitas tidur."
+        description={description}
       />
 
-      <SymptomAnalysis />
-
-      <AiSuggestionCard
-        title="Saran Validasi AI"
-        message="Gunakan teknik pernapasan 4-7-8 sebelum tidur untuk membantu menenangkan sistem saraf otonom Anda."
+      <SymptomAnalysis
+        anxietyLevel={anxietyLevel}
+        insomniaLevel={insomniaLevel}
+        depressionLevel={depressionLevel}
       />
+
+      <AiSuggestionCard title="Saran Validasi AI" message={aiSuggestion} />
 
       <div className="flex-1" />
 

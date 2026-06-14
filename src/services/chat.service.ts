@@ -81,6 +81,14 @@ export class ChatService {
             throw new Error("Failed to save AI response to the database.");
         }
 
+        // Count how many USER messages are in this session
+        const messages = await chatMessageRepository.getSessionChats(sessionId);
+        const userMessagesCount = messages.filter(m => m.role === 'USER').length;
+
+        if (userMessagesCount >= 7 || formattedResponse.metaData.isSessionEnded) {
+            await chatSessionRepository.updateStatus(sessionId, "COMPLETED");
+        }
+
         await pusherServer.trigger(
             `user-${userId}`,
             "chat-finished",
