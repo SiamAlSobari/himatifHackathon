@@ -5,4 +5,8 @@ export const envConfig = {
     NextAuthUrl: process.env.NEXTAUTH_URL,
     DatabaseUrl: process.env.DATABASE_URL,
     GeminiApiKey: process.env.GEMINI_API_KEY,
+    PusherAppId: process.env.PUSHER_APP_ID,
+    PusherKey: process.env.PUSHER_KEY,
+    PusherSecret: process.env.PUSHER_SECRET,
+    PusherCluster: process.env.PUSHER_CLUSTER
 }
