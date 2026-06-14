@@ -89,6 +89,8 @@ export class ChatService {
                 name: formattedResponse.metaData.uiTheme,
             }
         )
+        console.log("AI response processed and saved successfully.");
+        console.log("AI Response:", formattedResponse);
         return formattedResponse
     }
 }
