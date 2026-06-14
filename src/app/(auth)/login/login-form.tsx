@@ -3,6 +3,8 @@
 import { useState } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,6 +14,7 @@ export function LoginForm() {
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -41,57 +44,111 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+        <Alert
+          variant="destructive"
+          className="bg-red-50 text-red-700 border-red-200 rounded-xl"
+        >
+          <AlertDescription className="text-xs font-medium">
+            {error}
+          </AlertDescription>
         </Alert>
       )}
 
-      <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          type="email"
-          placeholder="nama@email.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          type="password"
-          placeholder="••••••••"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-      </div>
-
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? "Memproses..." : "Masuk"}
-      </Button>
-
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
+      <div className="space-y-1.5">
+        <Label
+          htmlFor="email"
+          className="text-[#0D1B2A] font-semibold text-[11px] tracking-wider uppercase ml-1"
+        >
+          Email
+        </Label>
+        <div className="relative">
+          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#2D3748]/40 pointer-events-none" />
+          <Input
+            id="email"
+            type="email"
+            placeholder="nama@email.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="h-11 pl-11 pr-4 text-sm border-black/15 focus-visible:border-[#1A8A7A] focus-visible:ring-[#1A8A7A]/15 rounded-xl transition-all duration-200"
+          />
         </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white px-2 text-zinc-500">atau</span>
+      </div>
+
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between ml-1">
+          <Label
+            htmlFor="password"
+            className="text-[#0D1B2A] font-semibold text-[11px] tracking-wider uppercase"
+          >
+            Password
+          </Label>
+          <Link
+            href="#"
+            className="text-[11px] font-medium text-[#1A8A7A] hover:text-[#0D1B2A] transition-colors"
+          >
+            Lupa password?
+          </Link>
+        </div>
+        <div className="relative">
+          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#2D3748]/40 pointer-events-none" />
+          <Input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="h-11 pl-11 pr-11 text-sm border-black/15 focus-visible:border-[#1A8A7A] focus-visible:ring-[#1A8A7A]/15 rounded-xl transition-all duration-200"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 h-7 w-7 flex items-center justify-center text-[#2D3748]/40 hover:text-[#2D3748]/70 transition-colors rounded-md hover:bg-black/5"
+            aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+            tabIndex={-1}
+          >
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
+          </button>
         </div>
       </div>
 
       <Button
+        type="submit"
+        disabled={loading}
+        className="w-full h-11 bg-[#0D1B2A] hover:bg-[#1A8A7A] text-white rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-[#1A8A7A]/25 font-semibold cursor-pointer flex items-center justify-center gap-2 group/btn"
+      >
+        {loading ? (
+          "Memproses..."
+        ) : (
+          <>
+            Masuk
+            <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+          </>
+        )}
+      </Button>
+
+      <div className="relative my-5">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-black/10" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase font-medium">
+          <span className="bg-white px-3 text-[#2D3748]/50">atau</span>
+        </div>
+      </div>
+
+      <button
         type="button"
-        variant="outline"
-        className="w-full"
+        className="w-full h-11 border border-black/10 bg-white hover:bg-[#F0F4F8] hover:border-[#1A8A7A]/30 text-[#0D1B2A] hover:text-[#1A8A7A] rounded-full transition-all duration-300 hover:shadow-sm flex items-center justify-center gap-2 font-semibold cursor-pointer active:scale-[0.99]"
         onClick={handleGoogle}
       >
-        <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+        <svg className="h-4 w-4" viewBox="0 0 24 24">
           <path
             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
             fill="#4285F4"
@@ -109,14 +166,17 @@ export function LoginForm() {
             fill="#EA4335"
           />
         </svg>
-        Google
-      </Button>
+        <span>Masuk dengan Google</span>
+      </button>
 
-      <p className="text-center text-sm text-zinc-500">
+      <p className="text-center text-sm text-[#2D3748]/60 mt-4">
         Belum punya akun?{" "}
-        <a href="/register" className="font-medium text-zinc-900 underline underline-offset-4">
+        <Link
+          href="/register"
+          className="font-semibold text-[#1A8A7A] hover:text-[#0D1B2A] transition-colors underline underline-offset-4"
+        >
           Daftar
-        </a>
+        </Link>
       </p>
     </form>
   )

@@ -1,34 +1,34 @@
-import Image from 'next/image'
-import React from 'react'
+import Image from "next/image";
+import React from "react";
 
 const features = [
   {
-    label: '24/7',
-    desc: 'Selalu Siap Mendengarkan',
+    label: "24/7",
+    desc: "Selalu Siap Mendengarkan",
   },
   {
-    label: 'AI ADAPTIF',
-    desc: 'Pertanyaan Menyesuaikan Jawaban',
+    label: "AI ADAPTIF",
+    desc: "Pertanyaan Menyesuaikan Jawaban",
   },
   {
-    label: 'REFLEKSI\nPERSONAL',
-    desc: 'Berdasarkan Pola Bahasa Pengguna',
+    label: "REFLEKSI\nPERSONAL",
+    desc: "Berdasarkan Pola Bahasa Pengguna",
   },
-]
+];
 
 export default function Section2() {
   return (
-    <section id="kenali" className="bg-white h-screen flex flex-col justify-center px-6 overflow-hidden">
+    <section
+      id="kenali"
+      className="bg-white h-screen flex flex-col justify-center px-6 overflow-hidden"
+    >
       <div className="max-w-6xl mx-auto w-full flex flex-col gap-10 mt-16">
-
         {/* Two-column layout */}
         <div className="grid grid-cols-2 gap-16 items-center">
-
           {/* Left: Text */}
           <div>
             <h2 className="text-5xl font-bold text-black mb-3 leading-tight">
-              Halo, Saya{' '}
-              <span className="text-[#1A8A7A]">LOMBUT</span> AI
+              Halo, Saya <span className="text-[#1A8A7A]">LOMBUT</span> AI
             </h2>
             <p className="text-sm font-semibold uppercase tracking-widest text-[#2D3748]/50 mb-6">
               Pendamping Refleksi Emosionalmu
@@ -36,14 +36,16 @@ export default function Section2() {
 
             <div className="space-y-4 text-[#2D3748]/80 text-base leading-relaxed">
               <p>
-                Aku dirancang untuk menemanimu memahami kondisi emosional melalui percakapan
-                yang berkembang secara alami. Setiap pertanyaan yang kuberikan akan
-                menyesuaikan dengan jawabanmu sebelumnya, sehingga setiap sesi terasa
-                lebih personal dan bermakna.
+                Aku dirancang untuk menemanimu memahami kondisi emosional
+                melalui percakapan yang berkembang secara alami. Setiap
+                pertanyaan yang kuberikan akan menyesuaikan dengan jawabanmu
+                sebelumnya, sehingga setiap sesi terasa lebih personal dan
+                bermakna.
               </p>
               <p>
-                Aku juga menganalisis pola bahasa yang kamu gunakan untuk membantu
-                memberikan gambaran refleksi mengenai kondisi emosionalmu.
+                Aku juga menganalisis pola bahasa yang kamu gunakan untuk
+                membantu memberikan gambaran refleksi mengenai kondisi
+                emosionalmu.
               </p>
             </div>
 
@@ -51,7 +53,8 @@ export default function Section2() {
             <div className="mt-6 flex items-start gap-3 bg-[#F0F4F8] rounded-xl px-4 py-4">
               <div className="w-1 min-h-9 rounded-full bg-[#1A8A7A] shrink-0 mt-0.5" />
               <p className="text-sm text-[#2D3748]/70 font-medium leading-snug">
-                Bukan untuk mendiagnosis, melainkan membantu kamu lebih mengenal dirimu sendiri.
+                Bukan untuk mendiagnosis, melainkan membantu kamu lebih mengenal
+                dirimu sendiri.
               </p>
             </div>
           </div>
@@ -62,10 +65,10 @@ export default function Section2() {
               {/* Card */}
               <div
                 className="relative bg-[#F0F4F8] rounded-2xl overflow-hidden border border-[#1A8A7A]/10"
-                style={{ height: '420px' }}
+                style={{ height: "420px" }}
               >
                 <Image
-                  src="/masamba.jpg"
+                  src="/mommy.jpg"
                   alt="LOMBUT AI"
                   fill
                   className="object-cover object-top"
@@ -78,7 +81,9 @@ export default function Section2() {
               <div className="absolute -bottom-4 -left-4 bg-white border border-[#E2E8F0] rounded-xl px-4 py-3 shadow-lg z-20">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                  <span className="text-xs font-semibold text-[#0D1B2A]">Online sekarang</span>
+                  <span className="text-xs font-semibold text-[#0D1B2A]">
+                    Online sekarang
+                  </span>
                 </div>
               </div>
             </div>
@@ -99,8 +104,7 @@ export default function Section2() {
             </div>
           ))}
         </div>
-
       </div>
     </section>
-  )
+  );
 }
