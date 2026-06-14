@@ -30,7 +30,6 @@ export async function registerUser(formData: FormData) {
     data: {
       email,
       passwordHash,
-      nama,
       name: nama,
       usia,
       jenisKelamin: jenisKelamin || null,
