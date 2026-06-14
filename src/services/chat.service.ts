@@ -6,6 +6,7 @@ import { AIChatResponse } from "@/lib/types/ai";
 import screeningService from "./screening.service";
 import screeningRepository from "@/repositories/screening.repository";
 import chatSessionRepository from "@/repositories/chatSessionRepository";
+import { pusherServer } from "@/lib/pusher/pusher-server";
 
 export class ChatService {
     private async formatChatHistories(sessionId: string) {
@@ -55,14 +56,14 @@ export class ChatService {
                 userPrompt = loadPrompt("trigger.prompt").replace("{{ui_theme}}", screeningResult);
             } else {
                 // Kalau bukan pesan pertama, simpan dulu pesannya ke database sebelum dikirim ke AI
-                createdUserMessage = await chatMessageRepository.createMessage(sessionId, "USER", message);
+                createdUserMessage = await chatMessageRepository.createMessage(sessionId, "USER", message, null);
             }
 
             // Kirim pesan ke AI tanpa menunggu responsnya, biar lebih cepat. Respons dari AI akan diproses di background dan disimpan ke database begitu diterima.
-            this.processAIResponse(sessionId, formattedHistory, userPrompt).catch(error => {
+            this.processAIResponse(userId, sessionId, formattedHistory, userPrompt).catch(error => {
                 console.error("Error getting AI response:", error);
             });
-            
+
             return createdUserMessage;
         } catch (error) {
             console.error("Error sending message:", error);
@@ -70,18 +71,28 @@ export class ChatService {
         }
     }
 
-    private async processAIResponse(sessionId: string, formattedHistory: string, prompt: string,) {
+    private async processAIResponse(userId: string, sessionId: string, formattedHistory: string, prompt: string,) {
         const response = await aiService.sendChatMessage(formattedHistory, prompt);
         const formattedResponse = AIResponseFormatter<AIChatResponse>(response);
 
         // Simpan response dari AI ke database
-        const createdAssistantMessage = await chatMessageRepository.createMessage(sessionId, "ASSISTANT", formattedResponse.suggestion);
+        const createdAssistantMessage = await chatMessageRepository.createMessage(sessionId, "ASSISTANT", formattedResponse.suggestion, formattedResponse.metaData);
         if (!createdAssistantMessage) {
             throw new Error("Failed to save AI response to the database.");
         }
 
-        console.log("AI response saved to database successfully.");
+        await pusherServer.trigger(
+            `user-${userId}`,
+            "chat-finished",
+            {
+                status: "completed",
+                name: formattedResponse.metaData.uiTheme,
+            }
+        )
+        console.log("AI response processed and saved successfully.");
         console.log("AI Response:", formattedResponse);
+        console.log("Saved Assistant Message:", createdAssistantMessage);
+
         return formattedResponse
     }
 }
