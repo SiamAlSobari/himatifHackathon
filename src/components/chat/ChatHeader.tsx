@@ -8,7 +8,7 @@ export default function ChatHeader() {
           <Bot className="h-5 w-5" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-slate-800">AURA AI</p>
+          <p className="text-sm font-semibold text-slate-800">LOMBUT AI</p>
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
             <span className="text-xs text-slate-500">Online</span>
