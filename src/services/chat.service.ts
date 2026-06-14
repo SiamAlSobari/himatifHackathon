@@ -56,7 +56,7 @@ export class ChatService {
                 userPrompt = loadPrompt("trigger.prompt").replace("{{ui_theme}}", screeningResult);
             } else {
                 // Kalau bukan pesan pertama, simpan dulu pesannya ke database sebelum dikirim ke AI
-                createdUserMessage = await chatMessageRepository.createMessage(sessionId, "USER", message);
+                createdUserMessage = await chatMessageRepository.createMessage(sessionId, "USER", message, null);
             }
 
             // Kirim pesan ke AI tanpa menunggu responsnya, biar lebih cepat. Respons dari AI akan diproses di background dan disimpan ke database begitu diterima.
@@ -76,7 +76,7 @@ export class ChatService {
         const formattedResponse = AIResponseFormatter<AIChatResponse>(response);
 
         // Simpan response dari AI ke database
-        const createdAssistantMessage = await chatMessageRepository.createMessage(sessionId, "ASSISTANT", formattedResponse.suggestion);
+        const createdAssistantMessage = await chatMessageRepository.createMessage(sessionId, "ASSISTANT", formattedResponse.suggestion, formattedResponse.metaData);
         if (!createdAssistantMessage) {
             throw new Error("Failed to save AI response to the database.");
         }
@@ -89,6 +89,10 @@ export class ChatService {
                 name: formattedResponse.metaData.uiTheme,
             }
         )
+        console.log("AI response processed and saved successfully.");
+        console.log("AI Response:", formattedResponse);
+        console.log("Saved Assistant Message:", createdAssistantMessage);
+
         return formattedResponse
     }
 }
