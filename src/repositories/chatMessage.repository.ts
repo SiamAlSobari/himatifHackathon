@@ -9,12 +9,13 @@ export class ChatMessageRepository {
         })
     }
 
-    async createMessage(sessionId: string, role: ChatMessageRole, content: string) {
+    async createMessage(sessionId: string, role: ChatMessageRole, content: string, metaData: any) {
         return await db.chatMessage.create({
             data: {
                 sessionId,
                 role,
-                content
+                content,
+                metaData
             }
         })
     }
