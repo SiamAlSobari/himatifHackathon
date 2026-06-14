@@ -47,12 +47,12 @@ export function RegisterForm() {
       redirect: false,
     })
 
-    router.push("/dashboard")
+    router.push("/onboarding")
     router.refresh()
   }
 
   async function handleGoogle() {
-    await signIn("google", { callbackUrl: "/dashboard" })
+    await signIn("google", { callbackUrl: "/onboarding" })
   }
 
   return (
