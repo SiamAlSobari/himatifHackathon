@@ -57,6 +57,7 @@ export default async function ArahkanPage() {
         id: activeAppointment.id,
         scheduledAt: activeAppointment.scheduledAt.toISOString(),
         psychologist: {
+          id: activeAppointment.psychologist.id,
           name: activeAppointment.psychologist.name,
           role: activeAppointment.psychologist.role,
           imageUrl: activeAppointment.psychologist.imageUrl,

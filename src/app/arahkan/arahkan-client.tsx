@@ -34,6 +34,7 @@ interface ActiveAppointment {
   id: string
   scheduledAt: string
   psychologist: {
+    id: string
     name: string
     role: string
     imageUrl: string
@@ -71,8 +72,9 @@ export default function ArahkanClient({
   const [appointment, setAppointment] = useState<ActiveAppointment | null>(activeAppointment)
   const [isSessionVisible, setIsSessionVisible] = useState(true)
 
-  // Booking modal
+  // Booking / Profile modal
   const [bookingPsych, setBookingPsych] = useState<Psychologist | null>(null)
+  const [modalMode, setModalMode] = useState<"booking" | "profile">("booking")
   const [selectedDate, setSelectedDate] = useState("")
   const [selectedTime, setSelectedTime] = useState("09:00")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -100,6 +102,12 @@ export default function ArahkanClient({
     setSelectedDate(d.toISOString().split("T")[0])
     setSelectedTime("09:00")
     setBookingPsych(psych)
+    setModalMode("booking")
+  }
+
+  const handleOpenProfile = (psych: Psychologist) => {
+    setBookingPsych(psych)
+    setModalMode("profile")
   }
 
   const handleConfirmBooking = async () => {
@@ -112,6 +120,7 @@ export default function ArahkanClient({
         id: res.id,
         scheduledAt: res.scheduledAt.toISOString(),
         psychologist: {
+          id: res.psychologist.id,
           name: res.psychologist.name,
           role: res.psychologist.role,
           imageUrl: res.psychologist.imageUrl,
@@ -220,20 +229,25 @@ export default function ArahkanClient({
                 </p>
               </div>
             ) : (
-              filteredPsychologists.map((psych) => (
-                <PsychologistCard
-                  key={psych.id}
-                  name={psych.name}
-                  role={psych.role}
-                  specialty={psych.specialty}
-                  rating={psych.rating}
-                  experienceYears={psych.experienceYears}
-                  imageUrl={psych.imageUrl}
-                  availability={psych.availability}
-                  busyUntil={psych.busyUntil}
-                  onBook={() => handleOpenBooking(psych)}
-                />
-              ))
+              filteredPsychologists.map((psych) => {
+                const isBooked = appointment?.psychologist.id === psych.id
+                return (
+                  <PsychologistCard
+                    key={psych.id}
+                    name={psych.name}
+                    role={psych.role}
+                    specialty={psych.specialty}
+                    rating={psych.rating}
+                    experienceYears={psych.experienceYears}
+                    imageUrl={psych.imageUrl}
+                    availability={psych.availability}
+                    busyUntil={psych.busyUntil}
+                    onBook={() => handleOpenBooking(psych)}
+                    onViewProfile={() => handleOpenProfile(psych)}
+                    isBooked={isBooked}
+                  />
+                )
+              })
             )}
           </div>
 
@@ -253,6 +267,7 @@ export default function ArahkanClient({
       {/* ── Floating active-session widget ── */}
       <ActiveSessionWidget
         psychologistName={appointment?.psychologist.name ?? null}
+        scheduledAt={appointment?.scheduledAt ?? null}
         visible={isSessionVisible}
         onClose={() => {
           if (appointment) handleCancelAppointment(appointment.id)
@@ -270,6 +285,7 @@ export default function ArahkanClient({
         isSubmitting={isSubmitting}
         onClose={() => setBookingPsych(null)}
         onConfirm={handleConfirmBooking}
+        mode={modalMode}
       />
 
       <EmergencyHotlineModal
