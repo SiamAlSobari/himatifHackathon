@@ -1,36 +1,56 @@
+import { auth } from "@/auth"
 import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+
+export const runtime = "nodejs"
 
 // Route yang bisa diakses tanpa login
-const PUBLIC_PATHS = ["/login", "/register"]
+const PUBLIC_PATHS = ["/login", "/register", "/psikolog/login", "/psikolog/register"]
 
-export function middleware(req: NextRequest) {
+export default auth((req) => {
+
   const { pathname } = req.nextUrl
+  const isLoggedIn = !!req.auth
+  const user = req.auth?.user as any
+  const role = user?.role // "USER" | "PSYCHOLOGY"
 
-  // Session cookie dari Auth.js
-  const sessionCookie =
-    req.cookies.get("authjs.session-token")?.value ||
-    req.cookies.get("__Secure-authjs.session-token")?.value
-  const isLoggedIn = !!sessionCookie
-
-  // Landing page ("/") dan auth pages ("/login", "/register") = publik
+  // Landing page ("/") dan auth pages = publik
   const isPublic =
     pathname === "/" || PUBLIC_PATHS.some((p) => pathname.startsWith(p))
 
-  // Belum login + bukan halaman publik → redirect ke /login
+  // Belum login + bukan halaman publik → redirect ke login
   if (!isLoggedIn && !isPublic) {
-    const loginUrl = new URL("/login", req.nextUrl)
+    const loginUrl = new URL(
+      pathname.startsWith("/psikolog") ? "/psikolog/login" : "/login",
+      req.nextUrl
+    )
     loginUrl.searchParams.set("callbackUrl", pathname)
     return NextResponse.redirect(loginUrl)
   }
 
-  // Sudah login + akses halaman auth → redirect ke /dashboard
+  // Sudah login + akses halaman auth → redirect ke dashboard masing-masing
   if (isLoggedIn && PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
-    return NextResponse.redirect(new URL("/dashboard", req.nextUrl))
+    const dest = role === "PSYCHOLOGY" ? "/psikolog" : "/dashboard"
+    return NextResponse.redirect(new URL(dest, req.nextUrl))
+  }
+
+  // Sudah login + cek otorisasi role
+  if (isLoggedIn) {
+    if (role === "PSYCHOLOGY") {
+      // Psikolog hanya bisa akses /psikolog/* dan /konsultasi/*
+      const allowed = pathname.startsWith("/psikolog") || pathname.startsWith("/konsultasi")
+      if (!allowed) {
+        return NextResponse.redirect(new URL("/psikolog", req.nextUrl))
+      }
+    } else {
+      // User biasa tidak boleh akses /psikolog/*
+      if (pathname.startsWith("/psikolog")) {
+        return NextResponse.redirect(new URL("/dashboard", req.nextUrl))
+      }
+    }
   }
 
   return NextResponse.next()
-}
+})
 
 export const config = {
   // Jalankan middleware di semua route kecuali API, static files, dan favicon
