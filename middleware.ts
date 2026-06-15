@@ -1,21 +1,31 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
+// Route yang bisa diakses tanpa login
+const PUBLIC_PATHS = ["/login", "/register"]
+
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
-  const sessionCookie = req.cookies.get("authjs.session-token")?.value
+
+  // Session cookie dari Auth.js
+  const sessionCookie =
+    req.cookies.get("authjs.session-token")?.value ||
+    req.cookies.get("__Secure-authjs.session-token")?.value
   const isLoggedIn = !!sessionCookie
 
-  const publicPaths = ["/login", "/register"]
-  const isPublic = publicPaths.some((p) => pathname.startsWith(p)) || pathname === "/"
+  // Landing page ("/") dan auth pages ("/login", "/register") = publik
+  const isPublic =
+    pathname === "/" || PUBLIC_PATHS.some((p) => pathname.startsWith(p))
 
+  // Belum login + bukan halaman publik → redirect ke /login
   if (!isLoggedIn && !isPublic) {
     const loginUrl = new URL("/login", req.nextUrl)
     loginUrl.searchParams.set("callbackUrl", pathname)
     return NextResponse.redirect(loginUrl)
   }
 
-  if (isLoggedIn && publicPaths.some((p) => pathname.startsWith(p))) {
+  // Sudah login + akses halaman auth → redirect ke /dashboard
+  if (isLoggedIn && PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
     return NextResponse.redirect(new URL("/dashboard", req.nextUrl))
   }
 
@@ -23,5 +33,6 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
+  // Jalankan middleware di semua route kecuali API, static files, dan favicon
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 }
