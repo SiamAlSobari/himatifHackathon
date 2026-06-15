@@ -23,10 +23,10 @@ export async function bookAppointment(psychologistId: string, scheduledAt: Date)
       id: appointment.id,
       scheduledAt: appointment.scheduledAt.toISOString(),
       psychologist: {
-        id: appointment.psychologist.id,
-        name: appointment.psychologist.name,
-        role: appointment.psychologist.role,
-        imageUrl: appointment.psychologist.imageUrl,
+        id: appointment.psychologistProfile.id,
+        name: appointment.psychologistProfile.user.name || "Psikolog",
+        role: appointment.psychologistProfile.role,
+        imageUrl: appointment.psychologistProfile.imageUrl,
       }
     }
   });

@@ -220,7 +220,7 @@ export default function ChatPanel({
                 </p>
               </div>
               <Link
-                href="/konsultasi"
+                href="/arahkan"
                 className="inline-flex items-center gap-2 rounded-lg bg-rose-700 hover:bg-rose-800 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
                 <HeartHandshake className="h-4 w-4" />
