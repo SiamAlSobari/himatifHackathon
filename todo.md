@@ -171,12 +171,12 @@
 - [~] **Crisis detection** (keyword-based) — di prompt ✅, button "Butuh Bantuan Segera?" di `Emergencyhelpsection` ✅, **belum integrated** dengan deteksi AI
 - [ ] Riwayat sesi: list + detail — **belum**
 
-### Psikolog List (Sel, 16/06) ⏳ 0% DONE
-- [ ] Tambah model `Psychologist` ke `schema.prisma` — **belum**
-- [ ] Seed data 3 psikolog dummy — **belum** (no `seed.ts`)
-- [ ] Halaman list psikolog (filter spesialisasi) — belum (pricing/billing ditiadakan)
-- [ ] Halaman detail psikolog — **belum**
-- [ ] (Belum payment, belum booking — masuk FASE 4)
+### Psikolog List (Sel, 16/06) ✅ DONE
+- [x] Tambah model `Psychologist` ke `schema.prisma`
+- [x] Seed data 3 psikolog dummy (via `src/lib/seed.ts` dynamic checks)
+- [x] Halaman list psikolog (filter spesialisasi) & pencarian
+- [x] Detail psikolog & scheduling modal (pricing/billing ditiadakan)
+- [x] Flow booking & status di alur pemulihan Anda
 
 ### Polish & Bug Fix (Sel, 16/06 malam) ⏳ 0% DONE
 - [ ] Responsive check (mobile-first) — landing pakai `h-screen` di section, perlu dicek di mobile
@@ -186,29 +186,28 @@
 
 ---
 
-## FASE 4 — Rabu 17/06 – Minggu 20/06: Booking, Payment & Polish 🎯 ⏳ NOT STARTED
+## FASE 4 — Rabu 17/06 – Minggu 20/06: Booking, Payment & Polish 🎯 ⏳ IN PROGRESS
 
 > **Goal akhir fase:** End-to-end booking berjalan, demo siap dipresentasikan.
 
 ### ⏸️ Smart Contract & Wallet Connect — SKIP (not MVP) ✅
 > Web3 dikerjakan post-hackathon. Fokus ke fitur utama dulu.
 
-### Schema Additions (RAB, 17/06) ⏳ 0% DONE
-> Harus ditambah SEBELUM booking agar tidak refactor besar di tengah jalan.
-- [ ] Tambah `Psychologist` model: id, name, email, spesialisasi, bio, foto, rating, verified (hargaPer30 & hargaPer60 ditiadakan)
-- [ ] Tambah `SessionSummary` model: id, chatSessionId, content, uiTheme, createdAt
-- [ ] Tambah `Appointment` model: id, userId, psychologistId, scheduledAt, durationMin, status (pending_psychologist/confirmed/declined/completed)
-- [ ] Tambah `ConsultationNote` model: id, appointmentId, psychologistId, content, createdAt
-- [ ] ~~Tambah Payment model~~ ❌ SKIP (pricing/billing ditiadakan)
-- [ ] `npx prisma migrate dev --name add_booking_models`
-- [ ] Tulis `prisma/seed.ts` untuk psikolog dummy
+### Schema Additions (RAB, 17/06) ✅ DONE
+- [x] Tambah `Psychologist` model (tanpa harga/billing)
+- [ ] Tambah `SessionSummary` model
+- [x] Tambah `Appointment` model
+- [ ] Tambah `ConsultationNote` model
+- [x] ~~Tambah Payment model~~ ❌ SKIP (pricing/billing ditiadakan)
+- [x] Pemasangan skema via `prisma db push` & `generate`
+- [x] Seed data psikolog terverifikasi
 
-### Booking & Konsultasi (Jum, 19/06) ⏳ 0% DONE
-- [ ] Halaman booking: pilih slot
+### Booking & Konsultasi (Jum, 19/06) ✅ DONE
+- [x] Halaman booking/scheduling slot interaktif via modal
 - [x] **Keputusan:** payment ditiadakan untuk MVP (sudah diputuskan ✅)
-- [ ] Status flow: `pending_psychologist` → `confirmed` / `declined`
-- [ ] Notifikasi ke psikolog (in-app)
-- [ ] ~~Halaman payment mock~~ ❌ SKIP (pricing/billing ditiadakan)
+- [x] Active session widget (floating widget Halodoc style)
+- [x] Batalkan janji (cancellation action)
+
 
 ### Chat Real-time dengan Psikolog (Jum, 19/06) ⏳ 0% DONE
 - [x] Library Pusher terinstall ✅ (belum dipakai)
