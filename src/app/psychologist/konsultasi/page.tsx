@@ -8,7 +8,15 @@ export const metadata = {
   description: "Halaman sesi konsultasi interaktif - Sudut Pandang Psikolog.",
 };
 
-export default async function PsychologistKonsultasiPage() {
+interface SearchParams {
+  appointmentId?: string;
+}
+
+export default async function PsychologistKonsultasiPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
   const session = await auth();
   if (!session?.user?.id) {
     redirect("/login?callbackUrl=/psychologist/konsultasi");
@@ -20,8 +28,12 @@ export default async function PsychologistKonsultasiPage() {
     redirect("/dashboard");
   }
 
+  const { appointmentId } = await searchParams;
+
   // Fetch active appointment for the user from database
-  const activeAppointment = await psychologistService.getActiveAppointment(session.user.id);
+  const activeAppointment = appointmentId
+    ? await psychologistService.getAppointmentById(appointmentId, session.user.id)
+    : await psychologistService.getActiveAppointment(session.user.id);
 
   // Fetch latest screening context for score rendering
   const latestScreening = await psychologistService.getLatestScreening(session.user.id);
@@ -30,6 +42,7 @@ export default async function PsychologistKonsultasiPage() {
   const finalConclusion = await psychologistService.getLatestAiSessionConclusion(session.user.id);
 
   const clientProfile = {
+    id: session.user.id,
     name: dbUser.name || dbUser.email || "Pengguna",
     image: dbUser.image || undefined,
     email: dbUser.email,

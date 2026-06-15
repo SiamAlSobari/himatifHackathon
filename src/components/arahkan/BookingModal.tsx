@@ -23,6 +23,7 @@ interface BookingModalProps {
   onClose: () => void
   onConfirm: () => void
   mode?: "booking" | "profile"
+  onRate?: (psychologistId: string, rating: number) => Promise<void>
 }
 
 export default function BookingModal({
@@ -35,10 +36,23 @@ export default function BookingModal({
   onClose,
   onConfirm,
   mode = "booking",
+  onRate,
 }: BookingModalProps) {
+  const [userRating, setUserRating] = React.useState<number>(0)
+  const [hoverRating, setHoverRating] = React.useState<number>(0)
+  const [isRatingSubmitting, setIsRatingSubmitting] = React.useState(false)
+  const [hasRated, setHasRated] = React.useState(false)
+
+  React.useEffect(() => {
+    setUserRating(0)
+    setHoverRating(0)
+    setHasRated(false)
+    setIsRatingSubmitting(false)
+  }, [psychologist?.id])
+
   if (!psychologist) return null
 
-  const timeSlots = ["09:00", "10:30", "13:00", "14:30", "16:00", "19:00"]
+  const timeSlots = ["09:00", "10:30", "13:00", "14:30", "16:00", "20:25"]
 
   // Get friendly clinical biography based on name/role
   const getBiography = (name: string) => {
@@ -146,6 +160,53 @@ export default function BookingModal({
                 {getBiography(psychologist.name)}
               </p>
             </div>
+
+            {/* Interactive Rating Component */}
+            {onRate && (
+              <div className="border-t border-slate-100 pt-4 mt-2">
+                <span className="block text-[10px] font-bold text-teal-950 uppercase tracking-wider mb-2 text-center">
+                  Berikan Rating Anda
+                </span>
+                <div className="flex items-center justify-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => {
+                    const active = star <= (hoverRating || userRating)
+                    return (
+                      <button
+                        key={star}
+                        type="button"
+                        disabled={isRatingSubmitting || hasRated}
+                        onMouseEnter={() => !hasRated && setHoverRating(star)}
+                        onMouseLeave={() => !hasRated && setHoverRating(0)}
+                        onClick={async () => {
+                          if (hasRated || isRatingSubmitting) return
+                          setUserRating(star)
+                          setIsRatingSubmitting(true)
+                          try {
+                            await onRate(psychologist.id, star)
+                            setHasRated(true)
+                          } catch (err) {
+                            setUserRating(0)
+                          } finally {
+                            setIsRatingSubmitting(false)
+                          }
+                        }}
+                        className={`material-symbols-outlined text-2xl transition-all duration-150 cursor-pointer ${
+                          hasRated || isRatingSubmitting ? "opacity-50" : "hover:scale-125"
+                        } ${active ? "text-amber-400" : "text-slate-300"}`}
+                        style={{ fontVariationSettings: `'FILL' ${active ? 1 : 0}` }}
+                      >
+                        star
+                      </button>
+                    )
+                  })}
+                </div>
+                {hasRated && (
+                  <p className="text-[11px] text-emerald-600 font-semibold text-center mt-1">
+                    Terima kasih atas rating Anda!
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Close Button */}
             <button

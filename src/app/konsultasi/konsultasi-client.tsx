@@ -11,10 +11,11 @@ import { completeAppointment, cancelAppointment } from "@/app/actions/psychologi
 import { footerLinkGroups } from "@/app/dashboard/data";
 import { useConsultationChat } from "@/hooks/konsultasi/useConsultationChat";
 import { ActiveAppointment, Psychologist } from "@/lib/types/konsultasi";
+import { getPusherClient } from "@/lib/pusher/pusher-client";
 
 interface KonsultasiClientProps {
   activeAppointment: ActiveAppointment | null;
-  userProfile: { name: string; image?: string };
+  userProfile: { id: string; name: string; image?: string };
   latestScreening: {
     score: number;
     createdAt: string;
@@ -46,11 +47,35 @@ export default function KonsultasiClient({
   // 2. Chat history state synced via custom hook
   const {
     messages,
+    isOnline,
     isTyping,
     inputValue,
     setInputValue,
     sendMessage,
   } = useConsultationChat(activeAppointment?.id, "user");
+
+  // Real-time synchronization for cancellation redirection
+  useEffect(() => {
+    if (!activeAppointment || !userProfile?.id) return;
+
+    const pusher = getPusherClient();
+    const channelName = `user-${userProfile.id}`;
+    const channel = pusher.subscribe(channelName);
+
+    const handleAppointmentUpdate = (data: any) => {
+      if (!data.activeAppointment || data.activeAppointment.id !== activeAppointment.id) {
+        toast.error("Sesi konsultasi Anda telah dibatalkan.");
+        router.push("/arahkan");
+      }
+    };
+
+    channel.bind("appointment-updated", handleAppointmentUpdate);
+
+    return () => {
+      channel.unbind("appointment-updated", handleAppointmentUpdate);
+      pusher.unsubscribe(channelName);
+    };
+  }, [activeAppointment, userProfile?.id, router]);
 
   // Track latest message id to display toast
   const lastMessageRef = useRef<string | null>(null);
@@ -180,6 +205,7 @@ export default function KonsultasiClient({
               psychologistName={psychologist.name}
               psychologistRole={psychologist.role}
               psychologistImage={psychologist.imageUrl}
+              isOnline={isOnline}
               isTyping={isTyping}
               messages={messages}
               inputValue={inputValue}

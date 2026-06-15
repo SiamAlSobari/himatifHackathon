@@ -12,6 +12,7 @@ interface Message {
 interface PsychologistChatAreaProps {
   clientName: string;
   clientImage: string;
+  isOnline: boolean;
   isTyping: boolean;
   messages: Message[];
   inputValue: string;
@@ -23,6 +24,7 @@ interface PsychologistChatAreaProps {
 export default function PsychologistChatArea({
   clientName,
   clientImage,
+  isOnline,
   isTyping,
   messages,
   inputValue,
@@ -55,15 +57,21 @@ export default function PsychologistChatArea({
               alt={clientName}
               src={clientImage}
             />
-            <span className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-white rounded-full ${isTyping ? "bg-amber-500 animate-pulse" : "bg-green-500"}`}></span>
+            {(isOnline || isTyping) && (
+              <span className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-white rounded-full ${isTyping ? "bg-amber-500 animate-pulse" : "bg-green-500"}`}></span>
+            )}
           </div>
           <div>
-            <h2 className="font-headline-md text-body-lg font-bold text-primary">{clientName}</h2>
-            <div className="flex items-center gap-1">
-              <span className={`text-xs font-semibold uppercase tracking-wider ${isTyping ? "text-amber-600" : "text-green-600"}`}>
-                {isTyping ? "Klien Mengetik..." : "Online"}
-              </span>
-            </div>
+            <h2 className={`font-headline-md font-bold text-primary transition-all duration-300 ${isOnline || isTyping ? "text-body-lg" : "text-xl"}`}>
+              {clientName}
+            </h2>
+            {(isOnline || isTyping) && (
+              <div className="flex items-center gap-1">
+                <span className={`text-xs font-semibold uppercase tracking-wider ${isTyping ? "text-amber-600 animate-pulse" : "text-green-600"}`}>
+                  {isTyping ? "Klien Mengetik..." : "Online"}
+                </span>
+              </div>
+            )}
           </div>
         </div>
         <button className="material-symbols-outlined text-outline p-2 hover:bg-surface-container hover:text-primary rounded-lg transition-all cursor-pointer">

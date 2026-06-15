@@ -11,6 +11,7 @@ import { completeAppointment } from "@/app/actions/psychologist";
 import { footerLinkGroups } from "@/app/dashboard/data";
 import { useConsultationChat } from "@/hooks/konsultasi/useConsultationChat";
 import { ActiveAppointment, ClientProfile } from "@/lib/types/konsultasi";
+import { getPusherClient } from "@/lib/pusher/pusher-client";
 
 interface PsychologistKonsultasiClientProps {
   activeAppointment: ActiveAppointment | null;
@@ -30,11 +31,35 @@ export default function PsychologistKonsultasiClient({
   // 1. Chat history state synced via custom hook
   const {
     messages,
+    isOnline,
     isTyping,
     inputValue,
     setInputValue,
     sendMessage,
   } = useConsultationChat(activeAppointment?.id, "psychologist");
+
+  // Real-time synchronization for cancellation redirection
+  useEffect(() => {
+    if (!activeAppointment || !client?.id) return;
+
+    const pusher = getPusherClient();
+    const channelName = `user-${client.id}`;
+    const channel = pusher.subscribe(channelName);
+
+    const handleAppointmentUpdate = (data: any) => {
+      if (!data.activeAppointment || data.activeAppointment.id !== activeAppointment.id) {
+        toast.error("Sesi konsultasi dengan Klien telah dibatalkan.");
+        router.push("/arahkan");
+      }
+    };
+
+    channel.bind("appointment-updated", handleAppointmentUpdate);
+
+    return () => {
+      channel.unbind("appointment-updated", handleAppointmentUpdate);
+      pusher.unsubscribe(channelName);
+    };
+  }, [activeAppointment, client?.id, router]);
 
   // Track latest message id to display toast
   const lastMessageRef = useRef<string | null>(null);
@@ -162,6 +187,7 @@ export default function PsychologistKonsultasiClient({
             <PsychologistChatArea
               clientName={client.name}
               clientImage={client.image || "https://i.pravatar.cc/80?img=12"}
+              isOnline={isOnline}
               isTyping={isTyping}
               messages={messages}
               inputValue={inputValue}

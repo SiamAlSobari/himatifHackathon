@@ -168,4 +168,3 @@ enum AppointmentStatus {
   COMPLETED
   CANCELLED
 }
-

@@ -11,6 +11,7 @@ interface PsychologistCardProps {
   busyUntil?: string | null
   onBook: () => void
   onViewProfile?: () => void
+  onCancel?: () => void
   isBooked?: boolean
 }
 
@@ -25,6 +26,7 @@ export default function PsychologistCard({
   busyUntil,
   onBook,
   onViewProfile,
+  onCancel,
   isBooked = false,
 }: PsychologistCardProps) {
   const isAvailable = availability === "AVAILABLE"
@@ -102,12 +104,20 @@ export default function PsychologistCard({
         </span>
 
         {isBooked ? (
-          <button
-            onClick={onViewProfile}
-            className="px-6 py-2.5 bg-teal-50 border border-teal-600 text-[#004349] text-xs font-bold rounded-lg hover:bg-teal-100/50 active:scale-95 transition-all cursor-pointer"
-          >
-            Terjadwal
-          </button>
+          <div className="flex flex-col gap-2 w-full">
+            <button
+              onClick={onViewProfile}
+              className="w-full text-center px-4 py-2 bg-teal-50 border border-teal-600 text-[#004349] text-xs font-bold rounded-lg hover:bg-teal-100/50 active:scale-95 transition-all cursor-pointer"
+            >
+              Terjadwal
+            </button>
+            <button
+              onClick={onCancel}
+              className="w-full text-center px-4 py-2 bg-red-50 border border-red-500 text-red-700 text-xs font-bold rounded-lg hover:bg-red-100/50 active:scale-95 transition-all cursor-pointer"
+            >
+              Batalkan Sesi
+            </button>
+          </div>
         ) : isAvailable ? (
           <button
             onClick={onBook}

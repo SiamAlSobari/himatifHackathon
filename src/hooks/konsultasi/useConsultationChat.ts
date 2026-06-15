@@ -7,6 +7,7 @@ export function useConsultationChat(
   role: "user" | "psychologist"
 ) {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isOnline, setIsOnline] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [isMessagesLoading, setIsMessagesLoading] = useState(true);
@@ -50,7 +51,25 @@ export function useConsultationChat(
     fetchMessages();
   }, [appointmentId]);
 
-  // 2. Pusher subscriptions for real-time messages and typing updates
+  // Broadcast presence helper function
+  const sendPresence = async (type: "join" | "greet" | "leave") => {
+    if (!appointmentId) return;
+    try {
+      await fetch("/api/konsultasi/presence", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          appointmentId,
+          role,
+          type,
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to send presence:", err);
+    }
+  };
+
+  // 2. Pusher subscriptions for real-time messages, typing, and presence updates
   useEffect(() => {
     if (!appointmentId) return;
 
@@ -85,12 +104,34 @@ export function useConsultationChat(
       }
     };
 
+    // Presence status binding
+    const handlePresenceStatus = (data: { type: "join" | "greet" | "leave"; sender: string }) => {
+      if (data.sender !== role) {
+        if (data.type === "join") {
+          setIsOnline(true);
+          // Greet back so they know we are already online
+          sendPresence("greet");
+        } else if (data.type === "greet") {
+          setIsOnline(true);
+        } else if (data.type === "leave") {
+          setIsOnline(false);
+        }
+      }
+    };
+
     channel.bind("message-sent", handleNewMessage);
     channel.bind("typing-status", handleTypingStatus);
+    channel.bind("presence-status", handlePresenceStatus);
+
+    // Announce we joined
+    sendPresence("join");
 
     return () => {
+      // Announce we left
+      sendPresence("leave");
       channel.unbind("message-sent", handleNewMessage);
       channel.unbind("typing-status", handleTypingStatus);
+      channel.unbind("presence-status", handlePresenceStatus);
       pusher.unsubscribe(channelName);
     };
   }, [appointmentId, role]);
@@ -165,6 +206,7 @@ export function useConsultationChat(
 
   return {
     messages,
+    isOnline,
     isTyping,
     inputValue,
     isMessagesLoading,

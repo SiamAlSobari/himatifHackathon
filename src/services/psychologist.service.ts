@@ -30,6 +30,18 @@ export class PsychologistService {
     })
   }
 
+  async getAppointmentById(id: string, userId: string) {
+    return await db.appointment.findFirst({
+      where: {
+        id,
+        userId,
+      },
+      include: {
+        psychologist: true,
+      },
+    })
+  }
+
   async getLatestScreening(userId: string) {
     return await db.screening.findFirst({
       where: { userId },
@@ -45,6 +57,30 @@ export class PsychologistService {
 
     if (!psych) {
       throw new Error("Psikolog tidak ditemukan")
+    }
+
+    // Check if user already booked this specific psychologist today
+    const startOfDay = new Date(scheduledAt);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(scheduledAt);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const existingToday = await db.appointment.findFirst({
+      where: {
+        userId,
+        psychologistId,
+        scheduledAt: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+        status: {
+          in: ["SCHEDULED", "COMPLETED"],
+        },
+      },
+    });
+
+    if (existingToday) {
+      throw new Error("Anda hanya dapat menjadwalkan sesi dengan psikolog ini 1 kali per hari.");
     }
 
     // Check if user already has an active scheduled appointment
@@ -140,58 +176,10 @@ export class PsychologistService {
   }
 
   async getOrCreateConsultationMessages(appointmentId: string) {
-    let messages = await db.consultationMessage.findMany({
+    return await db.consultationMessage.findMany({
       where: { appointmentId },
       orderBy: { createdAt: "asc" },
     });
-
-    if (messages.length === 0) {
-      const now = new Date();
-      const initialData = [
-        {
-          sender: "psychologist",
-          text: "Halo. Saya Dr. Sarah. Saya sudah meninjau hasil skrining 'Kenali' Anda. Terima kasih sudah bersedia berbagi. Bagaimana perasaan Anda saat ini?",
-          offsetMinutes: 8,
-        },
-        {
-          sender: "user",
-          text: "Halo Dokter. Sejujurnya saya merasa sangat cemas beberapa hari terakhir ini. Sulit sekali untuk fokus di pekerjaan.",
-          offsetMinutes: 5,
-        },
-        {
-          sender: "psychologist",
-          text: "Saya mengerti, rasa cemas memang bisa sangat menguras energi. Di laporan Anda tertulis ada gangguan tidur juga, apakah itu masih berlanjut sampai tadi malam?",
-          offsetMinutes: 4,
-        },
-        {
-          sender: "user",
-          text: "Iya Dokter, saya hanya tidur sekitar 3-4 jam. Pikiran saya tidak bisa berhenti berputar tentang kesalahan-kesalahan kecil di kantor.",
-          offsetMinutes: 2,
-        },
-        {
-          sender: "psychologist",
-          text: "Pikiran yang berulang (rumination) memang seringkali mengganggu waktu istirahat. Mari kita coba teknik pernapasan sejenak sebelum kita bahas lebih lanjut, apakah Anda bersedia?",
-          offsetMinutes: 1,
-        },
-      ];
-
-      const seededMessages = [];
-      for (const item of initialData) {
-        const msgTime = new Date(now.getTime() - item.offsetMinutes * 60 * 1000);
-        const msg = await db.consultationMessage.create({
-          data: {
-            appointmentId,
-            sender: item.sender,
-            text: item.text,
-            createdAt: msgTime,
-          },
-        });
-        seededMessages.push(msg);
-      }
-      messages = seededMessages;
-    }
-
-    return messages;
   }
 
   async createConsultationMessage(appointmentId: string, sender: "user" | "psychologist", text: string) {
@@ -201,6 +189,23 @@ export class PsychologistService {
         sender,
         text,
       },
+    });
+  }
+
+  async ratePsychologist(psychologistId: string, userRating: number) {
+    const psych = await db.psychologist.findUnique({
+      where: { id: psychologistId },
+    });
+    if (!psych) {
+      throw new Error("Psikolog tidak ditemukan");
+    }
+
+    // Calculate new rating (assume 9 historical ratings + user rating)
+    const newRating = Math.round(((psych.rating * 9 + userRating) / 10) * 10) / 10;
+
+    return await db.psychologist.update({
+      where: { id: psychologistId },
+      data: { rating: newRating },
     });
   }
 }
