@@ -17,6 +17,7 @@ model User {
   usia          Int?
   jenisKelamin  String?
   kontakDarurat String?
+  isOnboarded   Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

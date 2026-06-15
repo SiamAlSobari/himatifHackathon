@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { errorResponse, successResponse } from "@/lib/response";
 import { ScreeningRequest } from "@/lib/types/screening";
 import screeningService from "@/services/screening.service";
+import { db } from "@/lib/db";
 
 export async function POST(request: Request) {
     const session = await auth();
@@ -19,6 +20,13 @@ export async function POST(request: Request) {
         const savedResult = await screeningService.saveScreeningResult(session.user.id, screeningResult);
         if (!savedResult) {
             return errorResponse(500, "Failed to save screening result");
+        }
+
+        if (type === "ONBOARDING") {
+            await db.user.update({
+                where: { id: session.user.id },
+                data: { isOnboarded: true },
+            });
         }
 
         return successResponse(200, "Screening calculated successfully", savedResult);

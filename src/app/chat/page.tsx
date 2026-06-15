@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/ui/Navbar";
 import ChatPanel from "@/components/chat/ChatPanel";
 import SummarySidebar from "@/components/chat/SummarySidebar";
@@ -17,7 +19,14 @@ const themeBgMap = {
 
 export default function ChatPage() {
   const session = useSession();
+  const router = useRouter();
   const { data, isLoading, refetch } = useChatSession();
+
+  useEffect(() => {
+    if (!isLoading && data && data.isOnboarded === false) {
+      router.push("/screening");
+    }
+  }, [data, isLoading, router]);
 
   // Refetch data using TanStack Query when pusher triggers 'chat-finished'
   useChatNotification(

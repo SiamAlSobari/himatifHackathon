@@ -56,4 +56,5 @@ export interface ChatSessionData {
         completedSession?: ChatSessionWithMessages | null;
     } | null;
     latestScreening: Screening | null;
+    isOnboarded?: boolean;
 }

@@ -4,6 +4,7 @@ import chatSessionService from "@/services/chat-session.service";
 import chatService from "@/services/chat.service";
 import chatSessionRepository from "@/repositories/chatSessionRepository";
 import screeningRepository from "@/repositories/screening.repository";
+import { db } from "@/lib/db";
 
 export async function POST(request: Request) {
     const session = await auth();
@@ -52,6 +53,10 @@ export async function GET(request: Request) {
     try {
         const activeChatSession = await chatSessionService.getActiveChatSession(userId);
         const latestScreening = await screeningRepository.getLatestScreeningResult(userId);
+        const user = await db.user.findUnique({
+            where: { id: userId },
+            select: { isOnboarded: true }
+        });
 
         let cooldown = null;
 
@@ -91,7 +96,8 @@ export async function GET(request: Request) {
         return successResponse(200, "Active chat session retrieved successfully", {
             activeSession: activeChatSession,
             cooldown,
-            latestScreening
+            latestScreening,
+            isOnboarded: user?.isOnboarded ?? false
         });
     } catch (error) {
         console.error("Error in chat session route:", error);
