@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { toast } from "sonner"
 import Navbar from "@/components/ui/Navbar"
 import { bookAppointment, cancelAppointment } from "@/app/actions/psychologist"
+import { getPusherClient } from "@/lib/pusher/pusher-client"
 
 // Modular Components
 import PsychologistCard from "@/components/arahkan/PsychologistCard"
@@ -44,7 +45,7 @@ interface ActiveAppointment {
 interface ArahkanClientProps {
   psychologists: Psychologist[]
   activeAppointment: ActiveAppointment | null
-  userProfile: { name: string; image?: string }
+  userProfile: { id: string; name: string; image?: string }
   latestScreeningScore: number | null
 }
 
@@ -68,6 +69,14 @@ export default function ArahkanClient({
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
 
+  // Psychologists list in state so we can update rating in real-time
+  const [psychList, setPsychList] = useState<Psychologist[]>(psychologists)
+
+  // Sync psychList if psychologists prop changes
+  useEffect(() => {
+    setPsychList(psychologists)
+  }, [psychologists])
+
   // Appointment
   const [appointment, setAppointment] = useState<ActiveAppointment | null>(activeAppointment)
   const [isSessionVisible, setIsSessionVisible] = useState(true)
@@ -82,9 +91,34 @@ export default function ArahkanClient({
   // Emergency modal
   const [showEmergencyModal, setShowEmergencyModal] = useState(false)
 
+  // Real-time synchronization of bookings via Pusher
+  useEffect(() => {
+    if (!userProfile?.id) return
+
+    const pusher = getPusherClient()
+    const channelName = `user-${userProfile.id}`
+    const channel = pusher.subscribe(channelName)
+
+    const handleAppointmentUpdate = (data: any) => {
+      setAppointment(data.activeAppointment)
+      if (data.activeAppointment) {
+        toast.success(`Jadwal konsultasi diperbarui secara real-time: ${data.activeAppointment.psychologist.name}`)
+      } else {
+        toast.info("Jadwal konsultasi telah dibatalkan.")
+      }
+    }
+
+    channel.bind("appointment-updated", handleAppointmentUpdate)
+
+    return () => {
+      channel.unbind("appointment-updated", handleAppointmentUpdate)
+      pusher.unsubscribe(channelName)
+    }
+  }, [userProfile?.id])
+
   // ── Derived: filtered psychologist list ──
 
-  const filteredPsychologists = psychologists.filter((p) => {
+  const filteredPsychologists = psychList.filter((p) => {
     const q = searchQuery.toLowerCase()
     const matchesSearch =
       p.name.toLowerCase().includes(q) ||
@@ -144,6 +178,34 @@ export default function ArahkanClient({
       toast.success("Jadwal konsultasi berhasil dibatalkan.")
     } catch (err: any) {
       toast.error(err.message || "Gagal membatalkan konsultasi.")
+    }
+  }
+
+  const handleRatePsychologist = async (psychologistId: string, rating: number) => {
+    try {
+      const res = await fetch("/api/psychologist/rate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ psychologistId, rating }),
+      })
+      if (!res.ok) {
+        throw new Error("Gagal mengirim rating")
+      }
+      const json = await res.json()
+      if (json.success) {
+        toast.success("Terima kasih! Rating Anda berhasil dikirim.")
+        setPsychList((prev) =>
+          prev.map((p) =>
+            p.id === psychologistId ? { ...p, rating: json.data.rating } : p
+          )
+        )
+        if (bookingPsych && bookingPsych.id === psychologistId) {
+          setBookingPsych((prev) => prev ? { ...prev, rating: json.data.rating } : null)
+        }
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Gagal mengirim rating.")
+      throw err
     }
   }
 
@@ -244,6 +306,11 @@ export default function ArahkanClient({
                     busyUntil={psych.busyUntil}
                     onBook={() => handleOpenBooking(psych)}
                     onViewProfile={() => handleOpenProfile(psych)}
+                    onCancel={() => {
+                      if (appointment) {
+                        handleCancelAppointment(appointment.id)
+                      }
+                    }}
                     isBooked={isBooked}
                   />
                 )
@@ -268,6 +335,7 @@ export default function ArahkanClient({
       <ActiveSessionWidget
         psychologistName={appointment?.psychologist.name ?? null}
         scheduledAt={appointment?.scheduledAt ?? null}
+        appointmentId={appointment?.id ?? null}
         visible={isSessionVisible}
         onClose={() => {
           if (appointment) handleCancelAppointment(appointment.id)
@@ -286,6 +354,7 @@ export default function ArahkanClient({
         onClose={() => setBookingPsych(null)}
         onConfirm={handleConfirmBooking}
         mode={modalMode}
+        onRate={handleRatePsychologist}
       />
 
       <EmergencyHotlineModal

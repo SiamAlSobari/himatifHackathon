@@ -3,6 +3,7 @@
 import { auth } from "@/auth"
 import psychologistService from "@/services/psychologist.service"
 import { revalidatePath } from "next/cache"
+import { pusherServer } from "@/lib/pusher/pusher-server"
 
 export async function bookAppointment(psychologistId: string, scheduledAt: Date) {
   const session = await auth()
@@ -15,6 +16,20 @@ export async function bookAppointment(psychologistId: string, scheduledAt: Date)
     psychologistId,
     scheduledAt
   )
+
+  // Realtime notification update
+  await pusherServer.trigger(`user-${session.user.id}`, "appointment-updated", {
+    activeAppointment: {
+      id: appointment.id,
+      scheduledAt: appointment.scheduledAt.toISOString(),
+      psychologist: {
+        id: appointment.psychologist.id,
+        name: appointment.psychologist.name,
+        role: appointment.psychologist.role,
+        imageUrl: appointment.psychologist.imageUrl,
+      }
+    }
+  });
 
   revalidatePath("/arahkan")
   return appointment
@@ -30,6 +45,11 @@ export async function cancelAppointment(appointmentId: string) {
     appointmentId,
     session.user.id
   )
+
+  // Realtime notification update
+  await pusherServer.trigger(`user-${session.user.id}`, "appointment-updated", {
+    activeAppointment: null
+  });
 
   revalidatePath("/arahkan")
   revalidatePath("/konsultasi")

@@ -6,6 +6,7 @@ import Link from "next/link"
 interface ActiveSessionWidgetProps {
   psychologistName: string | null
   scheduledAt: string | null
+  appointmentId: string | null
   visible: boolean
   onClose: () => void
 }
@@ -13,10 +14,12 @@ interface ActiveSessionWidgetProps {
 export default function ActiveSessionWidget({
   psychologistName,
   scheduledAt,
+  appointmentId,
   visible,
   onClose,
 }: ActiveSessionWidgetProps) {
   const [status, setStatus] = useState<"upcoming" | "active" | "ended">("upcoming")
+  const [msUntilStart, setMsUntilStart] = useState<number>(0)
 
   useEffect(() => {
     if (!scheduledAt) return
@@ -30,10 +33,13 @@ export default function ActiveSessionWidget({
 
       if (now < scheduledTime) {
         setStatus("upcoming")
+        setMsUntilStart(scheduledTime - now)
       } else if (now >= scheduledTime && now <= endTime) {
         setStatus("active")
+        setMsUntilStart(0)
       } else {
         setStatus("ended")
+        setMsUntilStart(0)
       }
     }
 
@@ -45,6 +51,19 @@ export default function ActiveSessionWidget({
   if (!psychologistName || !visible || status === "ended") return null
 
   const isUpcoming = status === "upcoming"
+
+  const formatCountdown = (ms: number) => {
+    const totalSeconds = Math.max(0, Math.floor(ms / 1000))
+    const hrs = Math.floor(totalSeconds / 3600)
+    const mins = Math.floor((totalSeconds % 3600) / 60)
+    const secs = totalSeconds % 60
+
+    const hrsStr = hrs > 0 ? `${hrs.toString().padStart(2, "0")}:` : ""
+    const minsStr = mins.toString().padStart(2, "0")
+    const secsStr = secs.toString().padStart(2, "0")
+
+    return `${hrsStr}${minsStr}:${secsStr}`
+  }
 
   const content = (
     <div className="flex items-center gap-3">
@@ -61,11 +80,8 @@ export default function ActiveSessionWidget({
         </p>
         <p className="text-[10px] text-white/60 font-medium truncate">
           {isUpcoming
-            ? `Mulai ${new Date(scheduledAt!).toLocaleTimeString("id-ID", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })} WIB`
-            : "Klik untuk masuk chat"}
+            ? `Mulai dalam ${formatCountdown(msUntilStart)}`
+            : "Masuk ruang chat sekarang"}
         </p>
       </div>
     </div>
@@ -73,7 +89,7 @@ export default function ActiveSessionWidget({
 
   if (isUpcoming) {
     return (
-      <div className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-40 flex items-center gap-2 bg-[#1a3a4a]/95 text-white pl-4 pr-3 py-3 rounded-full shadow-lg border border-amber-500/20 select-none">
+      <div className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-40 flex items-center gap-2 bg-[#1a3a4a]/95 text-white pl-4 pr-3 py-3 rounded-full shadow-lg border border-amber-500/30 cursor-not-allowed select-none">
         {content}
 
         {/* Close button */}
@@ -94,8 +110,8 @@ export default function ActiveSessionWidget({
 
   return (
     <Link
-      href="/konsultasi"
-      className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-40 flex items-center gap-2 bg-[#1a3a4a] text-white pl-4 pr-3 py-3 rounded-full shadow-lg hover:bg-[#0b2c3c] transition-colors cursor-pointer"
+      href={`/konsultasi?appointmentId=${appointmentId}`}
+      className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-40 flex items-center gap-2 bg-[#004349] text-white pl-4 pr-3 py-3 rounded-full shadow-lg hover:bg-[#003a3f] border border-emerald-500/20 transition-all active:scale-95 cursor-pointer"
     >
       {content}
 

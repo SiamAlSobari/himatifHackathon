@@ -8,19 +8,32 @@ export const metadata = {
   description: "Halaman sesi konsultasi interaktif dengan psikolog profesional Anda.",
 };
 
-export default async function KonsultasiPage() {
+interface SearchParams {
+  appointmentId?: string;
+}
+
+export default async function KonsultasiPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
   const session = await auth();
   if (!session?.user?.id) {
     redirect("/login?callbackUrl=/konsultasi");
   }
 
-  // Fetch active appointment for the user from database
-  const activeAppointment = await psychologistService.getActiveAppointment(session.user.id);
+  const { appointmentId } = await searchParams;
+
+  // Fetch active appointment for the user from database (specific or active)
+  const activeAppointment = appointmentId
+    ? await psychologistService.getAppointmentById(appointmentId, session.user.id)
+    : await psychologistService.getActiveAppointment(session.user.id);
 
   // Fetch latest screening context for score rendering
   const latestScreening = await psychologistService.getLatestScreening(session.user.id);
 
   const userProfile = {
+    id: session.user.id,
     name: session.user.name || session.user.email || "Pengguna",
     image: session.user.image || undefined,
   };

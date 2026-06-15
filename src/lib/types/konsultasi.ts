@@ -17,6 +17,7 @@ export interface ActiveAppointment {
 }
 
 export interface ClientProfile {
+  id: string;
   name: string;
   image?: string;
   email: string;

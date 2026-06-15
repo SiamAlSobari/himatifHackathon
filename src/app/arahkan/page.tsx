@@ -64,6 +64,7 @@ export default async function ArahkanPage() {
         }
       } : null}
       userProfile={{
+        id: session.user.id,
         name: dbUser.name || dbUser.email || "Pengguna",
         image: dbUser.image || undefined,
       }}
