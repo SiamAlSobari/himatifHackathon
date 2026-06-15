@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Navbar from "@/components/ui/Navbar";
@@ -9,32 +9,8 @@ import ChatArea from "@/components/konsultasi/ChatArea";
 import ContextSidebar from "@/components/konsultasi/ContextSidebar";
 import { completeAppointment, cancelAppointment } from "@/app/actions/psychologist";
 import { footerLinkGroups } from "@/app/dashboard/data";
-
-// Pre-programmed psychologist replies for interactive feel
-const MOCK_REPLIES = [
-  "Tentu, mari kita mulai dengan menarik napas dalam-dalam selama 4 detik, tahan 4 detik, lalu hembuskan perlahan selama 4 detik. Coba lakukan ini 3 kali dan beri tahu saya bagaimana rasanya.",
-  "Bagus sekali. Teknik pernapasan ini membantu menenangkan sistem saraf Anda yang sedang tegang. Sekarang, mari kita bicarakan tentang pikiran-pikiran di kantor tadi. Apa ketakutan terbesar Anda jika membuat kesalahan kecil?",
-  "Saya sangat menghargai keterbukaan Anda. Ingatlah bahwa pikiran cemas sering kali mendramatisasi situasi. Kita akan belajar cara mengenali distorsi kognitif ini secara perlahan.",
-  "Terima kasih telah berbagi cerita ini. Saya di sini untuk mendengarkan dan mendampingi Anda melewati masa sulit ini. Tetap tenang, kita cari solusinya bersama-sama."
-];
-
-interface Psychologist {
-  id: string;
-  name: string;
-  role: string;
-  specialty: string;
-  imageUrl: string;
-  experienceYears: number;
-  tags: string[];
-  strNumber?: string;
-  practiceLocation?: string;
-}
-
-interface ActiveAppointment {
-  id: string;
-  scheduledAt: string;
-  psychologist: Psychologist;
-}
+import { useConsultationChat } from "@/hooks/konsultasi/useConsultationChat";
+import { ActiveAppointment, Psychologist } from "@/lib/types/konsultasi";
 
 interface KonsultasiClientProps {
   activeAppointment: ActiveAppointment | null;
@@ -67,47 +43,51 @@ export default function KonsultasiClient({
     practiceLocation: "RS Medika Utama"
   };
 
-  // 2. Chat history state
-  const [messages, setMessages] = useState([
-    {
-      id: "1",
-      sender: "psychologist" as const,
-      text: "Halo. Saya Dr. Sarah. Saya sudah meninjau hasil skrining 'Kenali' Anda. Terima kasih sudah bersedia berbagi. Bagaimana perasaan Anda saat ini?",
-      time: "10:02 AM",
-    },
-    {
-      id: "2",
-      sender: "user" as const,
-      text: "Halo Dokter. Sejujurnya saya merasa sangat cemas beberapa hari terakhir ini. Sulit sekali untuk fokus di pekerjaan.",
-      time: "10:05 AM",
-    },
-    {
-      id: "3",
-      sender: "psychologist" as const,
-      text: "Saya mengerti, rasa cemas memang bisa sangat menguras energi. Di laporan Anda tertulis ada gangguan tidur juga, apakah itu masih berlanjut sampai tadi malam?",
-      time: "10:06 AM",
-    },
-    {
-      id: "4",
-      sender: "user" as const,
-      text: "Iya Dokter, saya hanya tidur sekitar 3-4 jam. Pikiran saya tidak bisa berhenti berputar tentang kesalahan-kesalahan kecil di kantor.",
-      time: "10:08 AM",
-    },
-    {
-      id: "5",
-      sender: "psychologist" as const,
-      text: "Pikiran yang berulang (rumination) memang seringkali mengganggu waktu istirahat. Mari kita coba teknik pernapasan sejenak sebelum kita bahas lebih lanjut, apakah Anda bersedia?",
-      time: "10:10 AM",
-    },
-  ]);
+  // 2. Chat history state synced via custom hook
+  const {
+    messages,
+    isTyping,
+    inputValue,
+    setInputValue,
+    sendMessage,
+  } = useConsultationChat(activeAppointment?.id, "user");
 
-  const [inputValue, setInputValue] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [replyIndex, setReplyIndex] = useState(0);
+  // Track latest message id to display toast
+  const lastMessageRef = useRef<string | null>(null);
 
-  // 3. Countdown timer state (starts at 25 minutes = 1500 seconds)
-  const [secondsLeft, setSecondsLeft] = useState(1500);
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg.sender === "psychologist" && lastMsg.id !== lastMessageRef.current) {
+        lastMessageRef.current = lastMsg.id;
+        // Avoid toast on initial load of historical messages
+        if (messages.length > 5) {
+          toast.info(`Pesan baru dari ${psychologist.name.split(",")[0]}`);
+        }
+      }
+    }
+  }, [messages, psychologist.name]);
+
+  // 3. Countdown timer state based on appointment scheduledAt
+  const [secondsLeft, setSecondsLeft] = useState(() => {
+    if (activeAppointment) {
+      const now = Date.now();
+      const scheduledTime = new Date(activeAppointment.scheduledAt).getTime();
+      if (now < scheduledTime) {
+        return 1500; // Sesi belum dimulai, tunjukkan 25 menit
+      }
+      const endTime = scheduledTime + 25 * 60 * 1000;
+      const left = Math.max(0, Math.floor((endTime - now) / 1000));
+      return left;
+    }
+    return 1500;
+  });
   const [isFinished, setIsFinished] = useState(false);
+
+  // Check if session has actually started
+  const isAppointmentStarted = activeAppointment
+    ? Date.now() >= new Date(activeAppointment.scheduledAt).getTime()
+    : true;
 
   // 4. Picture-in-Picture floating view state
   const [showPiP, setShowPiP] = useState(false);
@@ -119,65 +99,33 @@ export default function KonsultasiClient({
       return;
     }
     const timer = setInterval(() => {
-      setSecondsLeft((prev) => prev - 1);
+      setSecondsLeft(() => {
+        if (activeAppointment) {
+          const now = Date.now();
+          const scheduledTime = new Date(activeAppointment.scheduledAt).getTime();
+          if (now < scheduledTime) {
+            return 1500;
+          }
+          const endTime = scheduledTime + 25 * 60 * 1000;
+          const left = Math.max(0, Math.floor((endTime - now) / 1000));
+          if (left <= 0) {
+            setIsFinished(true);
+            clearInterval(timer);
+          }
+          return left;
+        } else {
+          return Math.max(0, secondsLeft - 1);
+        }
+      });
     }, 1000);
     return () => clearInterval(timer);
-  }, [secondsLeft]);
+  }, [secondsLeft, activeAppointment]);
 
   // Format seconds to MM:SS
   const formatTime = (totalSeconds: number) => {
     const mins = Math.floor(totalSeconds / 60);
     const secs = totalSeconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  // Handle message send
-  const handleSend = () => {
-    const text = inputValue.trim();
-    if (!text) return;
-
-    // Add user message
-    const now = new Date();
-    const timeString = now.toLocaleTimeString("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-
-    const userMsg = {
-      id: Math.random().toString(),
-      sender: "user" as const,
-      text,
-      time: timeString,
-    };
-
-    setMessages((prev) => [...prev, userMsg]);
-    setInputValue("");
-
-    // Simulate psychologist typing response
-    setIsTyping(true);
-
-    setTimeout(() => {
-      const replyText = MOCK_REPLIES[replyIndex] || MOCK_REPLIES[MOCK_REPLIES.length - 1];
-      setReplyIndex((prev) => Math.min(MOCK_REPLIES.length - 1, prev + 1));
-
-      const psychMsg = {
-        id: Math.random().toString(),
-        sender: "psychologist" as const,
-        text: replyText,
-        time: new Date().toLocaleTimeString("id-ID", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-        }),
-      };
-
-      setMessages((prev) => [...prev, psychMsg]);
-      setIsTyping(false);
-      
-      // Subtle audio notification chime if available, or visual confirmation
-      toast.info(`Pesan baru dari ${psychologist.name.split(",")[0]}`);
-    }, 3000);
   };
 
   // Handle end session
@@ -236,7 +184,8 @@ export default function KonsultasiClient({
               messages={messages}
               inputValue={inputValue}
               setInputValue={setInputValue}
-              onSend={handleSend}
+              onSend={sendMessage}
+              isDisabled={!isAppointmentStarted}
             />
           )}
         </div>

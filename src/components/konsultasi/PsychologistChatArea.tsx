@@ -17,6 +17,7 @@ interface PsychologistChatAreaProps {
   inputValue: string;
   setInputValue: (value: string) => void;
   onSend: () => void;
+  isDisabled?: boolean;
 }
 
 export default function PsychologistChatArea({
@@ -27,6 +28,7 @@ export default function PsychologistChatArea({
   inputValue,
   setInputValue,
   onSend,
+  isDisabled = false,
 }: PsychologistChatAreaProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -117,21 +119,26 @@ export default function PsychologistChatArea({
 
       {/* Input Bar */}
       <div className="p-4 bg-white border-t border-outline-variant">
-        <div className="flex items-center gap-3 bg-surface-subtle border border-outline-variant rounded-xl px-4 py-2 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
-          <button className="material-symbols-outlined text-outline hover:text-primary transition-colors cursor-pointer">
+        <div className={`flex items-center gap-3 bg-surface-subtle border border-outline-variant rounded-xl px-4 py-2 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all ${isDisabled ? "opacity-60 cursor-not-allowed" : ""}`}>
+          <button
+            disabled={isDisabled}
+            className={`material-symbols-outlined text-outline transition-colors cursor-pointer ${isDisabled ? "opacity-50 cursor-not-allowed" : "hover:text-primary"}`}
+          >
             attach_file
           </button>
           <input
-            className="flex-1 bg-transparent border-none focus:ring-0 font-body-md py-2 text-on-surface outline-none focus:outline-none"
-            placeholder="Tulis pesan Anda sebagai psikolog di sini..."
+            className="flex-1 bg-transparent border-none focus:ring-0 font-body-md py-2 text-on-surface outline-none focus:outline-none disabled:cursor-not-allowed"
+            placeholder={isDisabled ? "Jadwal sesi konsultasi belum dimulai..." : "Tulis pesan Anda sebagai psikolog di sini..."}
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
+            disabled={isDisabled}
           />
           <button
             onClick={onSend}
-            className="bg-primary hover:bg-primary-container text-white p-2 rounded-lg transition-all active:scale-95 flex items-center justify-center cursor-pointer"
+            disabled={isDisabled}
+            className={`bg-primary text-white p-2 rounded-lg transition-all flex items-center justify-center ${isDisabled ? "opacity-50 cursor-not-allowed pointer-events-none" : "hover:bg-primary-container active:scale-95 cursor-pointer"}`}
           >
             <span className="material-symbols-outlined">send</span>
           </button>

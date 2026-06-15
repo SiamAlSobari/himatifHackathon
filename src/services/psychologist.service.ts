@@ -138,6 +138,71 @@ export class PsychologistService {
 
     return null
   }
+
+  async getOrCreateConsultationMessages(appointmentId: string) {
+    let messages = await db.consultationMessage.findMany({
+      where: { appointmentId },
+      orderBy: { createdAt: "asc" },
+    });
+
+    if (messages.length === 0) {
+      const now = new Date();
+      const initialData = [
+        {
+          sender: "psychologist",
+          text: "Halo. Saya Dr. Sarah. Saya sudah meninjau hasil skrining 'Kenali' Anda. Terima kasih sudah bersedia berbagi. Bagaimana perasaan Anda saat ini?",
+          offsetMinutes: 8,
+        },
+        {
+          sender: "user",
+          text: "Halo Dokter. Sejujurnya saya merasa sangat cemas beberapa hari terakhir ini. Sulit sekali untuk fokus di pekerjaan.",
+          offsetMinutes: 5,
+        },
+        {
+          sender: "psychologist",
+          text: "Saya mengerti, rasa cemas memang bisa sangat menguras energi. Di laporan Anda tertulis ada gangguan tidur juga, apakah itu masih berlanjut sampai tadi malam?",
+          offsetMinutes: 4,
+        },
+        {
+          sender: "user",
+          text: "Iya Dokter, saya hanya tidur sekitar 3-4 jam. Pikiran saya tidak bisa berhenti berputar tentang kesalahan-kesalahan kecil di kantor.",
+          offsetMinutes: 2,
+        },
+        {
+          sender: "psychologist",
+          text: "Pikiran yang berulang (rumination) memang seringkali mengganggu waktu istirahat. Mari kita coba teknik pernapasan sejenak sebelum kita bahas lebih lanjut, apakah Anda bersedia?",
+          offsetMinutes: 1,
+        },
+      ];
+
+      const seededMessages = [];
+      for (const item of initialData) {
+        const msgTime = new Date(now.getTime() - item.offsetMinutes * 60 * 1000);
+        const msg = await db.consultationMessage.create({
+          data: {
+            appointmentId,
+            sender: item.sender,
+            text: item.text,
+            createdAt: msgTime,
+          },
+        });
+        seededMessages.push(msg);
+      }
+      messages = seededMessages;
+    }
+
+    return messages;
+  }
+
+  async createConsultationMessage(appointmentId: string, sender: "user" | "psychologist", text: string) {
+    return await db.consultationMessage.create({
+      data: {
+        appointmentId,
+        sender,
+        text,
+      },
+    });
+  }
 }
 
 const psychologistService = new PsychologistService()

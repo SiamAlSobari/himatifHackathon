@@ -8,8 +8,10 @@ interface PsychologistCardProps {
   experienceYears: number
   imageUrl: string
   availability: string
-  busyUntil?: string
+  busyUntil?: string | null
   onBook: () => void
+  onViewProfile?: () => void
+  isBooked?: boolean
 }
 
 export default function PsychologistCard({
@@ -22,6 +24,8 @@ export default function PsychologistCard({
   availability,
   busyUntil,
   onBook,
+  onViewProfile,
+  isBooked = false,
 }: PsychologistCardProps) {
   const isAvailable = availability === "AVAILABLE"
 
@@ -83,15 +87,28 @@ export default function PsychologistCard({
       <div className="flex flex-col items-end justify-end gap-2 sm:w-40 shrink-0">
         <span
           className={`text-xs font-semibold ${
-            isAvailable ? "text-emerald-600" : "text-[#6f797a]"
+            isBooked
+              ? "text-teal-600"
+              : isAvailable
+              ? "text-emerald-600"
+              : "text-[#6f797a]"
           }`}
         >
-          {isAvailable
+          {isBooked
+            ? "Jadwal Anda"
+            : isAvailable
             ? "Tersedia Sekarang"
             : `Sibuk (Tersedia jam ${busyUntil || "16:00"})`}
         </span>
 
-        {isAvailable ? (
+        {isBooked ? (
+          <button
+            onClick={onViewProfile}
+            className="px-6 py-2.5 bg-teal-50 border border-teal-600 text-[#004349] text-xs font-bold rounded-lg hover:bg-teal-100/50 active:scale-95 transition-all cursor-pointer"
+          >
+            Terjadwal
+          </button>
+        ) : isAvailable ? (
           <button
             onClick={onBook}
             className="px-6 py-2.5 bg-[#004349] text-white text-xs font-bold rounded-lg hover:bg-[#003a3f] active:scale-95 transition-all cursor-pointer"
@@ -100,7 +117,7 @@ export default function PsychologistCard({
           </button>
         ) : (
           <button
-            onClick={onBook}
+            onClick={onViewProfile}
             className="px-6 py-2.5 border border-[#004349] text-[#004349] text-xs font-bold rounded-lg hover:bg-[#f8f9ff] active:scale-95 transition-all cursor-pointer"
           >
             Lihat Profil
