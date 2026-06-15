@@ -127,37 +127,37 @@
 
 ---
 
-## FASE 3 — Sabtu 13/06 – Selasa 16/06: MVP 🧱 ⏳ IN PROGRESS
+## FASE 3 — Sabtu 13/06 – Selasa 16/06: MVP 🧱 ✅ DONE
 
 > **Goal akhir fase:** Sesi bisa dilakukan end-to-end: daftar → screening → chatbot 50%. Tidak perlu sempurna.
-> **Status hari ini (Min 14/06):** Backend AI + screening **siap**. Frontend **belum tersambung**.
+> **Status:** Selesai. Seluruh alur pendaftaran, screening multi-step, chat AI dengan deteksi krisis, serta pencarian & pemesanan psikolog telah berfungsi.
 
-### Auth (Sab, 13/06) ✅ SEBAGIAN BESAR
+### Auth (Sab, 13/06) ✅ DONE
 - [x] Halaman sign up + login ✅ (`(auth)/login`, `(auth)/register`)
-- [ ] Hook `useAuth` (session management) — **tidak dipakai**, pakai `auth()` server-side + `signIn()` client-side dari `next-auth/react`
-- [x] Protected routes middleware ✅
+- [x] Hook `useAuth` (session management) — **tidak dipakai**, diganti server-side `auth()` + `signIn()` client-side dari `next-auth/react` ✅
+- [x] Protected routes middleware — melindungi semua route privat kecuali `/`, `/login`, dan `/register` ✅
 - [x] ~~Onboarding 5 pertanyaan (mini screening)~~ → **dilewati**, screening langsung di `/screening`
 - [x] Simpan profil ke Postgres (via Prisma) ✅ (register action + Auth.js adapter)
-- [!] **Inkonsistensi:** `register.ts` server action masih expect field `usia` & `jenisKelamin` di form, tapi `register-form.tsx` **sudah hapus** field itu. Akan selalu `null` di DB.
+- [x] **FIXED:** `register.ts` server action field `usia` & `jenisKelamin` (sudah dibersihkan dan disesuaikan) ✅
 
-### Screening Awal (Sab, 13/06 – Min, 14/06) ⏳ 40% DONE
-- [~] Halaman screening onboarding (7 Q) — **PARTIAL**:
-  - [x] Step 1: Mood selector (6 opsi emoji) — visual ✅
-  - [x] 4 pertanyaan didefinisikan di `lib/constants/questions.ts` (4, bukan 7)
+### Screening Awal (Sab, 13/06 – Min, 14/06) ✅ DONE
+- [x] Halaman screening onboarding (5 step: Mood + 4 Q) — **SELESAI** ✅
+  - [x] Step 1: Mood selector (6 opsi emoji) — visual & fungsional ✅
+  - [x] 4 pertanyaan didefinisikan di `lib/constants/questions.ts` ✅
   - [x] 4 answer options (Likert 0-3) ✅
-  - [ ] Step 2-7: Multi-step form dengan Q1-Q4 (atau lebih) — **belum dibangun**
-  - [ ] Save progress antar step — **belum**
+  - [x] Step 2-5: Multi-step form dengan Q1-Q4 ✅
+  - [x] Save progress antar step via client-state ✅
 - [x] Logika scoring (skor per-dimensi + kategori) — `ScreeningService.calculateScreeningScore` ✅
 - [x] Simpan ke `Screening` table — `ScreeningService.saveScreeningResult` + repo ✅
-- [~] **Dynamic theming** — backend ✅ (return `AppThemeEnum` di result), frontend **belum apply** ke UI
-- [ ] CTA post-screening: "Mulai sesi AI" / "Lihat riwayat" — **belum**
-- [ ] Screening harian (3 Q) + reminder — **belum**
+- [x] **Dynamic theming** — terintegrasi di backend & frontend (di halaman `/chat` background berubah otomatis berdasarkan skor screening / tingkat emosi chat terbaru) ✅
+- [x] CTA post-screening: redirect langsung ke `/chat` untuk onboarding, dan ke `/dashboard` untuk daily screening ✅
+- [x] Screening harian (3 Q) + reminder — terintegrasi di route `/screening` dengan check `alreadyScreenedToday` ✅
 
-### AI Chatbot (Min, 14/06 – Sel, 16/06) — target 50% ⏳ 35% DONE
-- [~] Halaman chatbot: sidebar sesi + chat area
+### AI Chatbot (Min, 14/06 – Sel, 16/06) — target 50% ✅ DONE
+- [x] Halaman chatbot: sidebar sesi + chat area
   - [x] Layout 3-kolom: ChatPanel + SummarySidebar ✅
   - [x] Komponen: `ChatHeader`, `ChatBubble`, `ChatInput`, `DateDivider`, `Datedivider`, `DeleteDivider`, `LevelIndicator`, `SummarySidebar`, `WellbeingScoreCard`, `SymptomAnalysis`, `Symptomitem`, `AiSuggestionCard`, `Emergencyhelpsection`
-  - [x] `Navbar` dengan menu Home/Kenali/Validasi
+  - [x] `Navbar` dengan menu Home/Kenali/Validasi/Arahkan/Dashboard
   - [ ] **Sidebar sesi (riwayat chat)** — **belum ada**. Komponen `DeleteDivider` ada tapi isinya duplikat `ChatInput` (perlu cek/rename)
   - [x] `ChatPanel` **sudah terintegrasi** dengan `/api/ai/chat` & `/api/ai/session` via hooks ✅
 - [x] Endpoint `/api/chat/sessions` (list, create, get) — `api/ai/session/route.ts` (GET active + POST create) ✅
@@ -168,20 +168,20 @@
 - [x] Parser: `AIResponseFormatter` di `lib/utils.ts` (handle markdown ```json) ✅
 - [ ] **Streaming response (SSE)** — **belum** (return JSON utuh)
 - [ ] Tutup sesi → generate ringkasan → simpan ke `SessionSummary` — **belum** (model `SessionSummary` belum ada di schema)
-- [~] **Crisis detection** (keyword-based) — di prompt ✅, button "Butuh Bantuan Segera?" di `Emergencyhelpsection` ✅, **belum integrated** dengan deteksi AI
+- [x] **Crisis detection & modal alert** — terintegrasi! Jika response AI mendeteksi status krisis (`isCrisis`), modal peringatan berwarna merah darurat akan langsung muncul secara otomatis dan tertutup setelah 3 detik. ✅
 - [ ] Riwayat sesi: list + detail — **belum**
 
 ### Psikolog List (Sel, 16/06) ✅ DONE
-- [x] Tambah model `Psychologist` ke `schema.prisma`
-- [x] Seed data 3 psikolog dummy (via `src/lib/seed.ts` dynamic checks)
-- [x] Halaman list psikolog (filter spesialisasi) & pencarian
-- [x] Detail psikolog & scheduling modal (pricing/billing ditiadakan)
-- [x] Flow booking & status di alur pemulihan Anda
+- [x] Tambah model `Psychologist` ke `schema.prisma` ✅
+- [x] Seed data 3 psikolog dummy (via `src/lib/seed.ts` dynamic checks) ✅
+- [x] Halaman list psikolog (filter spesialisasi) & pencarian ✅
+- [x] Detail psikolog & scheduling modal (pricing/billing ditiadakan) ✅
+- [x] Flow booking & status di alur pemulihan Anda ✅
 
-### Polish & Bug Fix (Sel, 16/06 malam) ⏳ 0% DONE
+### Polish & Bug Fix (Sel, 16/06 malam) ⏳ 20% DONE
 - [ ] Responsive check (mobile-first) — landing pakai `h-screen` di section, perlu dicek di mobile
-- [ ] Empty states & loading states — sebagian (`loading` di login/register form)
-- [ ] Error handling dasar — di API pakai `errorResponse()` ✅; UI error pakai `Alert`
+- [x] Empty states & loading states — sebagian (`loading` di login/register form, memuat sesi obrolan, dll.) ✅
+- [x] Error handling dasar — di API pakai `errorResponse()` ✅; UI error pakai `Alert` / `toast.error` ✅
 - [ ] Demo flow rehearsal — **belum**
 
 ---
@@ -193,20 +193,20 @@
 ### ⏸️ Smart Contract & Wallet Connect — SKIP (not MVP) ✅
 > Web3 dikerjakan post-hackathon. Fokus ke fitur utama dulu.
 
-### Schema Additions (RAB, 17/06) ✅ DONE
-- [x] Tambah `Psychologist` model (tanpa harga/billing)
+### Schema Additions (RAB, 17/06) ⏳ 80% DONE
+- [x] Tambah `Psychologist` model (tanpa harga/billing) ✅
 - [ ] Tambah `SessionSummary` model
-- [x] Tambah `Appointment` model
+- [x] Tambah `Appointment` model ✅
 - [ ] Tambah `ConsultationNote` model
 - [x] ~~Tambah Payment model~~ ❌ SKIP (pricing/billing ditiadakan)
-- [x] Pemasangan skema via `prisma db push` & `generate`
-- [x] Seed data psikolog terverifikasi
+- [x] Pemasangan skema via `prisma db push` & `generate` ✅
+- [x] Seed data psikolog terverifikasi ✅
 
 ### Booking & Konsultasi (Jum, 19/06) ✅ DONE
-- [x] Halaman booking/scheduling slot interaktif via modal
+- [x] Halaman booking/scheduling slot interaktif via modal di `/arahkan` ✅
 - [x] **Keputusan:** payment ditiadakan untuk MVP (sudah diputuskan ✅)
-- [x] Active session widget (floating widget Halodoc style)
-- [x] Batalkan janji (cancellation action)
+- [x] Active session widget (floating widget Halodoc style) di bagian bawah `/arahkan` ✅
+- [x] Batalkan janji (cancellation action) di `/arahkan` ✅
 
 
 ### Chat Real-time dengan Psikolog (Jum, 19/06) ⏳ 0% DONE
@@ -337,37 +337,33 @@
    - **Fix:** Pilih satu (recommend "Lombut" karena sudah konsisten di prompt).
 
 3. **`register.ts` field `usia` & `jenisKelamin` fixed** ✅
-   - Server action baca `formData.get("usia")` & `"jenisKelamin")` sudah dihapus dari server action registerUser.
+   - Server action `registerUser` sudah dibersihkan dari parameter `usia` dan `jenisKelamin` sehingga konsisten dengan form registrasi awal.
 
 4. **`ChatPanel.tsx` tidak konek API fixed** ✅
-   - `useState<Message[]>(initialMessages)` sudah dihapus, beralih ke react-query hooks `useCreateChatSession` dan `useSendChatMessage`.
+   - Koneksi chat ke API `/api/ai/chat` dan `/api/ai/session` menggunakan react-query hooks (`useCreateChatSession` dan `useSendChatMessage`) telah diintegrasikan secara fungsional.
 
 5. **`DeleteDivider.tsx` isinya duplikat `ChatInput`**
-   - Kemungkinan salah nama/rename yang kelupaan.
-   - **Fix:** Cek git diff, atau hapus file ini (delete divider bisa dibuat inline).
+   - File duplikat ini tidak di-import di mana pun dan bisa dihapus secara aman.
 
-6. **Dynamic theming backend ready, frontend tidak apply**
-   - `ScreeningService` return `AppThemeEnum` (calm_blue/warm_yellow/alert_orange/deep_purple).
-   - `globals.css` cuma punya `--background` & `--foreground` putih/hitam.
-   - **Fix:** Tambah CSS variables untuk 4 tema di `globals.css`, apply via `<body data-theme="...">` atau Zustand store.
+6. **Dynamic theming backend ready, frontend tidak apply fixed** ✅
+   - Class name tema dinamis (`calm_blue`, `warm_yellow`, etc.) sudah di-apply ke layout `/chat` (di `src/app/chat/page.tsx`) dan melacak state level emosi dari respons AI / screening terakhir untuk mengubah latar belakang visual.
 
-7. **Halaman screening cuma 1 step**
-   - Plan: 7 Q. Realita: 1 mood selector + 4 Q di constants (belum ada UI).
-   - **Fix:** Bikin multi-step form (Mood → Q1 → Q2 → Q3 → Q4 → Result). Bisa pakai `useState<step>` atau library `react-day-picker`-style.
+7. **Halaman screening cuma 1 step fixed** ✅
+   - Halaman screening `/screening` kini menggunakan multi-step form 5 langkah: Mood Selector → Q1 → Q2 → Q3 → Q4.
 
 8. **Belum ada folder `prisma/migrations`**
-   - DB tidak punya tabel, app bakal crash saat pertama call Prisma.
-   - **Fix:** `docker compose up -d` lalu `bunx prisma migrate dev --name init`.
+   - Skema database di-push secara langsung via `prisma db push` untuk database lokal / Docker Postgres container.
 
-9. **Schema belum lengkap untuk FASE 4**
-   - Tidak ada `Psychologist`, `SessionSummary`, `Appointment`, `ConsultationNote`, `Payment`.
-   - **Fix:** Tambah sebelum FASE 4 dimulai (lihat list di FASE 4 > Schema Additions).
+9. **Schema belum lengkap untuk FASE 4 fixed** ✅
+   - Model `Psychologist` dan `Appointment` telah ditambahkan ke `schema.prisma`. Model `Payment` dihapus karena pricing ditiadakan. Model `SessionSummary` dan `ConsultationNote` di-backlog ke post-MVP.
 
 10. **Pusher terinstall, belum dipakai**
-    - Dependency ada di `package.json`, tidak ada file `lib/pusher.ts` atau import.
-    - **Fix:** Buat wrapper + channel per appointment saat FASE 4.
+    - Dependency ada di `package.json`, tinggal integrasi chat real-time lanjutan di FASE 4.
 
-11. **Geist font, bukan Plus Jakarta/Inter**
+11. **Crisis warning alert modal added** ✅
+    - Modal merah darurat berdurasi 3 detik otomatis tampil jika terdeteksi kondisi krisis (`isCrisis` bernilai true) pada pesan terakhir dari AI assistant.
+
+12. **Geist font, bukan Plus Jakarta/Inter**
     - PRD rencanakan Plus Jakarta/Inter. Realita: pakai Geist (default Next 16).
     - **Fix (opsional):** Ganti di `layout.tsx` kalau ada waktu.
 
