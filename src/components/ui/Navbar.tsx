@@ -28,6 +28,7 @@ export default function Navbar({ userName, userImage, isOnboarded: propIsOnboard
   const { data } = useChatSession();
   const session = useSession();
   const isOnboarded = propIsOnboarded !== undefined ? propIsOnboarded : (data?.isOnboarded ?? true);
+  const role = (session?.data?.user as any)?.role;
 
   const finalUserName = userName || session?.data?.user?.name || "Pengguna";
   const finalUserImage = userImage || session?.data?.user?.image || "https://i.pravatar.cc/40?img=12";
@@ -41,7 +42,13 @@ export default function Navbar({ userName, userImage, isOnboarded: propIsOnboard
 
         {isOnboarded && (
           <nav className="hidden items-center gap-7 lg:flex">
-            {navItems.map((item) => {
+            {(role === "PSYCHOLOGY"
+              ? [
+                  { label: "Dashboard", href: "/psikolog" },
+                  { label: "Konsultasi", href: "/psikolog/konsultasi" },
+                ]
+              : navItems
+            ).map((item) => {
               const isActive = pathname.startsWith(item.href) && item.href !== "/";
               return (
                 <Link

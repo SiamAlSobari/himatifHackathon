@@ -129,9 +129,15 @@ export class PsychologistService {
   async cancelAppointment(appointmentId: string, userId: string) {
     const appointment = await db.appointment.findUnique({
       where: { id: appointmentId },
+      include: {
+        psychologistProfile: true,
+      },
     })
 
-    if (!appointment || appointment.userId !== userId) {
+    if (
+      !appointment ||
+      (appointment.userId !== userId && appointment.psychologistProfile.userId !== userId)
+    ) {
       throw new Error("Appointment not found or unauthorized")
     }
 
@@ -146,9 +152,15 @@ export class PsychologistService {
   async completeAppointment(appointmentId: string, userId: string) {
     const appointment = await db.appointment.findUnique({
       where: { id: appointmentId },
+      include: {
+        psychologistProfile: true,
+      },
     })
 
-    if (!appointment || appointment.userId !== userId) {
+    if (
+      !appointment ||
+      (appointment.userId !== userId && appointment.psychologistProfile.userId !== userId)
+    ) {
       throw new Error("Appointment not found or unauthorized")
     }
 
@@ -220,6 +232,25 @@ export class PsychologistService {
       where: { id: psychologistId },
       data: { rating: newRating },
     });
+  }
+
+  async getPsychologistProfileByUserId(userId: string) {
+    return await db.psychologistProfile.findUnique({
+      where: { userId },
+      include: { user: true },
+    })
+  }
+
+  async getPsychologistAppointments(profileId: string) {
+    return await db.appointment.findMany({
+      where: { psychologistId: profileId },
+      include: {
+        user: true,
+      },
+      orderBy: {
+        scheduledAt: "desc",
+      },
+    })
   }
 }
 

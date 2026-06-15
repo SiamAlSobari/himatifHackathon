@@ -18,6 +18,10 @@ interface PsychologistKonsultasiClientProps {
   client: ClientProfile;
   latestScreeningScore: number | null;
   finalConclusion: string | null;
+  psychologistUser: {
+    name: string;
+    image: string;
+  };
 }
 
 export default function PsychologistKonsultasiClient({
@@ -25,6 +29,7 @@ export default function PsychologistKonsultasiClient({
   client,
   latestScreeningScore,
   finalConclusion,
+  psychologistUser,
 }: PsychologistKonsultasiClientProps) {
   const router = useRouter();
 
@@ -49,7 +54,7 @@ export default function PsychologistKonsultasiClient({
     const handleAppointmentUpdate = (data: any) => {
       if (!data.activeAppointment || data.activeAppointment.id !== activeAppointment.id) {
         toast.error("Sesi konsultasi dengan Klien telah dibatalkan.");
-        router.push("/arahkan");
+        router.push("/psikolog");
       }
     };
 
@@ -151,7 +156,7 @@ export default function PsychologistKonsultasiClient({
       } else {
         toast.success("Sesi demo diselesaikan.");
       }
-      router.push("/arahkan");
+      router.push("/psikolog");
     } catch (err: any) {
       toast.error(err.message || "Gagal mengakhiri sesi.");
     }
@@ -160,7 +165,11 @@ export default function PsychologistKonsultasiClient({
   return (
     <div className="min-h-screen bg-background text-on-surface font-body-md antialiased flex flex-col justify-between">
       {/* Navbar wrapper */}
-      <Navbar userName="Psikolog" userImage="https://lh3.googleusercontent.com/aida-public/AB6AXuCm0bcB0lzDcZlnjBA25NjhIN4_C42QMvYjxW33jb2jch1A0EQCRcaSsOQUnjy3rMikDcIowjhdMI910iiO8Mkanuvq4kRKzOGEYhvhpRZWqgMKTvJofZGbb1HCI4eoTv1Vn1qqKHhHo7gkufVpq6AlJorSOFs6fEUSvTqlYiY6ylLJ6PTn8i_qY38_KETmZ0HhV_7RTHSyI3bS_qCgyVjEfrcP-GyBylZacT3cErIG9i_P9NGyFCM6FCtBJVVioI0F3eKMqvM8HA" isOnboarded={true} />
+      <Navbar
+        userName={psychologistUser.name}
+        userImage={psychologistUser.image}
+        isOnboarded={true}
+      />
 
       <main className="mx-auto max-w-7xl w-full px-6 pt-24 pb-12 flex flex-col md:flex-row gap-gutter flex-1">
         {/* Left Side: Chat Panel */}

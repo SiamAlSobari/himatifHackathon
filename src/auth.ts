@@ -8,7 +8,7 @@ import { envConfig } from "./lib/constants/env"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
-  session: { strategy: "database" },
+  session: { strategy: "database" }, // Tetap gunakan database strategy
   pages: {
     signIn: "/login",
   },
@@ -39,19 +39,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const isValid = await bcrypt.compare(password, user.passwordHash)
         if (!isValid) return null
 
+        // Return user object lengkap
         return {
           id: user.id,
           email: user.email,
           name: user.name,
           image: user.image,
+          role: user.role, // Pastikan role disertakan di sini
         }
       },
     }),
   ],
   callbacks: {
-    session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id
+    // Cukup gunakan session callback saja
+    async session({ session, user }) {
+      if (session.user && user) {
+        session.user.id = user.id as string
+        // Sekarang role langsung diambil dari objek user yang sudah ter-load
+        (session.user as any).role = (user as any).role
       }
       return session
     },
