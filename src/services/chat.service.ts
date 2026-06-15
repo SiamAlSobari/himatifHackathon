@@ -75,8 +75,12 @@ export class ChatService {
         const response = await aiService.sendChatMessage(formattedHistory, prompt);
         const formattedResponse = AIResponseFormatter<AIChatResponse>(response);
 
-        // Simpan response dari AI ke database
-        const createdAssistantMessage = await chatMessageRepository.createMessage(sessionId, "ASSISTANT", formattedResponse.suggestion, formattedResponse.metaData);
+        // Simpan response dari AI ke database (menyertakan finalConclusion di metadata)
+        const metaDataWithConclusion = {
+            ...(formattedResponse.metaData || {}),
+            finalConclusion: formattedResponse.finalConclusion || null,
+        };
+        const createdAssistantMessage = await chatMessageRepository.createMessage(sessionId, "ASSISTANT", formattedResponse.suggestion, metaDataWithConclusion);
         if (!createdAssistantMessage) {
             throw new Error("Failed to save AI response to the database.");
         }

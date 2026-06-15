@@ -209,17 +209,17 @@
 - [x] Batalkan janji (cancellation action) di `/arahkan` ✅
 
 
-### Chat Real-time dengan Psikolog (Jum, 19/06) ⏳ 0% DONE
+### Chat Real-time dengan Psikolog (Jum, 19/06) ⏳ 50% DONE
 - [x] Library Pusher terinstall ✅ (belum dipakai)
 - [ ] Setup Pusher client + server wrapper (`lib/pusher.ts`)
 - [ ] Channel chat per appointment (`appointment-{id}`)
-- [ ] UI chat dua arah (klien & psikolog) — base-nya bisa reuse `ChatPanel` + `ChatBubble`
+- [x] UI chat dua arah (klien & psikolog) — halaman `/konsultasi` beserta visualisasi countdown timer dan konteks hasil screening selesai dibuat ✅
 - [ ] Catatan pasca-sesi (psychologist only) — model `ConsultationNote`
 
-### Dashboard Psikolog (Jum, 19/06) ⏳ 0% DONE
+### Dashboard Psikolog (Jum, 19/06) ⏳ 30% DONE
 - [ ] Route group `(psychologist)` dengan layout sendiri
 - [ ] Antrian janji (pending, upcoming, completed)
-- [ ] Detail klien + brief (screening + ringkasan AI)
+- [x] Detail klien + brief (screening + ringkasan AI) — halaman `/psychologist/konsultasi` sudah selesai dibuat dan berhasil menarik data finalConclusion dari AI chat sesi terakhir user secara fungsional ✅
 - [ ] Tanda tangan digital sesi → **SKIP** (on-chain bukan MVP)
 
 ### Polish & Demo Prep (Sab, 20/06) ⏳ 0% DONE
