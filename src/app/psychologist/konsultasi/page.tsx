@@ -1,0 +1,64 @@
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import psychologistService from "@/services/psychologist.service";
+import PsychologistKonsultasiClient from "./konsultasi-client";
+
+export const metadata = {
+  title: "Sesi Konsultasi (Psikolog) - Jembatan Aman",
+  description: "Halaman sesi konsultasi interaktif - Sudut Pandang Psikolog.",
+};
+
+export default async function PsychologistKonsultasiPage() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect("/login?callbackUrl=/psychologist/konsultasi");
+  }
+
+  // Fetch logged in user profile (for the hackathon demo, they act as the client)
+  const dbUser = await psychologistService.getUserProfile(session.user.id);
+  if (!dbUser) {
+    redirect("/dashboard");
+  }
+
+  // Fetch active appointment for the user from database
+  const activeAppointment = await psychologistService.getActiveAppointment(session.user.id);
+
+  // Fetch latest screening context for score rendering
+  const latestScreening = await psychologistService.getLatestScreening(session.user.id);
+
+  // Fetch the final conclusion of the user's last AI chat session
+  const finalConclusion = await psychologistService.getLatestAiSessionConclusion(session.user.id);
+
+  const clientProfile = {
+    name: dbUser.name || dbUser.email || "Pengguna",
+    image: dbUser.image || undefined,
+    email: dbUser.email,
+    usia: dbUser.usia,
+    jenisKelamin: dbUser.jenisKelamin,
+  };
+
+  return (
+    <PsychologistKonsultasiClient
+      activeAppointment={
+        activeAppointment
+          ? {
+              id: activeAppointment.id,
+              scheduledAt: activeAppointment.scheduledAt.toISOString(),
+              psychologist: {
+                id: activeAppointment.psychologist.id,
+                name: activeAppointment.psychologist.name,
+                role: activeAppointment.psychologist.role,
+                specialty: activeAppointment.psychologist.specialty,
+                imageUrl: activeAppointment.psychologist.imageUrl,
+                experienceYears: activeAppointment.psychologist.experienceYears,
+                tags: activeAppointment.psychologist.tags,
+              },
+            }
+          : null
+      }
+      client={clientProfile}
+      latestScreeningScore={latestScreening?.score || null}
+      finalConclusion={finalConclusion}
+    />
+  );
+}

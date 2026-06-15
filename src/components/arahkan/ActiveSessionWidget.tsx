@@ -17,7 +17,7 @@ export default function ActiveSessionWidget({
 
   return (
     <Link
-      href="/chat"
+      href="/konsultasi"
       className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-40 flex items-center gap-3 bg-[#1a3a4a] text-white pl-4 pr-3 py-3 rounded-full shadow-lg hover:bg-[#0b2c3c] transition-colors cursor-pointer"
     >
       {/* Teal dot indicator */}

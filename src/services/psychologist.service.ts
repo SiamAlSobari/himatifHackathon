@@ -93,6 +93,51 @@ export class PsychologistService {
       },
     })
   }
+
+  async completeAppointment(appointmentId: string, userId: string) {
+    const appointment = await db.appointment.findUnique({
+      where: { id: appointmentId },
+    })
+
+    if (!appointment || appointment.userId !== userId) {
+      throw new Error("Appointment not found or unauthorized")
+    }
+
+    return await db.appointment.update({
+      where: { id: appointmentId },
+      data: {
+        status: "COMPLETED",
+      },
+    })
+  }
+
+  async getLatestAiSessionConclusion(userId: string): Promise<string | null> {
+    const latestCompleted = await db.chatSession.findFirst({
+      where: {
+        userId,
+        status: "COMPLETED",
+      },
+      include: {
+        chatMessages: {
+          orderBy: { createdAt: "desc" },
+        },
+      },
+    })
+
+    if (!latestCompleted) return null
+
+    // Find message with finalConclusion in its metaData
+    for (const msg of latestCompleted.chatMessages) {
+      if (msg.role === "ASSISTANT" && msg.metaData) {
+        const meta = msg.metaData as any;
+        if (meta.finalConclusion) {
+          return meta.finalConclusion;
+        }
+      }
+    }
+
+    return null
+  }
 }
 
 const psychologistService = new PsychologistService()

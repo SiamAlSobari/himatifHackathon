@@ -32,5 +32,22 @@ export async function cancelAppointment(appointmentId: string) {
   )
 
   revalidatePath("/arahkan")
+  revalidatePath("/konsultasi")
+  return updated
+}
+
+export async function completeAppointment(appointmentId: string) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized")
+  }
+
+  const updated = await psychologistService.completeAppointment(
+    appointmentId,
+    session.user.id
+  )
+
+  revalidatePath("/arahkan")
+  revalidatePath("/konsultasi")
   return updated
 }
