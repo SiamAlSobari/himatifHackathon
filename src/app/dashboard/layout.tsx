@@ -11,20 +11,20 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    redirect("/login?callbackUrl=/dashboard")
-  }
+  // const session = await auth()
+  // if (!session?.user?.id) {
+  //   redirect("/login?callbackUrl=/dashboard")
+  // }
 
   // Guard: harus sudah onboarding dulu sebelum akses dashboard
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { usia: true, jenisKelamin: true },
-  })
+  // const user = await db.user.findUnique({
+  //   where: { id: session.user.id },
+  //   select: { usia: true, jenisKelamin: true },
+  // })
 
-  if (!user?.usia || !user?.jenisKelamin) {
-    redirect("/onboarding")
-  }
+  // if (!user?.usia || !user?.jenisKelamin) {
+  //   redirect("/onboarding")
+  // }
 
   return <>{children}</>
 }
