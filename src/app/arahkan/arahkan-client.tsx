@@ -154,10 +154,10 @@ export default function ArahkanClient({
         id: res.id,
         scheduledAt: res.scheduledAt.toISOString(),
         psychologist: {
-          id: res.psychologist.id,
-          name: res.psychologist.name,
-          role: res.psychologist.role,
-          imageUrl: res.psychologist.imageUrl,
+          id: res.psychologistProfile.id,
+          name: res.psychologistProfile.user.name || "Psikolog",
+          role: res.psychologistProfile.role,
+          imageUrl: res.psychologistProfile.imageUrl,
         },
       })
       setIsSessionVisible(true)

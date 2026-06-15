@@ -18,14 +18,21 @@ model User {
   jenisKelamin  String?
   kontakDarurat String?
   isOnboarded   Boolean   @default(false)
+  role          UserRole  @default(USER)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts     Account[]
-  sessions     Session[]
-  screenings   Screening[]
-  chatSessions ChatSession[]
-  appointments Appointment[]
+  accounts            Account[]
+  sessions            Session[]
+  screenings          Screening[]
+  chatSessions        ChatSession[]
+  appointments        Appointment[]
+  psychologistProfile PsychologistProfile?
+}
+
+enum UserRole {
+  USER
+  PSYCHOLOGY
 }
 
 model Account {
@@ -123,9 +130,9 @@ enum ChatMessageRole {
   ASSISTANT
 }
 
-model Psychologist {
+model PsychologistProfile {
   id              String        @id @default(cuid())
-  name            String
+  userId          String        @unique
   role            String        // e.g. "Psikolog Klinis", "Psikiater"
   specialty       String        // e.g. "Penanganan Trauma & PTSD"
   rating          Float         // e.g. 4.9
@@ -136,6 +143,8 @@ model Psychologist {
   tags            String[]      // e.g. ["Trauma", "Depresi", "Kecemasan", "Remaja"]
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   appointments    Appointment[]
 }
 
@@ -149,7 +158,7 @@ model Appointment {
   updatedAt      DateTime          @updatedAt
 
   user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  psychologist         Psychologist          @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
+  psychologistProfile  PsychologistProfile   @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
   consultationMessages ConsultationMessage[]
 }
 

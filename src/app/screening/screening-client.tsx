@@ -179,7 +179,7 @@ export default function ScreeningClient({
 
       // Successful screening
       if (screeningType === "ONBOARDING") {
-        router.push("/chat"); // onboarding directs straight to chatbot
+        router.push("/validasi"); // onboarding directs straight to chatbot
       } else {
         router.push("/dashboard"); // daily directs back to dashboard
       }

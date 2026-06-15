@@ -9,8 +9,9 @@ export class PsychologistService {
   }
 
   async getPsychologists() {
-    return await db.psychologist.findMany({
+    return await db.psychologistProfile.findMany({
       orderBy: { rating: "desc" },
+      include: { user: true },
     })
   }
 
@@ -22,7 +23,11 @@ export class PsychologistService {
         status: "SCHEDULED",
       },
       include: {
-        psychologist: true,
+        psychologistProfile: {
+          include: {
+            user: true,
+          },
+        },
       },
       orderBy: {
         scheduledAt: "desc",
@@ -37,7 +42,11 @@ export class PsychologistService {
         userId,
       },
       include: {
-        psychologist: true,
+        psychologistProfile: {
+          include: {
+            user: true,
+          },
+        },
       },
     })
   }
@@ -51,7 +60,7 @@ export class PsychologistService {
 
   async bookAppointment(userId: string, psychologistId: string, scheduledAt: Date) {
     // Check if psychologist exists
-    const psych = await db.psychologist.findUnique({
+    const psych = await db.psychologistProfile.findUnique({
       where: { id: psychologistId },
     })
 
@@ -108,7 +117,11 @@ export class PsychologistService {
         status: "SCHEDULED",
       },
       include: {
-        psychologist: true,
+        psychologistProfile: {
+          include: {
+            user: true,
+          },
+        },
       },
     })
   }
@@ -193,7 +206,7 @@ export class PsychologistService {
   }
 
   async ratePsychologist(psychologistId: string, userRating: number) {
-    const psych = await db.psychologist.findUnique({
+    const psych = await db.psychologistProfile.findUnique({
       where: { id: psychologistId },
     });
     if (!psych) {
@@ -203,7 +216,7 @@ export class PsychologistService {
     // Calculate new rating (assume 9 historical ratings + user rating)
     const newRating = Math.round(((psych.rating * 9 + userRating) / 10) * 10) / 10;
 
-    return await db.psychologist.update({
+    return await db.psychologistProfile.update({
       where: { id: psychologistId },
       data: { rating: newRating },
     });

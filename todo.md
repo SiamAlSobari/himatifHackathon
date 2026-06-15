@@ -172,8 +172,8 @@
 - [ ] Riwayat sesi: list + detail — **belum**
 
 ### Psikolog List (Sel, 16/06) ✅ DONE
-- [x] Tambah model `Psychologist` ke `schema.prisma` ✅
-- [x] Seed data 3 psikolog dummy (via `src/lib/seed.ts` dynamic checks) ✅
+- [x] Tambah model `PsychologistProfile` (1-to-1 ke `User`) ke `schema.prisma` ✅
+- [x] Seed data 3 psikolog dummy (via `src/lib/seed.ts` dynamic checks) ke user + profile ✅
 - [x] Halaman list psikolog (filter spesialisasi) & pencarian ✅
 - [x] Detail psikolog & scheduling modal (pricing/billing ditiadakan) ✅
 - [x] Flow booking & status di alur pemulihan Anda ✅
@@ -194,9 +194,9 @@
 > Web3 dikerjakan post-hackathon. Fokus ke fitur utama dulu.
 
 ### Schema Additions (RAB, 17/06) ⏳ 80% DONE
-- [x] Tambah `Psychologist` model (tanpa harga/billing) ✅
+- [x] Tambah `PsychologistProfile` model (1-to-1 ke `User` dengan `UserRole` enum) ✅
 - [ ] Tambah `SessionSummary` model
-- [x] Tambah `Appointment` model ✅
+- [x] Tambah `Appointment` model (bergantung pada `PsychologistProfile`) ✅
 - [ ] Tambah `ConsultationNote` model
 - [x] ~~Tambah Payment model~~ ❌ SKIP (pricing/billing ditiadakan)
 - [x] Pemasangan skema via `prisma db push` & `generate` ✅
@@ -358,7 +358,7 @@
    - Skema database di-push secara langsung via `prisma db push` untuk database lokal / Docker Postgres container.
 
 9. **Schema belum lengkap untuk FASE 4 fixed** ✅
-   - Model `Psychologist` dan `Appointment` telah ditambahkan ke `schema.prisma`. Model `Payment` dihapus karena pricing ditiadakan. Model `SessionSummary` dan `ConsultationNote` di-backlog ke post-MVP.
+   - Model `PsychologistProfile` (1-to-1 ke `User`) dan `Appointment` telah ditambahkan ke `schema.prisma`. Model `Payment` dihapus karena pricing ditiadakan. Model `SessionSummary` dan `ConsultationNote` di-backlog ke post-MVP.
 
 10. **Pusher terinstall, belum dipakai** ✅
     - Chat dua arah real-time, typing status, presence status (online/mengetik), booking dan cancellation synchronization sudah terintegrasi penuh menggunakan Pusher.

@@ -1,7 +1,10 @@
 import { db } from "./db"
+import bcrypt from "bcrypt"
 
 export async function seedPsychologists() {
-  const count = await db.psychologist.count()
+  const count = await db.user.count({
+    where: { role: "PSYCHOLOGY" }
+  })
   if (count > 0) {
     return
   }
@@ -9,6 +12,7 @@ export async function seedPsychologists() {
   const psychologists = [
     {
       name: "Dr. Aris Setiawan, M.Psi",
+      email: "aris@jembatanaman.com",
       role: "Psikolog Klinis",
       specialty: "Penanganan Trauma & PTSD",
       rating: 4.9,
@@ -20,6 +24,7 @@ export async function seedPsychologists() {
     },
     {
       name: "Dr. Sarah Wijaya, Sp.KJ",
+      email: "sarah@jembatanaman.com",
       role: "Psikiater",
       specialty: "Gangguan Kecemasan & Mood",
       rating: 4.8,
@@ -31,6 +36,7 @@ export async function seedPsychologists() {
     },
     {
       name: "Dika Pratama, S.Psi",
+      email: "dika@jembatanaman.com",
       role: "Konselor Sebaya",
       specialty: "Kesehatan Mental Remaja",
       rating: 4.7,
@@ -42,9 +48,31 @@ export async function seedPsychologists() {
     },
   ]
 
+  const passwordHash = await bcrypt.hash("password123", 12)
+
   for (const psych of psychologists) {
-    await db.psychologist.create({
-      data: psych,
+    const user = await db.user.create({
+      data: {
+        name: psych.name,
+        email: psych.email,
+        passwordHash,
+        role: "PSYCHOLOGY",
+        isOnboarded: true,
+      }
+    })
+
+    await db.psychologistProfile.create({
+      data: {
+        userId: user.id,
+        role: psych.role,
+        specialty: psych.specialty,
+        rating: psych.rating,
+        experienceYears: psych.experienceYears,
+        imageUrl: psych.imageUrl,
+        availability: psych.availability,
+        busyUntil: psych.busyUntil,
+        tags: psych.tags,
+      }
     })
   }
 

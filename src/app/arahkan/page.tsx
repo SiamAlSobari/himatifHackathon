@@ -43,7 +43,7 @@ export default async function ArahkanPage() {
     <ArahkanClient
       psychologists={psychologists.map((p) => ({
         id: p.id,
-        name: p.name,
+        name: p.user.name || "Psikolog",
         role: p.role,
         specialty: p.specialty,
         rating: p.rating,
@@ -57,10 +57,10 @@ export default async function ArahkanPage() {
         id: activeAppointment.id,
         scheduledAt: activeAppointment.scheduledAt.toISOString(),
         psychologist: {
-          id: activeAppointment.psychologist.id,
-          name: activeAppointment.psychologist.name,
-          role: activeAppointment.psychologist.role,
-          imageUrl: activeAppointment.psychologist.imageUrl,
+          id: activeAppointment.psychologistProfile.id,
+          name: activeAppointment.psychologistProfile.user.name || "Psikolog",
+          role: activeAppointment.psychologistProfile.role,
+          imageUrl: activeAppointment.psychologistProfile.imageUrl,
         }
       } : null}
       userProfile={{

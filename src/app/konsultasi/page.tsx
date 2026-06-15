@@ -46,13 +46,13 @@ export default async function KonsultasiPage({
               id: activeAppointment.id,
               scheduledAt: activeAppointment.scheduledAt.toISOString(),
               psychologist: {
-                id: activeAppointment.psychologist.id,
-                name: activeAppointment.psychologist.name,
-                role: activeAppointment.psychologist.role,
-                specialty: activeAppointment.psychologist.specialty,
-                imageUrl: activeAppointment.psychologist.imageUrl,
-                experienceYears: activeAppointment.psychologist.experienceYears,
-                tags: activeAppointment.psychologist.tags,
+                id: activeAppointment.psychologistProfile.id,
+                name: activeAppointment.psychologistProfile.user.name || "Psikolog",
+                role: activeAppointment.psychologistProfile.role,
+                specialty: activeAppointment.psychologistProfile.specialty,
+                imageUrl: activeAppointment.psychologistProfile.imageUrl,
+                experienceYears: activeAppointment.psychologistProfile.experienceYears,
+                tags: activeAppointment.psychologistProfile.tags,
                 strNumber: undefined, // fallback will be used
                 practiceLocation: undefined, // fallback will be used
               },
