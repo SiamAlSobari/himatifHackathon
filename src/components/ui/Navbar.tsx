@@ -10,11 +10,9 @@ import { useChatSession } from "@/hooks/chat/useChatSession";
 import { useSession } from "next-auth/react";
 
 const navItems = [
-  { label: "Home", href: "/" },
-  { label: "Kenali", href: "/kenali" },
-  { label: "Validasi", href: "/validasi" },
-  { label: "Arahkan", href: "/arahkan" },
   { label: "Dashboard", href: "/dashboard" },
+  { label: "Validasi", href: "/validasi" },
+  { label: "Arahkan", href: "/arahkan" }
 ];
 
 interface NavbarProps {
