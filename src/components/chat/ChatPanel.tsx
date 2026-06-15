@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
-import { Bot, Plus, Clock, HeartHandshake, Loader2 } from "lucide-react";
+import { Bot, Plus, Clock, HeartHandshake, Loader2, AlertTriangle } from "lucide-react";
 import ChatHeader from "./ChatHeader";
 import DateDivider from "./Datedivider";
 import ChatBubble from "./ChatBubble";
@@ -10,6 +10,13 @@ import ChatInput from "./ChatInput";
 import { useCreateChatSession } from "@/hooks/chat/useCreateChatSession";
 import { useSendChatMessage } from "@/hooks/chat/useSendChatMessage";
 import { ChatSessionWithMessages } from "@/lib/types/chat";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 interface ChatPanelProps {
   activeSession: ChatSessionWithMessages | null;
@@ -39,6 +46,34 @@ export default function ChatPanel({
   // Determine actual session to display (active session or completed session during cooldown)
   const displaySession = activeSession || cooldown?.completedSession || null;
   const messages = displaySession?.chatMessages || [];
+
+  const [showCrisisModal, setShowCrisisModal] = useState(false);
+  const [lastSeenCrisisId, setLastSeenCrisisId] = useState<string | null>(null);
+
+  // Crisis detection hook
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMsg = messages[messages.length - 1];
+      const messageAgeMs = Date.now() - new Date(lastMsg.createdAt).getTime();
+      const isRecent = messageAgeMs < 15000; // Under 15 seconds
+
+      if (
+        lastMsg.role === "ASSISTANT" &&
+        lastMsg.metaData?.isCrisis &&
+        isRecent &&
+        lastMsg.id !== lastSeenCrisisId
+      ) {
+        setLastSeenCrisisId(lastMsg.id);
+        setShowCrisisModal(true);
+
+        const timer = setTimeout(() => {
+          setShowCrisisModal(false);
+        }, 3000);
+
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [messages, lastSeenCrisisId]);
 
   // Auto scroll to bottom of chat
   useEffect(() => {
@@ -205,6 +240,39 @@ export default function ChatPanel({
           activeTheme={activeTheme}
         />
       )}
+      <Dialog open={showCrisisModal} onOpenChange={setShowCrisisModal}>
+        <DialogContent className="border-red-200 bg-red-50 p-6 text-center max-w-sm sm:max-w-md shadow-2xl">
+          <DialogHeader className="flex flex-col items-center">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-red-600 shadow-md animate-bounce">
+              <AlertTriangle className="h-8 w-8" />
+            </div>
+            <DialogTitle className="font-serif text-xl font-bold text-red-800 leading-tight">
+              Peringatan: Kondisi Krisis Terdeteksi
+            </DialogTitle>
+            <DialogDescription className="mt-2 text-sm text-red-700 leading-relaxed">
+              Kami mendeteksi tingkat stres atau kondisi emosional Anda sangat tinggi dari obrolan terakhir. Tenang saja, Anda tidak sendirian. Silakan hubungi crisis center segera untuk mendapatkan pertolongan pertama secara gratis.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-6 flex flex-col gap-3">
+            <button
+              onClick={() => {
+                setShowCrisisModal(false);
+                window.open("tel:119");
+              }}
+              className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg active:scale-95 transition-all shadow-md shadow-red-600/10 cursor-pointer flex justify-center items-center gap-2"
+            >
+              <HeartHandshake className="h-4 w-4" />
+              Hubungi Crisis Center (119)
+            </button>
+            <button
+              onClick={() => setShowCrisisModal(false)}
+              className="w-full py-2.5 border border-red-300 text-red-700 hover:bg-red-100/50 font-medium rounded-lg active:scale-95 transition-all cursor-pointer"
+            >
+              Tutup Peringatan
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

@@ -15,15 +15,47 @@ export default async function ScreeningPage() {
     redirect("/login?callbackUrl=/screening")
   }
 
-  // Guard: harus sudah onboarding
+  // Guard: harus sudah onboarding profile
   const user = await db.user.findUnique({
     where: { id: session.user.id },
-    select: { usia: true, jenisKelamin: true },
+    select: { name: true, email: true, usia: true, jenisKelamin: true, isOnboarded: true },
   })
 
   if (!user?.usia || !user?.jenisKelamin) {
     redirect("/onboarding")
   }
 
-  return <ScreeningClient />
+  // Cek jika sudah screening hari ini (cooldown)
+  const startOfToday = new Date()
+  startOfToday.setHours(0, 0, 0, 0)
+  const screeningToday = await db.screening.findFirst({
+    where: {
+      userId: session.user.id,
+      createdAt: {
+        gte: startOfToday,
+      },
+    },
+  })
+
+  const latestScreening = await db.screening.findFirst({
+    where: { userId: session.user.id },
+    orderBy: { createdAt: "desc" },
+  })
+
+  return (
+    <ScreeningClient
+      isOnboarded={user.isOnboarded}
+      alreadyScreenedToday={!!screeningToday}
+      latestScreening={latestScreening ? {
+        score: latestScreening.score,
+        createdAt: latestScreening.createdAt.toISOString(),
+        type: latestScreening.type,
+      } : null}
+      userProfile={{
+        name: user.name || user.email || "Pengguna",
+        usia: user.usia,
+        jenisKelamin: user.jenisKelamin,
+      }}
+    />
+  )
 }

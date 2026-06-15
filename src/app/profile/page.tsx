@@ -14,12 +14,30 @@ import {
   quickHelpLinks,
 } from "./data";
 
+import { db } from "@/lib/db";
+import { redirect } from "next/navigation";
+
 export default async function ProfilePage() {
   const session = await auth();
-  const user = session?.user;
+  if (!session?.user?.id) {
+    redirect("/login?callbackUrl=/profile");
+  }
 
-  const displayName = user?.name || user?.email || "Pengguna";
-  const email = user?.email || "-";
+  const dbUser = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { name: true, image: true, email: true, usia: true, jenisKelamin: true, isOnboarded: true },
+  });
+
+  if (!dbUser?.usia || !dbUser?.jenisKelamin) {
+    redirect("/onboarding");
+  }
+
+  if (!dbUser?.isOnboarded) {
+    redirect("/screening");
+  }
+
+  const displayName = dbUser?.name || dbUser?.email || "Pengguna";
+  const email = dbUser?.email || "-";
 
   // Field tambahan seperti usia, lokasi, dan nomor telepon belum ada di
   // session default NextAuth. Jika sudah ditambahkan ke model User & callback
@@ -30,7 +48,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Navbar userName={displayName} userImage={user?.image} />
+      <Navbar userName={displayName} userImage={dbUser?.image} />
 
       <main className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -39,7 +57,7 @@ export default async function ProfilePage() {
               name={displayName}
               age={age}
               location={location}
-              avatarUrl={user?.image}
+              avatarUrl={dbUser?.image}
             />
             <QuickHelpCard title="Butuh Bantuan?" links={quickHelpLinks} />
           </div>

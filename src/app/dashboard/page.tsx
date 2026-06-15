@@ -1,4 +1,6 @@
 import { auth } from "@/auth";
+import { db } from "@/lib/db";
+import { redirect } from "next/navigation";
 import ActivityCard from "@/components/dashboard/Activitycard";
 // import ChatWidget from "@/components/dashboard/Chatwidget";
 import DashboardHeader from "@/components/dashboard/Dashboardheader";
@@ -18,15 +20,29 @@ import {
 
 export default async function DashboardPage() {
   const session = await auth();
-  const user = session?.user;
+  if (!session?.user?.id) {
+    redirect("/login?callbackUrl=/dashboard");
+  }
 
-  const displayName = user?.name || user?.email || "Pengguna";
-  // ambil namapertama akja
+  const dbUser = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { name: true, image: true, email: true, usia: true, jenisKelamin: true, isOnboarded: true },
+  });
+
+  if (!dbUser?.usia || !dbUser?.jenisKelamin) {
+    redirect("/onboarding");
+  }
+
+  if (!dbUser?.isOnboarded) {
+    redirect("/screening");
+  }
+
+  const displayName = dbUser?.name || dbUser?.email || "Pengguna";
   const firstName = displayName.split(" ")[0];
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Navbar userName={displayName} userImage={user?.image} />
+      <Navbar userName={displayName} userImage={dbUser?.image} />
 
       <main className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8">
         <DashboardHeader name={firstName} />

@@ -6,6 +6,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useChatSession } from "@/hooks/chat/useChatSession";
+import { useSession } from "next-auth/react";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -18,11 +20,19 @@ const navItems = [
 interface NavbarProps {
   userName?: string | null;
   userImage?: string | null;
+  isOnboarded?: boolean;
 }
 
-export default function Navbar({ userName, userImage }: NavbarProps) {
+export default function Navbar({ userName, userImage, isOnboarded: propIsOnboarded }: NavbarProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  
+  const { data } = useChatSession();
+  const session = useSession();
+  const isOnboarded = propIsOnboarded !== undefined ? propIsOnboarded : (data?.isOnboarded ?? true);
+
+  const finalUserName = userName || session?.data?.user?.name || "Pengguna";
+  const finalUserImage = userImage || session?.data?.user?.image || "https://i.pravatar.cc/40?img=12";
 
   return (
     <header className="w-full border-b border-slate-200 bg-white">
@@ -31,25 +41,26 @@ export default function Navbar({ userName, userImage }: NavbarProps) {
           Jembatan Aman
         </span>
 
-        <nav className="hidden items-center gap-7 lg:flex">
-          {navItems.map((item) => {
-            const isActive = pathname.startsWith(item.href) && item.href !== "/";
-
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={`text-sm font-medium transition-colors ${
-                  isActive
-                    ? "text-teal-700"
-                    : "text-slate-500 hover:text-teal-700"
-                }`}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
+        {isOnboarded && (
+          <nav className="hidden items-center gap-7 lg:flex">
+            {navItems.map((item) => {
+              const isActive = pathname.startsWith(item.href) && item.href !== "/";
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`text-sm font-medium transition-colors ${
+                    isActive
+                      ? "text-teal-700"
+                      : "text-slate-500 hover:text-teal-700"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+        )}
 
         <div className="flex flex-1 items-center justify-end gap-4">
           <div className="relative hidden w-full max-w-xs md:block">
@@ -77,8 +88,8 @@ export default function Navbar({ userName, userImage }: NavbarProps) {
               className="flex items-center gap-2 rounded-full transition-opacity hover:opacity-80"
             >
               <Image
-                src={userImage || "https://i.pravatar.cc/40?img=12"}
-                alt={userName || "Foto profil pengguna"}
+                src={finalUserImage}
+                alt={finalUserName || "Foto profil pengguna"}
                 width={36}
                 height={36}
                 className="h-9 w-9 rounded-full object-cover"
@@ -89,7 +100,7 @@ export default function Navbar({ userName, userImage }: NavbarProps) {
               <div className="absolute right-0 top-12 z-50 w-48 overflow-hidden rounded-xl border border-slate-100 bg-white py-2 shadow-lg">
                 <div className="px-4 py-2">
                   <p className="truncate text-sm font-semibold text-slate-800">
-                    {userName || "Pengguna"}
+                    {finalUserName}
                   </p>
                 </div>
                 <div className="my-1 border-t border-slate-100" />
