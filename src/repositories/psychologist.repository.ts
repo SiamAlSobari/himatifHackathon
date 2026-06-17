@@ -159,6 +159,23 @@ class PsychologistRepository {
         });
     }
 
+    async getLatestChatSession(userId: string) {
+        return await db.chatSession.findFirst({
+            where: {
+                userId,
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+            include: {
+                chatMessages: {
+                    orderBy: { createdAt: "desc" },
+                },
+            },
+        });
+    }
+
+
     async createPsychologistProfile(data: {
         userId: string;
         role: string;

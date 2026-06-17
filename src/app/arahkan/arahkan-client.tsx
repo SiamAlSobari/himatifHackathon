@@ -226,17 +226,17 @@ export default function ArahkanClient({
   // ── Render ──
 
   return (
-    <div className="bg-[#f8f9ff] text-[#0b1c30] font-body-md antialiased">
+    <div className="bg-background text-foreground font-body-md antialiased transition-colors duration-500">
       <main className="mx-auto max-w-7xl px-6 pt-24 pb-32 md:px-12">
         {/* ── Search & Filter Bar ── */}
         <div className="flex flex-col md:flex-row gap-4 items-center">
           {/* Search input */}
           <div className="relative w-full md:flex-1">
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#6f797a] text-xl">
+            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">
               search
             </span>
             <input
-              className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-[#bfc8c9]/60 bg-white focus:ring-2 focus:ring-[#004349] focus:border-[#004349] focus:outline-none transition-all text-sm placeholder:text-[#6f797a]"
+              className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-outline-variant/60 bg-surface focus:ring-2 focus:ring-primary focus:border-primary focus:outline-none transition-all text-sm placeholder:text-slate-400"
               placeholder="Cari spesialis atau masalah (Trauma, Kecemasan...)"
               type="text"
               value={searchQuery}
@@ -251,8 +251,8 @@ export default function ArahkanClient({
               onClick={() => { setSelectedTag(null); setSearchQuery("") }}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                 !selectedTag && searchQuery === ""
-                  ? "bg-[#004349] text-white"
-                  : "bg-white border border-[#bfc8c9]/60 text-[#3f484a] hover:bg-[#eff4ff]"
+                  ? "bg-primary text-white"
+                  : "bg-surface border border-outline-variant/60 text-foreground/85 hover:bg-primary-fixed-dim"
               }`}
             >
               <span className="material-symbols-outlined text-[16px]">filter_list</span>
@@ -265,8 +265,8 @@ export default function ArahkanClient({
                 onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
                 className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                   selectedTag === tag
-                    ? "bg-[#004349] text-white"
-                    : "bg-white border border-[#bfc8c9]/60 text-[#3f484a] hover:bg-[#eff4ff]"
+                    ? "bg-primary text-white"
+                    : "bg-surface border border-outline-variant/60 text-foreground/85 hover:bg-primary-fixed-dim"
                 }`}
               >
                 {tag}
@@ -279,15 +279,15 @@ export default function ArahkanClient({
         <div className="mt-10 grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left: psychologist list */}
           <div className="lg:col-span-8 flex flex-col gap-5">
-            <h2 className="text-lg font-bold text-[#0b1c30]">
+            <h2 className="text-lg font-bold text-foreground">
               Psikolog & Psikiater Terverifikasi
             </h2>
 
             {filteredPsychologists.length === 0 ? (
-              <div className="bg-white border border-[#bfc8c9]/40 rounded-2xl p-12 text-center shadow-sm">
-                <span className="material-symbols-outlined text-[#bfc8c9] text-5xl">search_off</span>
-                <p className="mt-4 font-bold text-[#0b1c30]">Tidak ada spesialis ditemukan</p>
-                <p className="text-xs text-[#6f797a] mt-1 font-medium">
+              <div className="bg-surface border border-outline-variant/40 rounded-2xl p-12 text-center shadow-sm">
+                <span className="material-symbols-outlined text-slate-300 text-5xl">search_off</span>
+                <p className="mt-4 font-bold text-foreground">Tidak ada spesialis ditemukan</p>
+                <p className="text-xs text-slate-400 mt-1 font-medium">
                   Coba gunakan kata kunci pencarian lain atau bersihkan filter.
                 </p>
               </div>

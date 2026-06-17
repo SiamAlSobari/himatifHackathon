@@ -17,6 +17,12 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     pathname === "/psikolog/register" ||
     pathname === "/onboarding";
 
+  // Define paths where Footer should NOT be displayed (e.g. Chat pages to avoid scrolling the main page)
+  const isChatPath =
+    pathname === "/validasi" ||
+    pathname === "/konsultasi" ||
+    pathname === "/psikolog/konsultasi";
+
   if (isAuthPath) {
     return <>{children}</>;
   }
@@ -24,8 +30,8 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Navbar />
-      <div className="flex-1 w-full">{children}</div>
-      <Footer linkGroups={footerLinkGroups} />
+      <div className="flex-1 w-full min-h-0">{children}</div>
+      {!isChatPath && <Footer linkGroups={footerLinkGroups} />}
     </div>
   );
 }

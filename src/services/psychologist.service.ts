@@ -400,6 +400,27 @@ export class PsychologistService {
     return updated;
   }
 
+  async getClientTheme(userId: string): Promise<string> {
+    const latestSession = await psychologistRepository.getLatestChatSession(userId);
+    if (latestSession) {
+      const lastMsg = latestSession.chatMessages.find(m => m.role === "ASSISTANT");
+      if (lastMsg && lastMsg.metaData && (lastMsg.metaData as any).uiTheme) {
+        return (lastMsg.metaData as any).uiTheme;
+      }
+    }
+
+    const latestScreening = await this.getLatestScreening(userId);
+    if (latestScreening) {
+      const score = latestScreening.score;
+      if (score >= 0 && score <= 4) return "calm_blue";
+      if (score >= 5 && score <= 9) return "warm_yellow";
+      if (score >= 10 && score <= 13) return "alert_orange";
+      return "deep_purple";
+    }
+
+    return "calm_blue";
+  }
+
   async getPsychologistConsultationSession(userId: string, appointmentId?: string) {
     const profile = await psychologistRepository.getPsychologistProfileByUserId(userId);
     if (!profile) {
@@ -420,6 +441,7 @@ export class PsychologistService {
     const clientUser = activeAppointment.user;
     const latestScreening = await this.getLatestScreening(clientUser.id);
     const finalConclusion = await this.getLatestAiSessionConclusion(clientUser.id);
+    const clientTheme = await this.getClientTheme(clientUser.id);
 
     return {
       activeAppointment: {
@@ -444,6 +466,7 @@ export class PsychologistService {
         jenisKelamin: clientUser.jenisKelamin,
       },
       latestScreeningScore: latestScreening?.score || null,
+      clientTheme,
       finalConclusion,
       psychologistUser: {
         name: profile.user.name || "Psikolog",

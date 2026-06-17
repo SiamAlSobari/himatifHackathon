@@ -15,80 +15,78 @@ export default function RecoveryFlow({
   formatDate,
 }: RecoveryFlowProps) {
   return (
-    <div className="bg-white border border-[#bfc8c9]/40 rounded-2xl p-6 shadow-sm">
-      <h4 className="text-xs font-bold text-[#3f484a] uppercase tracking-wider mb-5">
+    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+      <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-5">
         Alur Pemulihan Anda
       </h4>
 
-      <div className="space-y-0">
-        {/* Step 1: Deteksi Awal (always completed) */}
-        <div className="flex gap-3">
+      <div className="space-y-4">
+        {/* Step 1 */}
+        <div className="flex gap-4">
           <div className="flex flex-col items-center">
-            <span
-              className="material-symbols-outlined text-[#004349] text-xl"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              check_circle
-            </span>
-            <div className="w-px flex-1 bg-[#004349]" />
+            <div className="w-5 h-5 rounded-full bg-teal-50 flex items-center justify-center border-2 border-primary">
+              <span className="material-symbols-outlined text-primary text-xl" style={{ fontSize: "14px", fontVariationSettings: "'FILL' 1" }}>
+                check
+              </span>
+            </div>
+            <div className="w-px flex-1 bg-primary" />
           </div>
-          <div className="pb-5">
-            <p className="text-sm font-bold text-[#0b1c30] leading-tight">Deteksi Awal</p>
-            <p className="text-xs text-[#6f797a] mt-0.5 font-medium">
-              Kuesioner PHQ-9 selesai.
+          <div className="pb-4">
+            <p className="text-sm font-bold text-foreground leading-tight">Deteksi Awal</p>
+            <p className="text-xs text-slate-500 mt-0.5 font-medium">
+              Skrining harian untuk menganalisis kondisi emosional Anda.
             </p>
             {latestScreeningScore !== null && (
-              <p className="text-[10px] text-[#004349] font-bold mt-0.5">
-                Skor Terakhir: {latestScreeningScore}
+              <p className="text-[10px] text-primary font-bold mt-0.5">
+                Skor Terakhir: {latestScreeningScore} / 21
               </p>
             )}
           </div>
         </div>
 
-        {/* Step 2: Pilih Pendamping */}
-        <div className="flex gap-3">
+        {/* Step 2 */}
+        <div className="flex gap-4">
           <div className="flex flex-col items-center">
-            {appointment ? (
-              <span
-                className="material-symbols-outlined text-[#004349] text-xl"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                check_circle
-              </span>
-            ) : (
-              <div className="w-5 h-5 border-2 border-[#004349] rounded-full flex items-center justify-center">
-                <div className="w-1.5 h-1.5 bg-[#004349] rounded-full" />
-              </div>
-            )}
-            <div className={`w-px flex-1 ${appointment ? "bg-[#004349]" : "bg-[#bfc8c9]/50"}`} />
+            <div className={`w-5 h-5 rounded-full flex items-center justify-center border-2 ${appointment ? "bg-teal-50 border-primary" : "bg-white border-slate-200"}`}>
+              {appointment ? (
+                <span className="material-symbols-outlined text-primary text-xl" style={{ fontSize: "14px", fontVariationSettings: "'FILL' 1" }}>
+                  check
+                </span>
+              ) : (
+                <div className="w-1.5 h-1.5 bg-slate-300 rounded-full" />
+              )}
+            </div>
+            <div className={`w-px flex-1 ${appointment ? "bg-primary" : "bg-slate-200"}`} />
           </div>
-          <div className="pb-5">
-            <p className="text-sm font-bold text-[#0b1c30] leading-tight">Pilih Pendamping</p>
-            <p className="text-xs text-[#6f797a] mt-0.5 font-medium">
-              {appointment
-                ? `Telah memilih: ${appointment.psychologist.name.split(",")[0]}`
-                : "Sedang memproses daftar ahli..."}
+          <div className="pb-4">
+            <p className="text-sm font-bold text-foreground leading-tight">Pilih Pendamping</p>
+            <p className="text-xs text-slate-500 mt-0.5 font-medium">
+              Pilih dan hubungi psikolog spesialis yang sesuai dengan rekomendasi kami.
             </p>
           </div>
         </div>
 
-        {/* Step 3: Konsultasi Pertama */}
-        <div className="flex gap-3">
+        {/* Step 3 */}
+        <div className="flex gap-4">
           <div className="flex flex-col items-center">
             <div
-              className={`w-5 h-5 border-2 rounded-full ${
-                appointment ? "border-[#004349]" : "border-[#bfc8c9]"
+              className={`w-5 h-5 rounded-full flex items-center justify-center border-2 ${
+                appointment ? "bg-teal-50 border-primary" : "bg-white border-slate-200"
               }`}
-            />
+            >
+              {appointment ? (
+                <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
+              ) : (
+                <div className="w-1.5 h-1.5 bg-slate-300 rounded-full" />
+              )}
+            </div>
           </div>
           <div>
-            <p className={`text-sm font-bold leading-tight ${appointment ? "text-[#0b1c30]" : "text-[#bfc8c9]"}`}>
-              Konsultasi Pertama
+            <p className={`text-sm font-bold leading-tight ${appointment ? "text-foreground" : "text-slate-300"}`}>
+              Mulai Sesi
             </p>
-            <p className={`text-xs mt-0.5 font-medium ${appointment ? "text-[#004349] font-bold" : "text-[#bfc8c9]"}`}>
-              {appointment
-                ? formatDate(appointment.scheduledAt)
-                : "Jadwalkan sesi perdana."}
+            <p className={`text-xs mt-0.5 font-medium ${appointment ? "text-primary font-bold" : "text-slate-300"}`}>
+              {appointment ? "Sesi Sedang Aktif" : "Menunggu Sesi Dimulai"}
             </p>
           </div>
         </div>

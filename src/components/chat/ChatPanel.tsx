@@ -41,11 +41,23 @@ export default function ChatPanel({
   const createSessionMutation = useCreateChatSession();
   const sendMessageMutation = useSendChatMessage();
   
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   
   // Determine actual session to display (active session or completed session during cooldown)
   const displaySession = activeSession || cooldown?.completedSession || null;
   const messages = displaySession?.chatMessages || [];
+
+  // Get message user is currently sending (for optimistic rendering)
+  const pendingUserMessage = sendMessageMutation.isPending
+    ? sendMessageMutation.variables?.message
+    : null;
+
+  // Determine if AI is currently typing (last message is from user OR user is sending a message)
+  const isAiTyping =
+    (activeSession &&
+      messages.length > 0 &&
+      messages[messages.length - 1].role === "USER") ||
+    !!pendingUserMessage;
 
   const [showCrisisModal, setShowCrisisModal] = useState(false);
   const [lastSeenCrisisId, setLastSeenCrisisId] = useState<string | null>(null);
@@ -77,8 +89,13 @@ export default function ChatPanel({
 
   // Auto scroll to bottom of chat
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages.length, sendMessageMutation.isPending]);
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [messages.length, sendMessageMutation.isPending, isAiTyping]);
 
   // Handle message sending
   const handleSend = (text: string) => {
@@ -98,17 +115,7 @@ export default function ChatPanel({
     });
   };
 
-  // Get message user is currently sending (for optimistic rendering)
-  const pendingUserMessage = sendMessageMutation.isPending
-    ? sendMessageMutation.variables?.message
-    : null;
 
-  // Determine if AI is currently typing (last message is from user OR user is sending a message)
-  const isAiTyping =
-    (activeSession &&
-      messages.length > 0 &&
-      messages[messages.length - 1].role === "USER") ||
-    !!pendingUserMessage;
 
   // Loading state
   if (isLoading) {
@@ -154,7 +161,7 @@ export default function ChatPanel({
       <ChatHeader activeTheme={activeTheme} />
 
       {/* Messages list container */}
-      <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4 min-h-0">
+      <div ref={chatContainerRef} className="flex-1 space-y-4 overflow-y-auto px-6 py-4 min-h-0">
         {messages.length === 0 && !pendingUserMessage ? (
           <div className="flex h-full items-center justify-center text-slate-400 text-xs">
             Tidak ada pesan. Mulai obrolan sekarang.
@@ -200,7 +207,7 @@ export default function ChatPanel({
             isTyping={true}
           />
         )}
-        <div ref={messagesEndRef} />
+
       </div>
 
       {/* Footer input area / Cooldown display */}
