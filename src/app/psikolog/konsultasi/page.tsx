@@ -20,13 +20,13 @@ export default async function PsychologistKonsultasiPage({
 }) {
   const session = await auth();
   if (!session?.user?.id || (session.user as any).role !== "PSYCHOLOGY") {
-    redirect("/psikolog/login?callbackUrl=/psikolog/konsultasi");
+    redirect("/login?callbackUrl=/psikolog/konsultasi");
   }
 
   // Get the psychologist profile using session user id
   const psychProfile = await psychologistService.getPsychologistProfileByUserId(session.user.id);
   if (!psychProfile) {
-    redirect("/psikolog/login");
+    redirect("/login");
   }
 
   const { appointmentId } = await searchParams;

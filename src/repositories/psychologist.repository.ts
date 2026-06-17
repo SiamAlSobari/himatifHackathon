@@ -153,6 +153,21 @@ class PsychologistRepository {
         });
     }
 
+    async createPsychologistProfile(data: {
+        userId: string;
+        role: string;
+        specialty: string;
+        rating: number;
+        experienceYears: number;
+        imageUrl: string;
+        availability: string;
+        tags: string[];
+    }) {
+        return await db.psychologistProfile.create({
+            data,
+        });
+    }
+
     async getPsychologistAppointments(profileId: string) {
         return await db.appointment.findMany({
             where: { psychologistId: profileId },
