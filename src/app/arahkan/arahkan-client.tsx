@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
-import Navbar from "@/components/ui/Navbar"
 import { bookAppointment, cancelAppointment } from "@/app/actions/psychologist"
 import { getPusherClient } from "@/lib/pusher/pusher-client"
 
@@ -227,10 +226,7 @@ export default function ArahkanClient({
   // ── Render ──
 
   return (
-    <div className="min-h-screen bg-[#f8f9ff] text-[#0b1c30] font-body-md antialiased">
-      {/* ── Shared Navbar (same as dashboard / screening) ── */}
-      <Navbar userName={userProfile.name} userImage={userProfile.image} isOnboarded={true} />
-
+    <div className="bg-[#f8f9ff] text-[#0b1c30] font-body-md antialiased">
       <main className="mx-auto max-w-7xl px-6 pt-24 pb-32 md:px-12">
         {/* ── Search & Filter Bar ── */}
         <div className="flex flex-col md:flex-row gap-4 items-center">

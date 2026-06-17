@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Navbar from "@/components/ui/Navbar";
 import { screeningQuestions, answerOptions } from "@/lib/constants/questions";
 
 // Custom styles that mimic the provided HTML styling configuration
@@ -193,7 +192,6 @@ export default function ScreeningClient({
   if ((alreadyScreenedToday && isOnboarded) || isSubmittedSuccessfully) {
     return (
       <div className="min-h-screen bg-slate-50 font-body-md antialiased text-on-surface">
-        <Navbar userName={userProfile.name} isOnboarded={true} />
         <main className="mx-auto max-w-xl px-6 pt-24 pb-32 text-center">
           <div className="rounded-3xl border border-black/5 bg-white p-8 shadow-xl shadow-[#0D1B2A]/5 md:p-12">
             <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[#f0f7f8] text-[#0d5c63]">
@@ -257,9 +255,6 @@ export default function ScreeningClient({
           transform: translateY(-2px);
         }
       `}</style>
-
-      {/* Top Navbar */}
-      <Navbar userName={userProfile.name} isOnboarded={isOnboarded} />
 
       <main className="mx-auto max-w-7xl px-6 pt-24 pb-32 md:px-12">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">

@@ -1,10 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import Footer from "@/components/ui/footer";
-import Navbar from "@/components/ui/Navbar";
 import EmergencyBanner from "@/components/dashboard/Emergencybanner";
-import { footerLinkGroups } from "@/app/dashboard/data";
 
 import GreetingHeader from "@/components/dashboardpsikolog/Greetingheader";
 import TodayConsultationList from "@/components/dashboardpsikolog/Todayconsultationlist";
@@ -60,9 +57,7 @@ export default function DashboardPsikologPage() {
   const userImage = data.psychologist.image || undefined;
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <Navbar userName={displayName} userImage={userImage} />
-
+    <div className="bg-slate-50">
       <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <GreetingHeader name={displayName} />
 
@@ -80,8 +75,6 @@ export default function DashboardPsikologPage() {
           phoneNumber="119"
         />
       </main>
-
-      <Footer linkGroups={footerLinkGroups} />
     </div>
   );
 }

@@ -40,7 +40,7 @@ export default function Navbar({ userName, userImage, isOnboarded: propIsOnboard
           Jembatan Aman
         </span>
 
-        {isOnboarded && (
+        {session?.data?.user && isOnboarded && (
           <nav className="hidden items-center gap-7 lg:flex">
             {(role === "PSYCHOLOGY"
               ? [
@@ -77,50 +77,69 @@ export default function Navbar({ userName, userImage, isOnboarded: propIsOnboard
             />
           </div>
 
-          <button
-            type="button"
-            aria-label="Notifikasi"
-            className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-          >
-            <Bell className="h-5 w-5" />
-          </button>
+          {session?.data?.user ? (
+            <>
+              <button
+                type="button"
+                aria-label="Notifikasi"
+                className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+              >
+                <Bell className="h-5 w-5" />
+              </button>
 
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setMenuOpen((prev) => !prev)}
-              aria-label="Menu pengguna"
-              className="flex items-center gap-2 rounded-full transition-opacity hover:opacity-80"
-            >
-              <Image
-                src={finalUserImage}
-                alt={finalUserName || "Foto profil pengguna"}
-                width={36}
-                height={36}
-                className="h-9 w-9 rounded-full object-cover"
-              />
-            </button>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen((prev) => !prev)}
+                  aria-label="Menu pengguna"
+                  className="flex items-center gap-2 rounded-full transition-opacity hover:opacity-80"
+                >
+                  <Image
+                    src={finalUserImage}
+                    alt={finalUserName || "Foto profil pengguna"}
+                    width={36}
+                    height={36}
+                    className="h-9 w-9 rounded-full object-cover"
+                  />
+                </button>
 
-            {menuOpen && (
-              <div className="absolute right-0 top-12 z-50 w-48 overflow-hidden rounded-xl border border-slate-100 bg-white py-2 shadow-lg">
-                <div className="px-4 py-2">
-                  <p className="truncate text-sm font-semibold text-slate-800">
-                    {finalUserName}
-                  </p>
-                </div>
-                <div className="my-1 border-t border-slate-100" />
-                <form action={signOutAction}>
-                  <button
-                    type="submit"
-                    className="flex w-full items-center gap-2 px-4 py-2 text-sm text-slate-500 transition-colors hover:bg-slate-50 hover:text-rose-600"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Keluar
-                  </button>
-                </form>
+                {menuOpen && (
+                  <div className="absolute right-0 top-12 z-50 w-48 overflow-hidden rounded-xl border border-slate-100 bg-white py-2 shadow-lg">
+                    <div className="px-4 py-2">
+                      <p className="truncate text-sm font-semibold text-slate-800">
+                        {finalUserName}
+                      </p>
+                    </div>
+                    <div className="my-1 border-t border-slate-100" />
+                    <form action={signOutAction}>
+                      <button
+                        type="submit"
+                        className="flex w-full items-center gap-2 px-4 py-2 text-sm text-slate-500 transition-colors hover:bg-slate-50 hover:text-rose-600"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Keluar
+                      </button>
+                    </form>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </>
+          ) : (
+            <div className="flex items-center gap-4 shrink-0">
+              <Link
+                href="/login"
+                className="text-sm font-medium text-slate-600 hover:text-teal-700 transition-colors"
+              >
+                Login
+              </Link>
+              <Link
+                href="/register"
+                className="text-sm font-medium bg-teal-900 hover:bg-teal-800 text-white px-4 py-2 rounded-full transition-colors shadow-sm"
+              >
+                Register
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </header>

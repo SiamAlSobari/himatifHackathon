@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
 import { errorResponse, successResponse } from "@/lib/response";
-import userRepository from "@/repositories/user.repository";
-import screeningService from "@/services/screening.service";
+import userService from "@/services/user.service";
 
 export async function GET() {
   const session = await auth();
@@ -10,26 +9,10 @@ export async function GET() {
   }
 
   try {
-    const dbUser = await userRepository.getUserProfile(session.user.id);
-    if (!dbUser) {
-      return errorResponse(404, "User not found");
-    }
-
-    const hasScreenedToday = await screeningService.checkDailyScreeningStatus(session.user.id);
-
-    return successResponse(200, "Dashboard data retrieved successfully", {
-      user: {
-        name: dbUser.name || dbUser.email || "Pengguna",
-        image: dbUser.image,
-        email: dbUser.email,
-        usia: dbUser.usia,
-        jenisKelamin: dbUser.jenisKelamin,
-      },
-      isOnboarded: dbUser.isOnboarded,
-      hasScreenedToday,
-    });
-  } catch (error) {
+    const data = await userService.getUserDashboardData(session.user.id);
+    return successResponse(200, "Dashboard data retrieved successfully", data);
+  } catch (error: any) {
     console.error("[/api/dashboard] error:", error);
-    return errorResponse(500, "Failed to fetch dashboard data");
+    return errorResponse(500, error.message || "Failed to fetch dashboard data");
   }
 }

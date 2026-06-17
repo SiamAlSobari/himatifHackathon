@@ -3,12 +3,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import Navbar from "@/components/ui/Navbar";
-import Footer from "@/components/ui/footer";
 import ChatArea from "@/components/konsultasi/ChatArea";
 import ContextSidebar from "@/components/konsultasi/ContextSidebar";
 import { completeAppointment, cancelAppointment } from "@/app/actions/psychologist";
-import { footerLinkGroups } from "@/app/dashboard/data";
 import { useConsultationChat } from "@/hooks/konsultasi/useConsultationChat";
 import { ActiveAppointment, Psychologist } from "@/lib/types/konsultasi";
 import { getPusherClient } from "@/lib/pusher/pusher-client";
@@ -245,10 +242,7 @@ export default function KonsultasiClient({
   };
 
   return (
-    <div className="min-h-screen bg-background text-on-surface font-body-md antialiased flex flex-col justify-between">
-      {/* Navbar wrapper */}
-      <Navbar userName={userProfile.name} userImage={userProfile.image} isOnboarded={true} />
-
+    <div className="bg-background text-on-surface font-body-md antialiased flex flex-col justify-between">
       <main className="mx-auto max-w-7xl w-full px-6 pt-24 pb-12 flex flex-col md:flex-row gap-gutter flex-1">
         {/* Left Side: Chat Panel */}
         <div className="flex-1">
@@ -296,8 +290,7 @@ export default function KonsultasiClient({
         />
       </main>
 
-      {/* Footer */}
-      <Footer linkGroups={footerLinkGroups} />
+      {/* Footer is rendered by parent LayoutWrapper */}
 
       {/* Floating Picture-in-Picture (PiP) View */}
       {showPiP && (
