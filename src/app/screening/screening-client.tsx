@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Navbar from "@/components/ui/Navbar";
 import { screeningQuestions, answerOptions } from "@/lib/constants/questions";
+import { useTheme } from "@/components/providers/ThemeProvider";
+import { useQueryClient } from "@tanstack/react-query";
 
 // Custom styles that mimic the provided HTML styling configuration
 const colors = {
@@ -78,6 +79,8 @@ export default function ScreeningClient({
   userProfile,
 }: ScreeningClientProps) {
   const router = useRouter();
+  const { setTheme } = useTheme();
+  const queryClient = useQueryClient();
 
   // Navigation states:
   // Step 1: Mood Selector
@@ -178,6 +181,24 @@ export default function ScreeningClient({
         throw new Error(data.error || "Gagal menyimpan hasil screening.");
       }
 
+      // Calculate and save the theme based on the screening score
+      const score = data.data.score;
+      let computedTheme: "calm_blue" | "warm_yellow" | "alert_orange" | "deep_purple" = "calm_blue";
+      if (score >= 0 && score <= 4) {
+        computedTheme = "calm_blue";
+      } else if (score >= 5 && score <= 9) {
+        computedTheme = "warm_yellow";
+      } else if (score >= 10 && score <= 13) {
+        computedTheme = "alert_orange";
+      } else if (score >= 14 && score <= 21) {
+        computedTheme = "deep_purple";
+      }
+      setTheme(computedTheme);
+
+      // Invalidate queries to prevent stale data redirection loops
+      await queryClient.invalidateQueries({ queryKey: ["chat-session"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard-data"] });
+
       // Successful screening
       setIsSubmittedSuccessfully(true);
       router.refresh();
@@ -192,8 +213,7 @@ export default function ScreeningClient({
   // Show option screen when screening is completed or already done today
   if ((alreadyScreenedToday && isOnboarded) || isSubmittedSuccessfully) {
     return (
-      <div className="min-h-screen bg-slate-50 font-body-md antialiased text-on-surface">
-        <Navbar userName={userProfile.name} isOnboarded={true} />
+      <div className="min-h-screen bg-background font-body-md antialiased text-on-surface">
         <main className="mx-auto max-w-xl px-6 pt-24 pb-32 text-center">
           <div className="rounded-3xl border border-black/5 bg-white p-8 shadow-xl shadow-[#0D1B2A]/5 md:p-12">
             <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[#f0f7f8] text-[#0d5c63]">
@@ -239,15 +259,15 @@ export default function ScreeningClient({
     : "Mulailah perjalanan kesehatan mental Anda dengan screening dasar untuk menyesuaikan nuansa platform.";
 
   return (
-    <div className="min-h-screen bg-[#f8f9ff] text-[#0b1c30] font-body-md antialiased">
+    <div className="min-h-screen bg-background text-foreground font-body-md antialiased">
       {/* Styles applied inline to match static reference rules */}
       <style jsx global>{`
         .material-symbols-outlined {
           font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
         .active-card {
-          border-color: #0d5c63 !important;
-          background-color: #f0f7f8 !important;
+          border-color: var(--primary-container) !important;
+          background-color: var(--teal-50) !important;
           box-shadow: 0px 8px 16px rgba(13, 92, 99, 0.08) !important;
         }
         .stepper-progress {
@@ -257,9 +277,6 @@ export default function ScreeningClient({
           transform: translateY(-2px);
         }
       `}</style>
-
-      {/* Top Navbar */}
-      <Navbar userName={userProfile.name} isOnboarded={isOnboarded} />
 
       <main className="mx-auto max-w-7xl px-6 pt-24 pb-32 md:px-12">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">

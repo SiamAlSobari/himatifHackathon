@@ -225,6 +225,30 @@ class PsychologistRepository {
             },
         });
     }
+
+    async getUserUpcomingAppointments(userId: string) {
+        return await db.appointment.findMany({
+            where: {
+                userId,
+                status: {
+                    in: [AppointmentStatus.APPROVED, AppointmentStatus.SCHEDULED, AppointmentStatus.PENDING],
+                },
+                scheduledAt: {
+                    gte: new Date(),
+                },
+            },
+            include: {
+                psychologistProfile: {
+                    include: {
+                        user: true,
+                    },
+                },
+            },
+            orderBy: {
+                scheduledAt: "asc",
+            },
+        });
+    }
 }
 
 const psychologistRepository = new PsychologistRepository();

@@ -2,8 +2,6 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Navbar from "@/components/ui/Navbar";
-import Footer from "@/components/ui/footer";
 import ProfileCard from "@/components/profile/Profilecard";
 import QuickHelpCard from "@/components/profile/Quickhelpcard";
 import PersonalInfoCard from "@/components/profile/Personainfocard";
@@ -45,10 +43,7 @@ export default function ProfilePage() {
   const age = data.dbUser.usia || null;
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <Navbar userName={displayName} userImage={data.dbUser.image || undefined} />
-
-      <main className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8">
+    <main className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="flex flex-col gap-6 lg:col-span-1">
             <ProfileCard
@@ -83,8 +78,5 @@ export default function ProfilePage() {
           documents={medicalDocuments}
         />
       </main>
-
-      <Footer linkGroups={footerLinkGroups} />
-    </div>
   );
 }

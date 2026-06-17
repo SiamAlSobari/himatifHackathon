@@ -6,7 +6,7 @@ export default function Section1() {
   return (
     <section
       id="hero"
-      className="relative h-screen bg-[#F0F4F8] flex flex-col overflow-hidden"
+      className="relative h-screen bg-background flex flex-col overflow-hidden transition-colors duration-500"
     >
       {/* Background decorative blobs */}
       <div className="absolute top-0 right-0 w-w-125 h-w-125 bg-[#1A8A7A]/8 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
@@ -18,9 +18,9 @@ export default function Section1() {
         style={{ height: "45%" }}
       >
         {/* Headline */}
-        <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-[#0D1B2A] leading-tight mb-3">
+        <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-3">
           Dengarkan{" "}
-          <span className="text-[#1A8A7A] relative">
+          <span className="text-primary relative transition-colors duration-500">
             Dirimu
             <svg
               className="absolute -bottom-2 left-0 w-full"
@@ -30,7 +30,7 @@ export default function Section1() {
             >
               <path
                 d="M2 6C50 2 100 1 198 4"
-                stroke="#1A8A7A"
+                stroke="var(--primary)"
                 strokeWidth="3"
                 strokeLinecap="round"
               />
@@ -38,7 +38,7 @@ export default function Section1() {
           </span>
         </h1>
 
-        <p className="text-lg md:text-xl font-medium text-[#0D1B2A] mb-2">
+        <p className="text-lg md:text-xl font-medium text-foreground mb-2">
           Satu Percakapan Bisa Mengubah Banyak Hal.
         </p>
 
@@ -50,7 +50,7 @@ export default function Section1() {
         {/* CTA */}
         <Link
           href="/mulai"
-          className="inline-flex items-center gap-2 bg-[#0D1B2A] hover:bg-[#1A8A7A] text-white text-sm font-medium px-7 py-3 rounded-full transition-all duration-300 shadow-lg hover:shadow-[#1A8A7A]/30 hover:shadow-xl group"
+          className="inline-flex items-center gap-2 bg-foreground hover:bg-primary text-white text-sm font-medium px-7 py-3 rounded-full transition-all duration-300 shadow-lg hover:shadow-primary/30 hover:shadow-xl group"
         >
           Temukan dirimu
           <svg
@@ -83,7 +83,7 @@ export default function Section1() {
             priority
           />
           {/* Gradient overlay bawah */}
-          <div className="absolute bottom-0 left-0 right-0 h-20 bg-linear-to-t from-[#F0F4F8] to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 h-20 bg-linear-to-t from-background to-transparent transition-colors duration-500" />
         </div>
       </div>
     </section>

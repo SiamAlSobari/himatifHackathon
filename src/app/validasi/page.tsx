@@ -2,12 +2,13 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Navbar from "@/components/ui/Navbar";
 import ChatPanel from "@/components/chat/ChatPanel";
 import SummarySidebar from "@/components/chat/SummarySidebar";
 import { useSession } from "next-auth/react";
 import { useChatNotification } from "@/hooks/chat/useChatNotification";
 import { useChatSession } from "@/hooks/chat/useChatSession";
+import { useTheme } from "@/components/providers/ThemeProvider";
+import { AppTheme } from "@/lib/types/theme";
 
 // Theme mappings for the outer wrapper
 const themeBgMap = {
@@ -21,6 +22,7 @@ export default function ChatPage() {
   const session = useSession();
   const router = useRouter();
   const { data, isLoading, refetch } = useChatSession();
+  const { setTheme } = useTheme();
 
   useEffect(() => {
     if (!isLoading && data) {
@@ -58,12 +60,17 @@ export default function ChatPage() {
     getThemeFromScore(data?.latestScreening?.score) ||
     "calm_blue";
 
+  // Update the global theme whenever activeTheme changes (from AI response or latest screening)
+  useEffect(() => {
+    if (activeTheme) {
+      setTheme(activeTheme as AppTheme);
+    }
+  }, [activeTheme, setTheme]);
+
   const themeBg = themeBgMap[activeTheme as keyof typeof themeBgMap] || "bg-slate-50";
 
   return (
-    <div className={`flex h-screen flex-col transition-colors duration-500 ${themeBg}`}>
-      <Navbar />
-
+    <div className={`flex h-[calc(100vh-64px)] flex-col transition-colors duration-500 ${themeBg}`}>
       <main className="mx-auto grid w-full max-w-7xl flex-1 grid-cols-1 gap-4 overflow-hidden px-6 py-4 lg:grid-cols-3">
         <div className="lg:col-span-2 h-full min-h-0">
           <ChatPanel

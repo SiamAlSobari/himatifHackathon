@@ -16,7 +16,7 @@ export default function ClientListSection({
           List Client
         </h2>
         <Link
-          href="/clientlist"
+          href="/psikolog/clientlist"
           className="text-sm font-medium text-emerald-600 hover:underline"
         >
           Lihat Semua
