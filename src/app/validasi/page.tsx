@@ -23,8 +23,10 @@ export default function ChatPage() {
   const { data, isLoading, refetch } = useChatSession();
 
   useEffect(() => {
-    if (!isLoading && data && data.isOnboarded === false) {
-      router.push("/screening");
+    if (!isLoading && data) {
+      if (data.isOnboarded === false || data.hasScreenedToday === false) {
+        router.push("/screening");
+      }
     }
   }, [data, isLoading, router]);
 

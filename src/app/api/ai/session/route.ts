@@ -4,6 +4,7 @@ import chatSessionService from "@/services/chat-session.service";
 import chatService from "@/services/chat.service";
 import chatSessionRepository from "@/repositories/chatSessionRepository";
 import screeningRepository from "@/repositories/screening.repository";
+import screeningService from "@/services/screening.service";
 import { db } from "@/lib/db";
 
 export async function POST(request: Request) {
@@ -93,11 +94,14 @@ export async function GET(request: Request) {
             }
         }
 
+        const hasScreenedToday = await screeningService.checkDailyScreeningStatus(userId);
+
         return successResponse(200, "Active chat session retrieved successfully", {
             activeSession: activeChatSession,
             cooldown,
             latestScreening,
-            isOnboarded: user?.isOnboarded ?? false
+            isOnboarded: user?.isOnboarded ?? false,
+            hasScreenedToday
         });
     } catch (error) {
         console.error("Error in chat session route:", error);

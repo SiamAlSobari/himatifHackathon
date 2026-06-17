@@ -1,6 +1,7 @@
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { errorResponse, successResponse } from "@/lib/response"
+import screeningService from "@/services/screening.service"
 
 export async function POST() {
   const session = await auth()
@@ -15,11 +16,6 @@ export async function POST() {
         role: true,
         usia: true,
         jenisKelamin: true,
-        screenings: {
-          orderBy: { createdAt: "desc" },
-          take: 1,
-          select: { id: true },
-        },
       },
     })
 
@@ -29,8 +25,11 @@ export async function POST() {
       destination = "/psikolog"
     } else if (!user?.usia || !user?.jenisKelamin) {
       destination = "/onboarding"
-    } else if (!user.screenings || user.screenings.length === 0) {
-      destination = "/screening"
+    } else {
+      const hasScreenedToday = await screeningService.checkDailyScreeningStatus(session.user.id)
+      if (!hasScreenedToday) {
+        destination = "/screening"
+      }
     }
 
     return successResponse(200, "Destination resolved", { destination })

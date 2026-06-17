@@ -1,0 +1,63 @@
+import { auth } from "@/auth";
+import { errorResponse, successResponse } from "@/lib/response";
+import userRepository from "@/repositories/user.repository";
+import psychologistService from "@/services/psychologist.service";
+import screeningService from "@/services/screening.service";
+
+export async function GET(request: Request) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return errorResponse(401, "Unauthorized");
+  }
+
+  const { searchParams } = new URL(request.url);
+  const appointmentId = searchParams.get("appointmentId") || undefined;
+
+  try {
+    const dbUser = await userRepository.getUserProfile(session.user.id);
+    if (!dbUser) {
+      return errorResponse(404, "User not found");
+    }
+
+    const hasScreenedToday = await screeningService.checkDailyScreeningStatus(session.user.id);
+    const activeAppointment = appointmentId
+      ? await psychologistService.getAppointmentById(appointmentId, session.user.id)
+      : await psychologistService.getActiveAppointment(session.user.id);
+    const latestScreening = await psychologistService.getLatestScreening(session.user.id);
+
+    return successResponse(200, "Konsultasi data retrieved successfully", {
+      dbUser: {
+        id: session.user.id,
+        name: dbUser.name || dbUser.email || "Pengguna",
+        image: dbUser.image,
+        usia: dbUser.usia,
+        jenisKelamin: dbUser.jenisKelamin,
+      },
+      activeAppointment: activeAppointment ? {
+        id: activeAppointment.id,
+        scheduledAt: activeAppointment.scheduledAt.toISOString(),
+        psychologist: {
+          id: activeAppointment.psychologistProfile.id,
+          name: activeAppointment.psychologistProfile.user.name || "Psikolog",
+          role: activeAppointment.psychologistProfile.role,
+          specialty: activeAppointment.psychologistProfile.specialty,
+          imageUrl: activeAppointment.psychologistProfile.imageUrl,
+          experienceYears: activeAppointment.psychologistProfile.experienceYears,
+          tags: activeAppointment.psychologistProfile.tags,
+          strNumber: undefined,
+          practiceLocation: undefined,
+        }
+      } : null,
+      latestScreening: latestScreening ? {
+        score: latestScreening.score,
+        createdAt: latestScreening.createdAt.toISOString(),
+        type: latestScreening.type,
+      } : null,
+      isOnboarded: dbUser.isOnboarded,
+      hasScreenedToday,
+    });
+  } catch (error) {
+    console.error("[/api/konsultasi] error:", error);
+    return errorResponse(500, "Failed to fetch konsultasi data");
+  }
+}

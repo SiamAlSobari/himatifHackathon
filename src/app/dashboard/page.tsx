@@ -1,8 +1,8 @@
-import { auth } from "@/auth";
-import { db } from "@/lib/db";
-import { redirect } from "next/navigation";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import ActivityCard from "@/components/dashboard/Activitycard";
-// import ChatWidget from "@/components/dashboard/Chatwidget";
 import DashboardHeader from "@/components/dashboard/Dashboardheader";
 import EmergencyBanner from "@/components/dashboard/Emergencybanner";
 import Footer from "@/components/ui/footer";
@@ -10,6 +10,7 @@ import MoodChartCard from "@/components/dashboard/Moodchartcard";
 import Navbar from "@/components/ui/Navbar";
 import ScheduleCard from "@/components/dashboard/Schedulecard";
 import ScreeningSummaryCard from "@/components/dashboard/Screeningsummarycard";
+import { useDashboard } from "@/hooks/dashboard/useDashboard";
 import {
   activityRecommendations,
   footerLinkGroups,
@@ -18,31 +19,34 @@ import {
   screeningResults,
 } from "./data";
 
-export default async function DashboardPage() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    redirect("/login?callbackUrl=/dashboard");
+export default function DashboardPage() {
+  const router = useRouter();
+  const { data, isLoading } = useDashboard();
+
+  useEffect(() => {
+    if (!isLoading && data) {
+      if (!data.user.usia || !data.user.jenisKelamin) {
+        router.push("/onboarding");
+      } else if (!data.hasScreenedToday) {
+        router.push("/screening");
+      }
+    }
+  }, [data, isLoading, router]);
+
+  if (isLoading || !data) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <span className="h-8 w-8 animate-spin rounded-full border-4 border-[#004349] border-t-transparent" />
+      </div>
+    );
   }
 
-  const dbUser = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { name: true, image: true, email: true, usia: true, jenisKelamin: true, isOnboarded: true },
-  });
-
-  if (!dbUser?.usia || !dbUser?.jenisKelamin) {
-    redirect("/onboarding");
-  }
-
-  if (!dbUser?.isOnboarded) {
-    redirect("/screening");
-  }
-
-  const displayName = dbUser?.name || dbUser?.email || "Pengguna";
+  const displayName = data.user.name || "Pengguna";
   const firstName = displayName.split(" ")[0];
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Navbar userName={displayName} userImage={dbUser?.image} />
+      <Navbar userName={displayName} userImage={data.user.image || undefined} />
 
       <main className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8">
         <DashboardHeader name={firstName} />
@@ -85,7 +89,6 @@ export default async function DashboardPage() {
       </main>
 
       <Footer linkGroups={footerLinkGroups} />
-      {/* <ChatWidget /> */}
     </div>
   );
 }

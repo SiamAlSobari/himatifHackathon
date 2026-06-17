@@ -2,29 +2,41 @@
 export const screeningQuestions: Question[] = [
     {
         qNumber: 1,
-        text: "Dalam dua minggu terakhir, seberapa sering kamu merasa kehabisan energi atau burnout bahkan sebelum hari dimulai?",
+        text: "(DASS-13) Merasa sedih dan depresi.",
     },
     {
         qNumber: 2,
-        text: "Seberapa sering kamu merasa kesulitan fokus saat mengerjakan tugas atau mengejar deadline karena isi kepala terasa terlalu penuh?"
+        text: "(DASS-15) Kelelahan.",
     },
     {
         qNumber: 3,
-        text: "Meskipun sedang bersama teman-teman, seberapa sering kamu merasa sendirian atau merasa tidak ada yang benar-benar mengerti bebanmu?"
+        text: "(DASS-28) Mudah panik.",
     },
     {
         qNumber: 4,
-        text: "Seberapa sering pikiran yang berisik (overthinking) membuat jam tidurmu berantakan atau membuatmu sulit beristirahat dengan tenang?"
+        text: "(DASS-33) Berada pada keadaan tegang.",
+    },
+    {
+        qNumber: 5,
+        text: "(PHQ-1) Kurang berminat atau kesenangan dalam melakukan sesuatu.",
+    },
+    {
+        qNumber: 6,
+        text: "(GAD-1) Merasa gugup, cemas, atau tegang.",
+    },
+    {
+        qNumber: 7,
+        text: "(GAD-6) Merasa takut seolah sesuatu yang buruk akan terjadi.",
     }
 ]
 
 export const answerOptions = [
     {
-        text: "Tidak Pernah",
+        text: "Tidak pernah",
         score: 0,
     },
     {
-        text: "Kadang-kadang / Jarang",
+        text: "Kadang-kadang",
         score: 1,
     },
     {
@@ -32,7 +44,7 @@ export const answerOptions = [
         score: 2,
     },
     {
-        text: "Selalu",
+        text: "Hampir setiap saat",
         score: 3,
     },
 ]
