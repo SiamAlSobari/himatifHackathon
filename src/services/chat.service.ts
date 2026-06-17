@@ -80,7 +80,8 @@ export class ChatService {
             ...(formattedResponse.metaData || {}),
             finalConclusion: formattedResponse.finalConclusion || null,
         };
-        const createdAssistantMessage = await chatMessageRepository.createMessage(sessionId, "ASSISTANT", formattedResponse.suggestion, metaDataWithConclusion);
+        const assistantResponseContent = formattedResponse.suggestion || (formattedResponse as any).balasan_ai || response || "Maaf, Lombut AI sedang beristirahat sejenak. Silakan coba kirim pesan lagi.";
+        const createdAssistantMessage = await chatMessageRepository.createMessage(sessionId, "ASSISTANT", assistantResponseContent, metaDataWithConclusion);
         if (!createdAssistantMessage) {
             throw new Error("Failed to save AI response to the database.");
         }

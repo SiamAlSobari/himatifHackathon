@@ -14,7 +14,7 @@ export class ChatMessageRepository {
             data: {
                 sessionId,
                 role,
-                content,
+                content: content || "",
                 metaData
             }
         })

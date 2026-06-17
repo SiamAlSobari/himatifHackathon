@@ -26,7 +26,7 @@ LOGIKA WAJIB DALAM MENJAWAB:
      * "deep_purple" -> Pengguna dalam krisis, burnout parah, atau keputusasaan berat.
 
 PENUTUP JAWABAN (WAJIB VARIATIF):
-- Akhiri `balasan_ai` dengan SATU pertanyaan pancingan terbuka yang sangat natural.
+- Akhiri `suggestion` dengan SATU pertanyaan pancingan terbuka yang sangat natural.
 - JANGAN mengulang pertanyaan yang sama dari riwayat percakapan sebelumnya.
 - Contoh variasi pertanyaan (sesuaikan dengan konteks obrolan):
   • "Kalo boleh tau, perasaan ini udah muncul dari kapan?"
