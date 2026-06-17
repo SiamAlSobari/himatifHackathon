@@ -65,14 +65,14 @@
 - [x] Install semua shadcn components ✅
 - [x] Setup folder structure — pakai `src/` (Next 16 + alias `@/*` = `./src/*`)
 - [~] Setup fonts — pakai **Geist** (default Next 16), bukan Plus Jakarta/Inter. **Ganti?**
-- [ ] Setup theme provider (untuk dynamic theming) — **belum**. `AppThemeEnum` ada, tidak dipakai
+- [x] Setup theme provider (untuk dynamic theming) — **SELESAI** (Terintegrasi via `ThemeProvider.tsx`, sinkronisasi cookie & sessionStorage) ✅
 - [x] Catatan: Ganti dari npm → **Bun.js** (v1.3.9). `bun run dev` jalan normal ✅
 
 ### Backend / API
 - [x] Setup API routes di Next.js (`/app/api/...`) ✅
-- [~] **Setup PostgreSQL** — `docker-compose.yml` ✅, DB container **belum up** di banyak mesin
+- [x] **Setup PostgreSQL** — `docker-compose.yml` ✅, DB container berhasil dijalankan via Docker ✅
 - [x] Tulis `docker-compose.yml` ✅
-- [~] Setup DB & koneksi — `prisma.config.ts` ✅, `db.ts` pakai `PrismaPg` adapter, tapi **migration belum jalan**
+- [x] Setup DB & koneksi — `prisma.config.ts` ✅, `db.ts` pakai `PrismaPg` adapter, migrasi via db push lancar ✅
 - [x] Install Prisma + `npx prisma init` ✅
 - [x] Tulis `schema.prisma` ✅
   - `User`: id, name, email, emailVerified, image, passwordHash?, usia?, jenisKelamin?, kontakDarurat? ✅
@@ -80,9 +80,9 @@
   - `Screening`: id, userId, score, type (ONBOARDING/DAILY), answer (json) ✅
   - `ChatSession`: id, userId, status (ACTIVE/SEALED/COMPLETED) ✅
   - `ChatMessage`: id, sessionId, role (USER/ASSISTANT), content, metaData (json) ✅
-  - `!` **Belum ada:** `Psychologist`, `SessionSummary`, `Appointment`, `ConsultationNote`, `Payment`
-- [ ] `npx prisma migrate dev --name init` — **belum jalan**
-- [ ] Tulis `seed.ts` untuk psikolog dummy — **belum**
+  - `!` **Belum ada:** `Psychologist`, `SessionSummary`, `Appointment`, `ConsultationNote`, `Payment` (Model `PsychologistProfile` dan `Appointment` sudah ditambahkan di Fase 4)
+- [x] `npx prisma migrate dev --name init` — **Diganti dengan `prisma db push`** agar sinkronisasi skema DB kontainer lebih fleksibel dan cepat untuk demo ✅
+- [x] Tulis `seed.ts` untuk psikolog dummy — **SELESAI** (Seeding Dr. Aris, Dr. Sarah, Dika Pratama via `/api/arahkan`) ✅
 - [x] Setup `.env.example` ✅
 - [x] **Setup Auth.js v5** ✅
   - [x] `src/auth.ts` (bukan di root, karena alias `@/* = src/*`)
@@ -218,22 +218,22 @@
 - [x] Status "online" dan "mengetik" dinamis yang melacak status kehadiran real-time lawan bicara ✅
 - [ ] Catatan pasca-sesi (psychologist only) — model `ConsultationNote`
 
-### Dashboard Psikolog (Jum, 19/06) ⏳ 50% DONE
-- [ ] Route group `(psychologist)` dengan layout sendiri
-- [ ] Antrian janji (pending, upcoming, completed)
+### Dashboard Psikolog (Jum, 19/06) ✅ 95% DONE
+- [x] Route group `(psychologist)` dengan layout sendiri — **Dialihkan**: Menggunakan folder `/psikolog` langsung & dikontrol melalui custom `LayoutWrapper.tsx` secara terpusat ✅
+- [x] Antrian janji (pending, upcoming, completed) — **SELESAI** (Kartu janji temu hari ini & daftar klien pending untuk di-Accept/Decline terintegrasi di dashboard psikolog `/psikolog`) ✅
 - [x] Detail klien + brief (screening + ringkasan AI) — halaman `/psychologist/konsultasi` sudah selesai dibuat dan berhasil menarik data finalConclusion dari AI chat sesi terakhir user secara fungsional ✅
 - [x] Redireksi otomatis jika sesi konsultasi dibatalkan secara real-time oleh klien ✅
-- [ ] Tanda tangan digital sesi → **SKIP** (on-chain bukan MVP)
+- [x] Tanda tangan digital sesi → **SKIP** (on-chain bukan MVP) ✅
 
-### Polish & Demo Prep (Sab, 20/06) ⏳ 0% DONE
-- [ ] **PUTUSKAN** nama produk: "Ruang" atau "Jembatan Aman"? Konsisten di semua file
-- [ ] **PUTUSKAN** nama AI: "Lombut" atau "AURA"? Konsisten di prompt + UI
-- [ ] **FIX**: `register.ts` server action field `usia` & `jenisKelamin` (sudah dihapus dari form)
-- [ ] **FIX**: `ChatPanel` konek ke `/api/ai/chat` & `/api/ai/session`
-- [ ] **FIX**: Dynamic theming — apply `AppThemeEnum` ke `globals.css` atau `<body>` class
-- [ ] **FIX**: `DeleteDivider.tsx` isinya duplikat `ChatInput` (rename atau hapus)
-- [ ] **FIX**: Halaman screening multi-step (Q1-Q4 minimal)
-- [ ] **FIX**: Sidebar riwayat chat di `/chat`
+### Polish & Demo Prep (Sab, 20/06) ⏳ 65% DONE
+- [~] **PUTUSKAN** nama produk: "Ruang" atau "Jembatan Aman"? Konsisten di semua file — **Sebagian Konsisten**: Nama "Jembatan Aman" digunakan di Landing Page, Navbar, Footer, & tab judul. Beberapa text onboarding/register masih menggunakan kata "Ruang".
+- [x] **PUTUSKAN** nama AI: "Lombut" atau "AURA"? Konsisten di prompt + UI — **SELESAI**: Ditetapkan menggunakan nama **LOMBUT AI** (konsisten di header obrolan `/validasi` dan file prompt) ✅
+- [x] **FIX**: `register.ts` server action field `usia` & `jenisKelamin` (sudah dihapus dari form) — **SELESAI**: Dibersihkan, diisi pada tahap onboarding profil terpisah ✅
+- [x] **FIX**: `ChatPanel` konek ke `/api/ai/chat` & `/api/ai/session` — **SELESAI**: Terkoneksi penuh via hooks react-query ✅
+- [x] **FIX**: Dynamic theming — apply `AppThemeEnum` ke `globals.css` atau `<body>` class — **SELESAI**: Theme provider meng-apply class theme ke document root (`theme-calm_blue`, dll.) yang disesuaikan secara real-time dari respons AI ✅
+- [x] **FIX**: `DeleteDivider.tsx` isinya duplikat `ChatInput` (rename atau hapus) — **SELESAI**: Komponen tidak lagi di-import atau digunakan ✅
+- [x] **FIX**: Halaman screening multi-step (Q1-Q4 minimal) — **SELESAI**: Menggunakan formulir multi-step 5 langkah (Mood + Q1-Q4) ✅
+- [ ] **FIX**: Sidebar riwayat chat di `/chat` — **Di-backlog**: Dialihkan ke backlog fitur post-MVP (Riwayat Chat AI)
 - [ ] End-to-end test semua flow
 - [ ] Bug fix terakhir
 - [ ] Siapkan script demo (5 menit):
@@ -269,6 +269,11 @@
 - [ ] SSE streaming untuk `/api/ai/chat` (sekarang return JSON utuh)
 - [ ] Switch font ke Plus Jakarta Sans / Inter (opsional)
 - [ ] Encrypt chat messages at-rest (AES-256) sesuai NFR PRD
+- [ ] **Sistem Verifikasi STR/SIPP Psikolog** oleh Admin (saat ini pendaftaran langsung terverifikasi)
+- [ ] **Ekspor Riwayat Screening & Ringkasan Konsultasi** ke file PDF (untuk rujukan eksternal)
+- [ ] **Jurnal Harian Suasana Hati (Daily Mood Diary)** mandiri di luar screening, dengan catatan teks singkat
+- [ ] **Notifikasi Real-time Toast** saat user/psikolog sedang aktif di halaman lain ketika ada pesan masuk baru
+- [ ] **Halaman Arsip Sesi Chat AI (AI Chat Session Archives)** untuk melihat kembali histori obrolan chatbot Lombut AI sebelumnya
 
 ---
 
