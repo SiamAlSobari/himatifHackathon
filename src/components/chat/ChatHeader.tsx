@@ -2,8 +2,8 @@ import { Bot, MoreVertical } from "lucide-react";
 
 const headerAvatarColorMap = {
   calm_blue: "bg-teal-900",
-  warm_yellow: "bg-amber-850",
-  alert_orange: "bg-orange-850",
+  warm_yellow: "bg-amber-800",
+  alert_orange: "bg-orange-600",
   deep_purple: "bg-indigo-900",
 };
 
