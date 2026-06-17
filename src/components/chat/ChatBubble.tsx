@@ -6,6 +6,7 @@ interface ChatBubbleProps {
   message: string;
   time: string;
   isTyping?: boolean;
+  userImage?: string | null;
 }
 
 export default function ChatBubble({
@@ -13,6 +14,7 @@ export default function ChatBubble({
   message,
   time,
   isTyping = false,
+  userImage,
 }: ChatBubbleProps) {
   const isAi = sender === "ai";
 
@@ -63,7 +65,7 @@ export default function ChatBubble({
 
       {!isAi && (
         <Image
-          src="https://i.pravatar.cc/40?img=12"
+          src={userImage || "https://i.pravatar.cc/40?img=12"}
           alt="Foto profil pengguna"
           width={32}
           height={32}

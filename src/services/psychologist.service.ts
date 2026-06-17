@@ -260,6 +260,98 @@ export class PsychologistService {
     });
 
     // Format client list (extract unique clients from appointments)
+    const clientList = await this.formatClientList(appointments);
+
+    return {
+      psychologist: {
+        id: profile.userId,
+        name: profile.user.name || "Spesialis",
+        image: profile.imageUrl,
+      },
+      todayConsultations,
+      consultationHistory,
+      clientList,
+    };
+  }
+
+  async respondToBooking(appointmentId: string, action: "ACCEPT" | "DECLINE", psychologistUserId: string) {
+    const appointment = await psychologistRepository.getAppointmentWithProfile(appointmentId);
+
+    if (!appointment) {
+      throw new Error("Jadwal janji temu tidak ditemukan");
+    }
+
+    // Verify the psychologist owns this appointment profile
+    if (appointment.psychologistProfile.userId !== psychologistUserId) {
+      throw new Error("Unauthorized - Anda bukan pemilik jadwal ini");
+    }
+
+    const profile = await psychologistRepository.getPsychologistProfileByUserId(psychologistUserId);
+    if (!profile) {
+      throw new Error("Profil psikolog tidak ditemukan");
+    }
+
+    const { AppointmentStatus } = await import("../../generated/prisma/enums");
+    const newStatus = action === "ACCEPT" ? AppointmentStatus.APPROVED : AppointmentStatus.DECLINED;
+    const updated = await psychologistRepository.updateAppointmentStatus(appointmentId, newStatus);
+
+    const { pusherServer } = await import("@/lib/pusher/pusher-server");
+
+    // Format payload for user view
+    const activeAppointmentPayload = action === "ACCEPT" ? {
+      id: updated.id,
+      scheduledAt: updated.scheduledAt.toISOString(),
+      psychologist: {
+        id: profile.id,
+        name: profile.user.name || "Psikolog",
+        role: profile.role,
+        imageUrl: profile.imageUrl,
+      }
+    } : null;
+
+    // Trigger Pusher notification for the client (realtime floating button countdown)
+    await pusherServer.trigger(`user-${updated.userId}`, "appointment-updated", {
+      activeAppointment: activeAppointmentPayload
+    });
+
+    // Also trigger self update for psychologist to refresh dashboard
+    await pusherServer.trigger(`user-${psychologistUserId}`, "booking-updated", {});
+
+    return updated;
+  }
+
+  async getClientTheme(userId: string): Promise<string> {
+    const latestSession = await psychologistRepository.getLatestChatSession(userId);
+    if (latestSession) {
+      const lastMsg = latestSession.chatMessages.find(m => m.role === "ASSISTANT");
+      if (lastMsg && lastMsg.metaData && (lastMsg.metaData as any).uiTheme) {
+        return (lastMsg.metaData as any).uiTheme;
+      }
+    }
+
+    const latestScreening = await this.getLatestScreening(userId);
+    if (latestScreening) {
+      const score = latestScreening.score;
+      if (score >= 0 && score <= 4) return "calm_blue";
+      if (score >= 5 && score <= 9) return "warm_yellow";
+      if (score >= 10 && score <= 13) return "alert_orange";
+      return "deep_purple";
+    }
+
+    return "calm_blue";
+  }
+
+  async getPsychologistClients(userId: string) {
+    const profile = await psychologistRepository.getPsychologistProfileByUserId(userId);
+    if (!profile) {
+      throw new Error("Profil psikolog tidak ditemukan");
+    }
+
+    const appointments = await psychologistRepository.getPsychologistAppointments(profile.id);
+    return await this.formatClientList(appointments);
+  }
+
+  private async formatClientList(appointments: any[]) {
     const uniqueClientsMap = new Map<string, typeof appointments[0]["user"]>();
     for (const appt of appointments) {
       if (!uniqueClientsMap.has(appt.userId)) {
@@ -342,83 +434,7 @@ export class PsychologistService {
       })
     );
 
-    return {
-      psychologist: {
-        id: profile.userId,
-        name: profile.user.name || "Spesialis",
-        image: profile.imageUrl,
-      },
-      todayConsultations,
-      consultationHistory,
-      clientList,
-    };
-  }
-
-  async respondToBooking(appointmentId: string, action: "ACCEPT" | "DECLINE", psychologistUserId: string) {
-    const appointment = await psychologistRepository.getAppointmentWithProfile(appointmentId);
-
-    if (!appointment) {
-      throw new Error("Jadwal janji temu tidak ditemukan");
-    }
-
-    // Verify the psychologist owns this appointment profile
-    if (appointment.psychologistProfile.userId !== psychologistUserId) {
-      throw new Error("Unauthorized - Anda bukan pemilik jadwal ini");
-    }
-
-    const profile = await psychologistRepository.getPsychologistProfileByUserId(psychologistUserId);
-    if (!profile) {
-      throw new Error("Profil psikolog tidak ditemukan");
-    }
-
-    const { AppointmentStatus } = await import("../../generated/prisma/enums");
-    const newStatus = action === "ACCEPT" ? AppointmentStatus.APPROVED : AppointmentStatus.DECLINED;
-    const updated = await psychologistRepository.updateAppointmentStatus(appointmentId, newStatus);
-
-    const { pusherServer } = await import("@/lib/pusher/pusher-server");
-
-    // Format payload for user view
-    const activeAppointmentPayload = action === "ACCEPT" ? {
-      id: updated.id,
-      scheduledAt: updated.scheduledAt.toISOString(),
-      psychologist: {
-        id: profile.id,
-        name: profile.user.name || "Psikolog",
-        role: profile.role,
-        imageUrl: profile.imageUrl,
-      }
-    } : null;
-
-    // Trigger Pusher notification for the client (realtime floating button countdown)
-    await pusherServer.trigger(`user-${updated.userId}`, "appointment-updated", {
-      activeAppointment: activeAppointmentPayload
-    });
-
-    // Also trigger self update for psychologist to refresh dashboard
-    await pusherServer.trigger(`user-${psychologistUserId}`, "booking-updated", {});
-
-    return updated;
-  }
-
-  async getClientTheme(userId: string): Promise<string> {
-    const latestSession = await psychologistRepository.getLatestChatSession(userId);
-    if (latestSession) {
-      const lastMsg = latestSession.chatMessages.find(m => m.role === "ASSISTANT");
-      if (lastMsg && lastMsg.metaData && (lastMsg.metaData as any).uiTheme) {
-        return (lastMsg.metaData as any).uiTheme;
-      }
-    }
-
-    const latestScreening = await this.getLatestScreening(userId);
-    if (latestScreening) {
-      const score = latestScreening.score;
-      if (score >= 0 && score <= 4) return "calm_blue";
-      if (score >= 5 && score <= 9) return "warm_yellow";
-      if (score >= 10 && score <= 13) return "alert_orange";
-      return "deep_purple";
-    }
-
-    return "calm_blue";
+    return clientList;
   }
 
   async getPsychologistConsultationSession(userId: string, appointmentId?: string) {

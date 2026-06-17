@@ -9,6 +9,7 @@ import ChatBubble from "./ChatBubble";
 import ChatInput from "./ChatInput";
 import { useCreateChatSession } from "@/hooks/chat/useCreateChatSession";
 import { useSendChatMessage } from "@/hooks/chat/useSendChatMessage";
+import { useSession } from "next-auth/react";
 import { ChatSessionWithMessages } from "@/lib/types/chat";
 import {
   Dialog,
@@ -38,6 +39,7 @@ export default function ChatPanel({
   refetch,
   activeTheme = "calm_blue",
 }: ChatPanelProps) {
+  const session = useSession();
   const createSessionMutation = useCreateChatSession();
   const sendMessageMutation = useSendChatMessage();
   
@@ -181,6 +183,7 @@ export default function ChatPanel({
                   sender={msg.role === "ASSISTANT" ? "ai" : "user"}
                   message={msg.content}
                   time={formattedTime}
+                  userImage={session.data?.user?.image}
                 />
               );
             })}
@@ -192,6 +195,7 @@ export default function ChatPanel({
                   sender="user"
                   message={pendingUserMessage}
                   time={new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  userImage={session.data?.user?.image}
                 />
               </div>
             )}
