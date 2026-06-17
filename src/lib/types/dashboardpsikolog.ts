@@ -4,7 +4,7 @@ export interface TodayConsultation {
   clientRole: string;
   clientImage: string;
   schedule: string;
-  status: "Berlangsung" | "Terjadwal";
+  status: "Berlangsung" | "Terjadwal" | "Selesai";
 }
 
 export interface ConsultationHistoryItem {
@@ -31,4 +31,5 @@ export interface ClientItem {
   trend: string;
   screeningResults: ScreeningResult[];
   aiSummary: string[];
+  pendingAppointmentId?: string;
 }

@@ -34,14 +34,14 @@ export function LoginForm() {
       setLoading(false)
       return
     }
-
     // Tentukan tujuan setelah login (onboarding / screening / dashboard)
     try {
-      const destRes = await fetch("/api/auth/destination", { method: "POST" })
+      const destRes = await fetch("/api/auth/destination", { method: "POST", credentials: "include" })
       const destJson = await destRes.json()
-      const dest = destJson?.destination || "/dashboard"
+      const dest = destJson?.data?.destination || "/dashboard"
       router.push(dest)
-    } catch {
+    } catch (err) {
+      console.log("Error login redirect:" + err)
       router.push("/dashboard")
     }
     router.refresh()

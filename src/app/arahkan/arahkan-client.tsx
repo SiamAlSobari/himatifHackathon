@@ -13,6 +13,7 @@ import RecoveryFlow from "@/components/arahkan/RecoveryFlow"
 import ActiveSessionWidget from "@/components/arahkan/ActiveSessionWidget"
 import BookingModal from "@/components/arahkan/BookingModal"
 import EmergencyHotlineModal from "@/components/arahkan/EmergencyHotlineModal"
+import ConfirmEndSessionModal from "@/components/konsultasi/ConfirmEndSessionModal"
 
 // ────────────────────────────────────────────
 // Types
@@ -91,6 +92,11 @@ export default function ArahkanClient({
   // Emergency modal
   const [showEmergencyModal, setShowEmergencyModal] = useState(false)
 
+  // Cancel appointment custom modal states
+  const [cancelModalOpen, setCancelModalOpen] = useState(false)
+  const [cancelAppointmentId, setCancelAppointmentId] = useState<string | null>(null)
+  const [isCancelling, setIsCancelling] = useState(false)
+
   // Real-time synchronization of bookings via Pusher
   useEffect(() => {
     if (!userProfile?.id) return
@@ -149,20 +155,9 @@ export default function ArahkanClient({
     setIsSubmitting(true)
     try {
       const dt = new Date(`${selectedDate}T${selectedTime}:00`)
-      const res = await bookAppointment(bookingPsych.id, dt)
-      setAppointment({
-        id: res.id,
-        scheduledAt: res.scheduledAt.toISOString(),
-        psychologist: {
-          id: res.psychologistProfile.id,
-          name: res.psychologistProfile.user.name || "Psikolog",
-          role: res.psychologistProfile.role,
-          imageUrl: res.psychologistProfile.imageUrl,
-        },
-      })
-      setIsSessionVisible(true)
+      await bookAppointment(bookingPsych.id, dt)
       setBookingPsych(null)
-      toast.success(`Berhasil menjadwalkan konsultasi dengan ${bookingPsych.name}!`)
+      toast.success(`Berhasil mengajukan jadwal dengan ${bookingPsych.name}! Menunggu konfirmasi psikolog.`)
     } catch (err: any) {
       toast.error(err.message || "Gagal menjadwalkan konsultasi.")
     } finally {
@@ -170,14 +165,24 @@ export default function ArahkanClient({
     }
   }
 
-  const handleCancelAppointment = async (id: string) => {
-    if (!window.confirm("Apakah Anda yakin ingin membatalkan jadwal konsultasi ini?")) return
+  const handleCancelAppointment = (id: string) => {
+    setCancelAppointmentId(id)
+    setCancelModalOpen(true)
+  }
+
+  const handleConfirmCancelAppointment = async () => {
+    if (!cancelAppointmentId) return
+    setIsCancelling(true)
     try {
-      await cancelAppointment(id)
+      await cancelAppointment(cancelAppointmentId)
       setAppointment(null)
+      setCancelModalOpen(false)
+      setCancelAppointmentId(null)
       toast.success("Jadwal konsultasi berhasil dibatalkan.")
     } catch (err: any) {
       toast.error(err.message || "Gagal membatalkan konsultasi.")
+    } finally {
+      setIsCancelling(false)
     }
   }
 
@@ -360,6 +365,20 @@ export default function ArahkanClient({
       <EmergencyHotlineModal
         visible={showEmergencyModal}
         onClose={() => setShowEmergencyModal(false)}
+      />
+
+      <ConfirmEndSessionModal
+        isOpen={cancelModalOpen}
+        title="Batalkan Jadwal Konsultasi"
+        message="Apakah Anda yakin ingin membatalkan jadwal konsultasi ini?"
+        onConfirm={handleConfirmCancelAppointment}
+        onDecline={() => {
+          setCancelModalOpen(false)
+          setCancelAppointmentId(null)
+        }}
+        isConfirming={isCancelling}
+        confirmLabel="Ya, Batalkan"
+        declineLabel="Batal"
       />
     </div>
   )

@@ -8,7 +8,7 @@ import { envConfig } from "./lib/constants/env"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(db),
-  session: { strategy: "database" }, // Tetap gunakan database strategy
+  session: { strategy: "jwt" }, // Gunakan jwt strategy agar cocok dengan Credentials provider
   pages: {
     signIn: "/login",
   },
@@ -51,12 +51,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    // Cukup gunakan session callback saja
-    async session({ session, user }) {
-      if (session.user && user) {
-        session.user.id = user.id as string
-        // Sekarang role langsung diambil dari objek user yang sudah ter-load
-        (session.user as any).role = (user as any).role
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id
+        token.role = (user as any).role
+      }
+      return token
+    },
+    async session({ session, token }) {
+      if (session.user && token) {
+        session.user.id = token.id as string;
+        (session.user as any).role = token.role as string;
       }
       return session
     },

@@ -19,6 +19,14 @@ class ScreeningRepository {
             orderBy: { createdAt: "desc" },
         })
     }
+
+    async getScreeningsByUserId(userId: string, limit?: number) {
+        return await db.screening.findMany({
+            where: { userId },
+            orderBy: { createdAt: "desc" },
+            take: limit,
+        });
+    }
 }
 
 const screeningRepository = new ScreeningRepository();

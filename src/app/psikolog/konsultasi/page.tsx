@@ -1,76 +1,33 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/auth";
-import psychologistService from "@/services/psychologist.service";
+"use client";
+
+import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import PsychologistKonsultasiClient from "./konsultasi-client";
-import { db } from "@/lib/db";
+import { usePsychologistConsultation } from "@/hooks/psychologist/usePsychologistConsultation";
 
-export const metadata = {
-  title: "Sesi Konsultasi (Psikolog) - Jembatan Aman",
-  description: "Halaman sesi konsultasi interaktif - Sudut Pandang Psikolog.",
-};
+export default function PsychologistKonsultasiPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const appointmentId = searchParams.get("appointmentId") || undefined;
 
-interface SearchParams {
-  appointmentId?: string;
-}
+  const { data, isLoading, error } = usePsychologistConsultation(appointmentId);
 
-export default async function PsychologistKonsultasiPage({
-  searchParams,
-}: {
-  searchParams: Promise<SearchParams>;
-}) {
-  const session = await auth();
-  if (!session?.user?.id || (session.user as any).role !== "PSYCHOLOGY") {
-    redirect("/psikolog/login?callbackUrl=/psikolog/konsultasi");
+  useEffect(() => {
+    if (error) {
+      console.error("Failed to load consultation session:", error);
+      router.push("/login");
+    }
+  }, [error, router]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <span className="h-8 w-8 animate-spin rounded-full border-4 border-[#004349] border-t-transparent" />
+      </div>
+    );
   }
 
-  // Get the psychologist profile using session user id
-  const psychProfile = await psychologistService.getPsychologistProfileByUserId(session.user.id);
-  if (!psychProfile) {
-    redirect("/psikolog/login");
-  }
-
-  const { appointmentId } = await searchParams;
-
-  // Fetch appointment
-  let activeAppointment = null;
-  if (appointmentId) {
-    activeAppointment = await db.appointment.findFirst({
-      where: {
-        id: appointmentId,
-        psychologistId: psychProfile.id,
-      },
-      include: {
-        user: true,
-        psychologistProfile: {
-          include: {
-            user: true,
-          },
-        },
-      },
-    });
-  } else {
-    // If no appointmentId provided, grab the nearest scheduled appointment for this psychologist
-    activeAppointment = await db.appointment.findFirst({
-      where: {
-        psychologistId: psychProfile.id,
-        status: "SCHEDULED",
-      },
-      include: {
-        user: true,
-        psychologistProfile: {
-          include: {
-            user: true,
-          },
-        },
-      },
-      orderBy: {
-        scheduledAt: "asc",
-      },
-    });
-  }
-
-  if (!activeAppointment) {
-    // No active appointment found
+  if (error || !data) {
     return (
       <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6 text-center">
         <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm max-w-md">
@@ -92,43 +49,13 @@ export default async function PsychologistKonsultasiPage({
     );
   }
 
-  const clientUser = activeAppointment.user;
-
-  // Fetch context of the patient/client
-  const latestScreening = await psychologistService.getLatestScreening(clientUser.id);
-  const finalConclusion = await psychologistService.getLatestAiSessionConclusion(clientUser.id);
-
-  const clientProfile = {
-    id: clientUser.id,
-    name: clientUser.name || clientUser.email || "Klien",
-    image: clientUser.image || undefined,
-    email: clientUser.email,
-    usia: clientUser.usia,
-    jenisKelamin: clientUser.jenisKelamin,
-  };
-
   return (
     <PsychologistKonsultasiClient
-      activeAppointment={{
-        id: activeAppointment.id,
-        scheduledAt: activeAppointment.scheduledAt.toISOString(),
-        psychologist: {
-          id: activeAppointment.psychologistProfile.id,
-          name: activeAppointment.psychologistProfile.user.name || "Psikolog",
-          role: activeAppointment.psychologistProfile.role,
-          specialty: activeAppointment.psychologistProfile.specialty,
-          imageUrl: activeAppointment.psychologistProfile.imageUrl,
-          experienceYears: activeAppointment.psychologistProfile.experienceYears,
-          tags: activeAppointment.psychologistProfile.tags,
-        },
-      }}
-      client={clientProfile}
-      latestScreeningScore={latestScreening?.score || null}
-      finalConclusion={finalConclusion}
-      psychologistUser={{
-        name: psychProfile.user.name || "Psikolog",
-        image: psychProfile.imageUrl,
-      }}
+      activeAppointment={data.activeAppointment}
+      client={data.client}
+      latestScreeningScore={data.latestScreeningScore}
+      finalConclusion={data.finalConclusion}
+      psychologistUser={data.psychologistUser}
     />
   );
 }

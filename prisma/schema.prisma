@@ -173,6 +173,9 @@ model ConsultationMessage {
 }
 
 enum AppointmentStatus {
+  PENDING
+  APPROVED
+  DECLINED
   SCHEDULED
   COMPLETED
   CANCELLED

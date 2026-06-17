@@ -19,10 +19,7 @@ export default auth((req) => {
 
   // Belum login + bukan halaman publik → redirect ke login
   if (!isLoggedIn && !isPublic) {
-    const loginUrl = new URL(
-      pathname.startsWith("/psikolog") ? "/psikolog/login" : "/login",
-      req.nextUrl
-    )
+    const loginUrl = new URL("/login", req.nextUrl)
     loginUrl.searchParams.set("callbackUrl", pathname)
     return NextResponse.redirect(loginUrl)
   }

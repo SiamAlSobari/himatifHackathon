@@ -131,7 +131,7 @@ export default function PsychologistRegisterPage() {
             <div className="text-xs text-[#2D3748]/70">
               sudah bermitra?{" "}
               <Link
-                href="/psikolog/login"
+                href="/login"
                 className="font-bold text-[#1A8A7A] hover:text-[#0D1B2A] transition-colors"
               >
                 masuk →
@@ -143,7 +143,7 @@ export default function PsychologistRegisterPage() {
             <div className="mb-5">
               <div className="hidden lg:flex justify-end mb-3">
                 <Link
-                  href="/psikolog/login"
+                  href="/login"
                   className="text-xs font-bold text-[#1A8A7A] hover:text-[#0D1B2A] transition-colors"
                 >
                   Sudah bermitra? Masuk →

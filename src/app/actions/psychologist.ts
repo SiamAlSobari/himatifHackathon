@@ -17,19 +17,8 @@ export async function bookAppointment(psychologistId: string, scheduledAt: Date)
     scheduledAt
   )
 
-  // Realtime notification update
-  await pusherServer.trigger(`user-${session.user.id}`, "appointment-updated", {
-    activeAppointment: {
-      id: appointment.id,
-      scheduledAt: appointment.scheduledAt.toISOString(),
-      psychologist: {
-        id: appointment.psychologistProfile.id,
-        name: appointment.psychologistProfile.user.name || "Psikolog",
-        role: appointment.psychologistProfile.role,
-        imageUrl: appointment.psychologistProfile.imageUrl,
-      }
-    }
-  });
+  // Notify the psychologist in real-time to refresh their dashboard
+  await pusherServer.trigger(`user-${appointment.psychologistProfile.userId}`, "booking-requested", {});
 
   revalidatePath("/arahkan")
   return appointment
