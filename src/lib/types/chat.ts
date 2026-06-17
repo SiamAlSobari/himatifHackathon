@@ -57,4 +57,5 @@ export interface ChatSessionData {
     } | null;
     latestScreening: Screening | null;
     isOnboarded?: boolean;
+    hasScreenedToday?: boolean;
 }

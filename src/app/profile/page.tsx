@@ -1,4 +1,7 @@
-import { auth } from "@/auth";
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/ui/Navbar";
 import Footer from "@/components/ui/footer";
 import ProfileCard from "@/components/profile/Profilecard";
@@ -7,6 +10,7 @@ import PersonalInfoCard from "@/components/profile/Personainfocard";
 import AccountSettingsCard from "@/components/profile/Accountsettingcard";
 import ConsultationHistoryCard from "@/components/profile/Consultationhistorycard";
 import MedicalDocumentsCard from "@/components/profile/Medicaldocumentcard";
+import { useProfile } from "@/hooks/profile/useProfile";
 import {
   consultationHistory,
   footerLinkGroups,
@@ -14,41 +18,35 @@ import {
   quickHelpLinks,
 } from "./data";
 
-import { db } from "@/lib/db";
-import { redirect } from "next/navigation";
+export default function ProfilePage() {
+  const router = useRouter();
+  const { data, isLoading } = useProfile();
 
-export default async function ProfilePage() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    redirect("/login?callbackUrl=/profile");
+  useEffect(() => {
+    if (!isLoading && data) {
+      if (!data.dbUser.usia || !data.dbUser.jenisKelamin) {
+        router.push("/onboarding");
+      } else if (!data.hasScreenedToday) {
+        router.push("/screening");
+      }
+    }
+  }, [data, isLoading, router]);
+
+  if (isLoading || !data) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <span className="h-8 w-8 animate-spin rounded-full border-4 border-[#004349] border-t-transparent" />
+      </div>
+    );
   }
 
-  const dbUser = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { name: true, image: true, email: true, usia: true, jenisKelamin: true, isOnboarded: true },
-  });
-
-  if (!dbUser?.usia || !dbUser?.jenisKelamin) {
-    redirect("/onboarding");
-  }
-
-  if (!dbUser?.isOnboarded) {
-    redirect("/screening");
-  }
-
-  const displayName = dbUser?.name || dbUser?.email || "Pengguna";
-  const email = dbUser?.email || "-";
-
-  // Field tambahan seperti usia, lokasi, dan nomor telepon belum ada di
-  // session default NextAuth. Jika sudah ditambahkan ke model User & callback
-  // session, ganti null di bawah ini dengan misal: (user as any).usia, dst.
-  const age = null as number | null;
-  const location = null as string | null;
-  const phoneNumber = null as string | null;
+  const displayName = data.dbUser.name || "Pengguna";
+  const email = data.dbUser.email || "-";
+  const age = data.dbUser.usia || null;
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Navbar userName={displayName} userImage={dbUser?.image} />
+      <Navbar userName={displayName} userImage={data.dbUser.image || undefined} />
 
       <main className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -56,8 +54,8 @@ export default async function ProfilePage() {
             <ProfileCard
               name={displayName}
               age={age}
-              location={location}
-              avatarUrl={dbUser?.image}
+              location={null}
+              avatarUrl={data.dbUser.image}
             />
             <QuickHelpCard title="Butuh Bantuan?" links={quickHelpLinks} />
           </div>
@@ -67,7 +65,7 @@ export default async function ProfilePage() {
               <PersonalInfoCard
                 fullName={displayName}
                 email={email}
-                phoneNumber={phoneNumber}
+                phoneNumber={null}
               />
               <AccountSettingsCard initialNotificationsEnabled={false} />
             </div>

@@ -87,8 +87,9 @@ export default function ScreeningClient({
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isSubmittedSuccessfully, setIsSubmittedSuccessfully] = useState<boolean>(false);
 
-  const totalSteps = 5; // Mood (1) + Q1-Q4 (4) = 5 steps
+  const totalSteps = screeningQuestions.length + 1;
 
   const handleMoodSelect = (moodId: string) => {
     setSelectedMood(moodId);
@@ -178,11 +179,7 @@ export default function ScreeningClient({
       }
 
       // Successful screening
-      if (screeningType === "ONBOARDING") {
-        router.push("/validasi"); // onboarding directs straight to chatbot
-      } else {
-        router.push("/dashboard"); // daily directs back to dashboard
-      }
+      setIsSubmittedSuccessfully(true);
       router.refresh();
     } catch (err) {
       console.error(err);
@@ -192,8 +189,8 @@ export default function ScreeningClient({
     }
   };
 
-  // Cooldown screen for onboarded users who already completed daily screening today
-  if (alreadyScreenedToday && isOnboarded) {
+  // Show option screen when screening is completed or already done today
+  if ((alreadyScreenedToday && isOnboarded) || isSubmittedSuccessfully) {
     return (
       <div className="min-h-screen bg-slate-50 font-body-md antialiased text-on-surface">
         <Navbar userName={userProfile.name} isOnboarded={true} />
@@ -205,23 +202,23 @@ export default function ScreeningClient({
               </span>
             </div>
             <h1 className="font-serif text-2xl font-bold text-[#004349] leading-tight mb-4">
-              Daily Screening Selesai!
+              Screening Selesai!
             </h1>
             <p className="text-sm text-slate-500 leading-relaxed mb-8">
-              Halo <span className="font-bold text-slate-800">{userProfile.name}</span>, Anda sudah menyelesaikan screening harian hari ini. Terima kasih telah memantau kesehatan mental Anda. Kembali lagi besok ya!
+              Halo <span className="font-bold text-slate-800">{userProfile.name}</span>, Anda sudah menyelesaikan screening. Terima kasih telah memantau kesehatan mental Anda. Apakah Anda ingin memulai sesi curhat AI hari ini atau kembali ke dashboard?
             </p>
             <div className="flex flex-col gap-3">
               <button
-                onClick={() => router.push("/dashboard")}
-                className="w-full py-3.5 bg-[#004349] text-white font-medium rounded-lg active:scale-95 transition-all hover:bg-[#004349]/90 shadow-md shadow-[#004349]/10"
-              >
-                Kembali ke Dashboard
-              </button>
-              <button
-                onClick={() => router.push("/chat")}
-                className="w-full py-3.5 border-2 border-[#0d5c63] text-[#0d5c63] font-medium rounded-lg active:scale-95 transition-all hover:bg-slate-50"
+                onClick={() => router.push("/validasi")}
+                className="w-full py-3.5 bg-[#004349] text-white font-medium rounded-lg active:scale-95 transition-all hover:bg-[#004349]/90 shadow-md shadow-[#004349]/10 cursor-pointer"
               >
                 Mulai Sesi Curhat AI
+              </button>
+              <button
+                onClick={() => router.push("/dashboard")}
+                className="w-full py-3.5 border-2 border-[#0d5c63] text-[#0d5c63] font-medium rounded-lg active:scale-95 transition-all hover:bg-slate-50 cursor-pointer"
+              >
+                Kembali ke Dashboard
               </button>
             </div>
           </div>

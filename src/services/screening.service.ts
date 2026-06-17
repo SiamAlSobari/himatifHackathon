@@ -7,13 +7,13 @@ export class ScreeningService {
 
     async getScreeningResultByScore(score: number): Promise<AppThemeEnum> {
         let theme = AppThemeEnum.CALM_BLUE;
-        if (score >= 0 && score <= 3) {
+        if (score >= 0 && score <= 4) {
             theme = AppThemeEnum.CALM_BLUE;
-        } else if (score >= 4 && score <= 6) {
+        } else if (score >= 5 && score <= 9) {
             theme = AppThemeEnum.WARM_YELLOW;
-        } else if (score >= 7 && score <= 9) {
+        } else if (score >= 10 && score <= 13) {
             theme = AppThemeEnum.ALERT_ORANGE;
-        } else if (score >= 10 && score <= 12) {
+        } else if (score >= 14 && score <= 21) {
             theme = AppThemeEnum.DEEP_PURPLE;
         }
 
@@ -29,13 +29,13 @@ export class ScreeningService {
         }, totalScore);
 
         let theme = AppThemeEnum.CALM_BLUE;
-        if (totalScore >= 0 && totalScore <= 3) {
+        if (totalScore >= 0 && totalScore <= 4) {
             theme = AppThemeEnum.CALM_BLUE;
-        } else if (totalScore >= 4 && totalScore <= 6) {
+        } else if (totalScore >= 5 && totalScore <= 9) {
             theme = AppThemeEnum.WARM_YELLOW;
-        } else if (totalScore >= 7 && totalScore <= 9) {
+        } else if (totalScore >= 10 && totalScore <= 13) {
             theme = AppThemeEnum.ALERT_ORANGE;
-        } else if (totalScore >= 10 && totalScore <= 12) {
+        } else if (totalScore >= 14 && totalScore <= 21) {
             theme = AppThemeEnum.DEEP_PURPLE;
         }
 
@@ -64,6 +64,36 @@ export class ScreeningService {
         } catch (error) {
             console.error("Error saving screening result:", error);
             throw new Error("Failed to save screening result");
+        }
+    }
+
+    async checkDailyScreeningStatus(userId: string): Promise<boolean> {
+        const latestScreening = await screeningRepository.getLatestScreeningResult(userId);
+        if (!latestScreening) {
+            return false;
+        }
+
+        const today = new Date();
+        const screeningDate = new Date(latestScreening.createdAt);
+
+        return (
+            screeningDate.getFullYear() === today.getFullYear() &&
+            screeningDate.getMonth() === today.getMonth() &&
+            screeningDate.getDate() === today.getDate()
+        );
+    }
+
+    getDepressionCategory(score: number): "Normal" | "Ringan" | "Sedang" | "Parah" | "Sangat Parah" {
+        if (score <= 4) {
+            return "Normal";
+        } else if (score <= 9) {
+            return "Ringan";
+        } else if (score <= 13) {
+            return "Sedang";
+        } else if (score <= 17) {
+            return "Parah";
+        } else {
+            return "Sangat Parah";
         }
     }
 }

@@ -1,68 +1,31 @@
-import { db } from "@/lib/db"
+import userRepository from "@/repositories/user.repository"
+import psychologistRepository from "@/repositories/psychologist.repository"
+import screeningRepository from "@/repositories/screening.repository"
 
 export class PsychologistService {
   async getUserProfile(id: string) {
-    return await db.user.findUnique({
-      where: { id },
-      select: { name: true, image: true, email: true, usia: true, jenisKelamin: true, isOnboarded: true },
-    })
+    return await userRepository.getUserProfile(id)
   }
 
   async getPsychologists() {
-    return await db.psychologistProfile.findMany({
-      orderBy: { rating: "desc" },
-      include: { user: true },
-    })
+    return await psychologistRepository.getPsychologists()
   }
 
-
   async getActiveAppointment(userId: string) {
-    return await db.appointment.findFirst({
-      where: {
-        userId,
-        status: "SCHEDULED",
-      },
-      include: {
-        psychologistProfile: {
-          include: {
-            user: true,
-          },
-        },
-      },
-      orderBy: {
-        scheduledAt: "desc",
-      },
-    })
+    return await psychologistRepository.getActiveAppointment(userId)
   }
 
   async getAppointmentById(id: string, userId: string) {
-    return await db.appointment.findFirst({
-      where: {
-        id,
-        userId,
-      },
-      include: {
-        psychologistProfile: {
-          include: {
-            user: true,
-          },
-        },
-      },
-    })
+    return await psychologistRepository.getAppointmentById(id, userId)
   }
 
   async getLatestScreening(userId: string) {
-    return await db.screening.findFirst({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-    })
+    return await screeningRepository.getLatestScreeningResult(userId)
   }
 
   async bookAppointment(userId: string, psychologistId: string, scheduledAt: Date) {
     // Check if psychologist exists
-    const psych = await db.psychologistProfile.findUnique({
-      where: { id: psychologistId },
-    })
+    const psych = await psychologistRepository.getPsychologistProfileById(psychologistId)
 
     if (!psych) {
       throw new Error("Psikolog tidak ditemukan")
@@ -74,65 +37,26 @@ export class PsychologistService {
     const endOfDay = new Date(scheduledAt);
     endOfDay.setHours(23, 59, 59, 999);
 
-    const existingToday = await db.appointment.findFirst({
-      where: {
-        userId,
-        psychologistId,
-        scheduledAt: {
-          gte: startOfDay,
-          lte: endOfDay,
-        },
-        status: {
-          in: ["SCHEDULED", "COMPLETED"],
-        },
-      },
-    });
+    const existingToday = await psychologistRepository.findAppointmentToday(userId, psychologistId, startOfDay, endOfDay);
 
     if (existingToday) {
       throw new Error("Anda hanya dapat menjadwalkan sesi dengan psikolog ini 1 kali per hari.");
     }
 
     // Check if user already has an active scheduled appointment
-    const existing = await db.appointment.findFirst({
-      where: {
-        userId,
-        status: "SCHEDULED",
-      },
-    })
+    const existing = await psychologistRepository.findActiveScheduledAppointment(userId)
 
     if (existing) {
       // Cancel the previous one
-      await db.appointment.update({
-        where: { id: existing.id },
-        data: { status: "CANCELLED" },
-      })
+      await psychologistRepository.updateAppointmentStatus(existing.id, "CANCELLED")
     }
 
     // Create new appointment
-    return await db.appointment.create({
-      data: {
-        userId,
-        psychologistId,
-        scheduledAt,
-        status: "SCHEDULED",
-      },
-      include: {
-        psychologistProfile: {
-          include: {
-            user: true,
-          },
-        },
-      },
-    })
+    return await psychologistRepository.createAppointment(userId, psychologistId, scheduledAt)
   }
 
   async cancelAppointment(appointmentId: string, userId: string) {
-    const appointment = await db.appointment.findUnique({
-      where: { id: appointmentId },
-      include: {
-        psychologistProfile: true,
-      },
-    })
+    const appointment = await psychologistRepository.getAppointmentWithProfile(appointmentId)
 
     if (
       !appointment ||
@@ -141,21 +65,11 @@ export class PsychologistService {
       throw new Error("Appointment not found or unauthorized")
     }
 
-    return await db.appointment.update({
-      where: { id: appointmentId },
-      data: {
-        status: "CANCELLED",
-      },
-    })
+    return await psychologistRepository.updateAppointmentStatus(appointmentId, "CANCELLED")
   }
 
   async completeAppointment(appointmentId: string, userId: string) {
-    const appointment = await db.appointment.findUnique({
-      where: { id: appointmentId },
-      include: {
-        psychologistProfile: true,
-      },
-    })
+    const appointment = await psychologistRepository.getAppointmentWithProfile(appointmentId)
 
     if (
       !appointment ||
@@ -164,26 +78,11 @@ export class PsychologistService {
       throw new Error("Appointment not found or unauthorized")
     }
 
-    return await db.appointment.update({
-      where: { id: appointmentId },
-      data: {
-        status: "COMPLETED",
-      },
-    })
+    return await psychologistRepository.updateAppointmentStatus(appointmentId, "COMPLETED")
   }
 
   async getLatestAiSessionConclusion(userId: string): Promise<string | null> {
-    const latestCompleted = await db.chatSession.findFirst({
-      where: {
-        userId,
-        status: "COMPLETED",
-      },
-      include: {
-        chatMessages: {
-          orderBy: { createdAt: "desc" },
-        },
-      },
-    })
+    const latestCompleted = await psychologistRepository.getLatestCompletedChatSession(userId)
 
     if (!latestCompleted) return null
 
@@ -201,26 +100,15 @@ export class PsychologistService {
   }
 
   async getOrCreateConsultationMessages(appointmentId: string) {
-    return await db.consultationMessage.findMany({
-      where: { appointmentId },
-      orderBy: { createdAt: "asc" },
-    });
+    return await psychologistRepository.getConsultationMessages(appointmentId);
   }
 
   async createConsultationMessage(appointmentId: string, sender: "user" | "psychologist", text: string) {
-    return await db.consultationMessage.create({
-      data: {
-        appointmentId,
-        sender,
-        text,
-      },
-    });
+    return await psychologistRepository.createConsultationMessage(appointmentId, sender, text);
   }
 
   async ratePsychologist(psychologistId: string, userRating: number) {
-    const psych = await db.psychologistProfile.findUnique({
-      where: { id: psychologistId },
-    });
+    const psych = await psychologistRepository.getPsychologistProfileById(psychologistId);
     if (!psych) {
       throw new Error("Psikolog tidak ditemukan");
     }
@@ -228,29 +116,15 @@ export class PsychologistService {
     // Calculate new rating (assume 9 historical ratings + user rating)
     const newRating = Math.round(((psych.rating * 9 + userRating) / 10) * 10) / 10;
 
-    return await db.psychologistProfile.update({
-      where: { id: psychologistId },
-      data: { rating: newRating },
-    });
+    return await psychologistRepository.updatePsychologistRating(psychologistId, newRating);
   }
 
   async getPsychologistProfileByUserId(userId: string) {
-    return await db.psychologistProfile.findUnique({
-      where: { userId },
-      include: { user: true },
-    })
+    return await psychologistRepository.getPsychologistProfileByUserId(userId)
   }
 
   async getPsychologistAppointments(profileId: string) {
-    return await db.appointment.findMany({
-      where: { psychologistId: profileId },
-      include: {
-        user: true,
-      },
-      orderBy: {
-        scheduledAt: "desc",
-      },
-    })
+    return await psychologistRepository.getPsychologistAppointments(profileId)
   }
 }
 

@@ -346,7 +346,7 @@
    - Koneksi chat ke API `/api/ai/chat` dan `/api/ai/session` menggunakan react-query hooks (`useCreateChatSession` dan `useSendChatMessage`) telah diintegrasikan secara fungsional.
 
 5. **`DeleteDivider.tsx` isinya duplikat `ChatInput`**
-   - File duplikat ini tidak di-import di mana pun dan bisa dihapus secara aman.
+   - File duplikat ini tidak di-import di mana pun dan bisa dihapus secara aman. (sudah dihapus)
 
 6. **Dynamic theming backend ready, frontend tidak apply fixed** ✅
    - Class name tema dinamis (`calm_blue`, `warm_yellow`, etc.) sudah di-apply ke layout `/chat` (di `src/app/chat/page.tsx`) dan melacak state level emosi dari respons AI / screening terakhir untuk mengubah latar belakang visual.
