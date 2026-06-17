@@ -64,9 +64,23 @@ export default function ActivityCard({
       <p className="mt-1 text-xs text-slate-400">{subtitle || description}</p>
 
       <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-        {items.map((item) => (
-          <ActivityTile key={item.id} {...item} />
-        ))}
+        {items.length > 0 ? (
+          items.map((item) => (
+            <ActivityTile key={item.id} {...item} />
+          ))
+        ) : (
+          <div className="w-full rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center text-slate-500">
+            <span className="material-symbols-outlined text-3xl text-slate-300">
+              local_activity
+            </span>
+            <p className="mt-2 text-xs font-semibold text-slate-600">
+              Belum ada rekomendasi aktivitas
+            </p>
+            <p className="mt-0.5 text-[10px] text-slate-400">
+              Lakukan screening harian untuk mendapatkan rekomendasi aktivitas yang sesuai.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

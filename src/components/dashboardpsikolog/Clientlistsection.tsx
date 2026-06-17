@@ -25,9 +25,23 @@ export default function ClientListSection({
       <p className="mb-4 text-sm text-slate-400">List client terbaru kamu</p>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {clients.map((client) => (
-          <ClientCard key={client.id} client={client} />
-        ))}
+        {clients.length > 0 ? (
+          clients.map((client) => (
+            <ClientCard key={client.id} client={client} />
+          ))
+        ) : (
+          <div className="col-span-full rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center text-slate-500">
+            <span className="material-symbols-outlined text-3xl text-slate-300">
+              group
+            </span>
+            <p className="mt-2 text-xs font-semibold text-slate-600">
+              Belum ada klien terdaftar
+            </p>
+            <p className="mt-0.5 text-[10px] text-slate-400">
+              Klien baru akan terdaftar saat menjadwalkan konsultasi dengan Anda.
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -42,36 +42,54 @@ export default function ConsultationHistoryTable({
           </thead>
 
           <tbody>
-            {history.map((item) => (
-              <tr
-                key={item.id}
-                className="border-b border-slate-100 last:border-0"
-              >
-                <td className="py-4 align-middle">
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-600">
-                      {item.psychologInitials}
-                    </span>
+            {history.length > 0 ? (
+              history.map((item) => (
+                <tr
+                  key={item.id}
+                  className="border-b border-slate-100 last:border-0"
+                >
+                  <td className="py-4 align-middle">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-600">
+                        {item.psychologInitials}
+                      </span>
 
-                    <span className="font-medium text-slate-700">
-                      {item.psychologName}
+                      <span className="font-medium text-slate-700">
+                        {item.psychologName}
+                      </span>
+                    </div>
+                  </td>
+
+                  <td className="py-4 text-slate-500 align-middle">
+                    {item.date}
+                  </td>
+
+                  <td className="py-4 align-middle">
+                    <span
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${statusStyles[item.status]}`}
+                    >
+                      {item.status}
                     </span>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={3} className="py-8 text-center text-slate-400">
+                  <div className="flex flex-col items-center justify-center">
+                    <span className="material-symbols-outlined text-3xl text-slate-300">
+                      history_toggle_off
+                    </span>
+                    <p className="mt-2 text-xs font-semibold text-slate-500">
+                      Belum ada riwayat sesi konsultasi
+                    </p>
+                    <p className="mt-0.5 text-[10px] text-slate-400">
+                      Sesi konsultasi yang telah selesai akan tercatat di sini.
+                    </p>
                   </div>
                 </td>
-
-                <td className="py-4 text-slate-500 align-middle">
-                  {item.date}
-                </td>
-
-                <td className="py-4 align-middle">
-                  <span
-                    className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${statusStyles[item.status]}`}
-                  >
-                    {item.status}
-                  </span>
-                </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
