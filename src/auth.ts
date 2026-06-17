@@ -55,6 +55,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.id = user.id
         token.role = (user as any).role
+
+        if ((user as any).role === "PSYCHOLOGY") {
+          const profile = await db.psychologistProfile.findUnique({
+            where: { userId: user.id }
+          })
+          if (profile) {
+            token.picture = profile.imageUrl
+          }
+        }
       }
       return token
     },
@@ -62,6 +71,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (session.user && token) {
         session.user.id = token.id as string;
         (session.user as any).role = token.role as string;
+        if (token.picture) {
+          session.user.image = token.picture as string;
+        }
       }
       return session
     },

@@ -111,7 +111,7 @@ export default function ActiveSessionWidget({
   return (
     <Link
       href={`/konsultasi?appointmentId=${appointmentId}`}
-      className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-40 flex items-center gap-2 bg-[#004349] text-white pl-4 pr-3 py-3 rounded-full shadow-lg hover:bg-[#003a3f] border border-emerald-500/20 transition-all active:scale-95 cursor-pointer"
+      className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-40 flex items-center gap-2 bg-primary text-white pl-4 pr-3 py-3 rounded-full shadow-lg hover:bg-primary-container border border-emerald-500/20 transition-all active:scale-95 cursor-pointer"
     >
       {content}
 
@@ -122,7 +122,7 @@ export default function ActiveSessionWidget({
           e.stopPropagation()
           onClose()
         }}
-        className="ml-1 text-white/40 hover:text-white transition-colors cursor-pointer"
+        className="ml-1 text-white/80 hover:text-white transition-colors cursor-pointer"
         aria-label="Tutup widget"
       >
         <span className="material-symbols-outlined text-lg">close</span>

@@ -54,6 +54,7 @@ export default function PsychologistKonsultasiPage() {
       activeAppointment={data.activeAppointment}
       client={data.client}
       latestScreeningScore={data.latestScreeningScore}
+      clientTheme={data.clientTheme}
       finalConclusion={data.finalConclusion}
       psychologistUser={data.psychologistUser}
     />

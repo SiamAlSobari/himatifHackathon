@@ -16,6 +16,7 @@ interface PsychologistKonsultasiClientProps {
   activeAppointment: ActiveAppointment | null;
   client: ClientProfile;
   latestScreeningScore: number | null;
+  clientTheme: string;
   finalConclusion: string | null;
   psychologistUser: {
     name: string;
@@ -27,10 +28,33 @@ export default function PsychologistKonsultasiClient({
   activeAppointment,
   client,
   latestScreeningScore,
+  clientTheme,
   finalConclusion,
   psychologistUser,
 }: PsychologistKonsultasiClientProps) {
   const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !clientTheme) return;
+
+    const root = document.documentElement;
+    const originalThemes: string[] = [];
+    root.classList.forEach((cls) => {
+      if (cls.startsWith("theme-")) {
+        originalThemes.push(cls);
+        root.classList.remove(cls);
+      }
+    });
+
+    root.classList.add(`theme-${clientTheme}`);
+
+    return () => {
+      root.classList.remove(`theme-${clientTheme}`);
+      originalThemes.forEach((cls) => {
+        root.classList.add(cls);
+      });
+    };
+  }, [clientTheme]);
 
   // End session states & hook
   const { requestEnd, confirmEnd, declineEnd, isConfirming, isDeclining } = useEndSession();

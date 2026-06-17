@@ -6,6 +6,7 @@ interface ChatBubbleProps {
   message: string;
   time: string;
   isTyping?: boolean;
+  userImage?: string | null;
 }
 
 export default function ChatBubble({
@@ -13,6 +14,7 @@ export default function ChatBubble({
   message,
   time,
   isTyping = false,
+  userImage,
 }: ChatBubbleProps) {
   const isAi = sender === "ai";
 
@@ -23,7 +25,7 @@ export default function ChatBubble({
       }`}
     >
       {isAi && (
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0A5C61] text-white shadow-sm transition-transform hover:scale-105">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-sm transition-transform hover:scale-105">
           <Sparkles className="h-4 w-4" />
         </div>
       )}
@@ -31,7 +33,7 @@ export default function ChatBubble({
       <div
         className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm transition-all duration-300 ${
           isAi
-            ? "bg-[#0A5C61] text-white rounded-tl-sm"
+            ? "bg-primary text-white rounded-tl-sm"
             : "bg-white border border-slate-200 text-slate-800 rounded-tr-sm"
         }`}
       >
@@ -42,7 +44,7 @@ export default function ChatBubble({
               <span className="h-2 w-2 animate-bounce rounded-full bg-white" style={{ animationDelay: "150ms" }} />
               <span className="h-2 w-2 animate-bounce rounded-full bg-white" style={{ animationDelay: "300ms" }} />
             </div>
-            <span className="text-xs font-medium text-teal-100/90 animate-pulse">
+            <span className="text-xs font-medium text-white/80 animate-pulse">
               Lombut AI sedang berpikir...
             </span>
           </div>
@@ -53,7 +55,7 @@ export default function ChatBubble({
         {!isTyping && (
           <p
             className={`mt-1.5 text-right text-[10px] font-medium tracking-wide ${
-              isAi ? "text-teal-200/80" : "text-slate-400"
+              isAi ? "text-white/70" : "text-slate-400"
             }`}
           >
             {time}
@@ -63,7 +65,7 @@ export default function ChatBubble({
 
       {!isAi && (
         <Image
-          src="https://i.pravatar.cc/40?img=12"
+          src={userImage || "https://i.pravatar.cc/40?img=12"}
           alt="Foto profil pengguna"
           width={32}
           height={32}

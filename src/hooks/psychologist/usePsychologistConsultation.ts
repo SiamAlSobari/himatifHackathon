@@ -5,6 +5,7 @@ export interface PsychologistConsultationData {
   activeAppointment: ActiveAppointment;
   client: ClientProfile;
   latestScreeningScore: number | null;
+  clientTheme: string;
   finalConclusion: string | null;
   psychologistUser: {
     name: string;
