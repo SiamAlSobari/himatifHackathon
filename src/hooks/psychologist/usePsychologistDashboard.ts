@@ -3,6 +3,7 @@ import { TodayConsultation, ConsultationHistoryItem, ClientItem } from "@/lib/ty
 
 export interface PsychologistDashboardData {
   psychologist: {
+    id: string;
     name: string;
     image: string;
   };

@@ -12,6 +12,9 @@ import { footerLinkGroups } from "@/app/dashboard/data";
 import { useConsultationChat } from "@/hooks/konsultasi/useConsultationChat";
 import { ActiveAppointment, ClientProfile } from "@/lib/types/konsultasi";
 import { getPusherClient } from "@/lib/pusher/pusher-client";
+import { useEndSession } from "@/hooks/konsultasi/useEndSession";
+import ConfirmEndSessionModal from "@/components/konsultasi/ConfirmEndSessionModal";
+
 
 interface PsychologistKonsultasiClientProps {
   activeAppointment: ActiveAppointment | null;
@@ -32,6 +35,13 @@ export default function PsychologistKonsultasiClient({
   psychologistUser,
 }: PsychologistKonsultasiClientProps) {
   const router = useRouter();
+
+  // End session states & hook
+  const { requestEnd, confirmEnd, declineEnd, isConfirming, isDeclining } = useEndSession();
+  const [endSessionModalOpen, setEndSessionModalOpen] = useState(false);
+  const [isIncomingRequest, setIsIncomingRequest] = useState(false);
+  const [waitingForResponseModalOpen, setWaitingForResponseModalOpen] = useState(false);
+
 
   // 1. Chat history state synced via custom hook
   const {
@@ -65,6 +75,45 @@ export default function PsychologistKonsultasiClient({
       pusher.unsubscribe(channelName);
     };
   }, [activeAppointment, client?.id, router]);
+
+  // Subscribe to end session Pusher events on channel `appointment-${activeAppointment.id}`
+  useEffect(() => {
+    if (!activeAppointment?.id) return;
+
+    const pusher = getPusherClient();
+    const channelName = `appointment-${activeAppointment.id}`;
+    const channel = pusher.subscribe(channelName);
+
+    const handleEndSessionRequested = (data: any) => {
+      // If we are NOT the requester, show confirmation modal
+      if (data.requester !== "psychologist") {
+        setIsIncomingRequest(true);
+        setEndSessionModalOpen(true);
+      }
+    };
+
+    const handleEndSessionDeclined = () => {
+      // Initiator gets notified and waiting modal is dismissed
+      setWaitingForResponseModalOpen(false);
+      toast.error("Permintaan mengakhiri sesi ditolak oleh pasien.");
+    };
+
+    const handleSessionEnded = () => {
+      toast.success("Sesi konsultasi telah berakhir.");
+      router.push("/psikolog");
+    };
+
+    channel.bind("end-session", handleEndSessionRequested);
+    channel.bind("end-session-declined", handleEndSessionDeclined);
+    channel.bind("session-ended", handleSessionEnded);
+
+    return () => {
+      channel.unbind("end-session", handleEndSessionRequested);
+      channel.unbind("end-session-declined", handleEndSessionDeclined);
+      channel.unbind("session-ended", handleSessionEnded);
+      pusher.unsubscribe(channelName);
+    };
+  }, [activeAppointment?.id, router]);
 
   // Track latest message id to display toast
   const lastMessageRef = useRef<string | null>(null);
@@ -144,21 +193,45 @@ export default function PsychologistKonsultasiClient({
 
   // Handle end session
   const handleEndSession = async () => {
-    const confirmClose = window.confirm(
-      "Apakah Anda yakin ingin mengakhiri sesi konsultasi aktif ini? Catatan klinis klien akan diperbarui."
-    );
-    if (!confirmClose) return;
+    setIsIncomingRequest(false);
+    setEndSessionModalOpen(true);
+  };
 
-    try {
-      if (activeAppointment) {
-        await completeAppointment(activeAppointment.id);
-        toast.success("Sesi konsultasi berhasil diselesaikan oleh Anda.");
-      } else {
-        toast.success("Sesi demo diselesaikan.");
-      }
+  const handleConfirmEndSession = async () => {
+    if (!activeAppointment?.id) {
+      // Demo mode completion fallback
+      toast.success("Sesi demo diselesaikan.");
       router.push("/psikolog");
+      return;
+    }
+    try {
+      if (isIncomingRequest) {
+        // We are accepting the incoming request
+        await confirmEnd({ appointmentId: activeAppointment.id });
+        setEndSessionModalOpen(false);
+      } else {
+        // We are initiating the end session request
+        await requestEnd({ appointmentId: activeAppointment.id, requester: "psychologist" });
+        setEndSessionModalOpen(false);
+        setWaitingForResponseModalOpen(true);
+      }
     } catch (err: any) {
-      toast.error(err.message || "Gagal mengakhiri sesi.");
+      toast.error(err.message || "Gagal memproses akhir sesi.");
+    }
+  };
+
+  const handleDeclineEndSession = async () => {
+    if (!activeAppointment?.id) {
+      setEndSessionModalOpen(false);
+      return;
+    }
+    try {
+      if (isIncomingRequest) {
+        await declineEnd({ appointmentId: activeAppointment.id });
+      }
+      setEndSessionModalOpen(false);
+    } catch (err: any) {
+      toast.error(err.message || "Gagal menolak akhir sesi.");
     }
   };
 
@@ -261,6 +334,36 @@ export default function PsychologistKonsultasiClient({
           <span className="material-symbols-outlined text-xl">picture_in_picture_alt</span>
         </button>
       )}
+
+      {/* Confirmation and request modals */}
+      <ConfirmEndSessionModal
+        isOpen={endSessionModalOpen}
+        title={isIncomingRequest ? "Persetujuan Akhiri Sesi" : "Akhiri Sesi Konsultasi"}
+        message={
+          isIncomingRequest
+            ? "Pasien ingin mengakhiri sesi, apakah anda menyetujuinya?"
+            : "Apakah Anda yakin ingin mengajukan permohonan untuk mengakhiri sesi konsultasi ini?"
+        }
+        onConfirm={handleConfirmEndSession}
+        onDecline={handleDeclineEndSession}
+        isConfirming={isConfirming}
+        isDeclining={isDeclining}
+        confirmLabel={isIncomingRequest ? "Ya" : "Ya, Ajukan"}
+        declineLabel={isIncomingRequest ? "Tidak" : "Batal"}
+      />
+
+      <ConfirmEndSessionModal
+        isOpen={waitingForResponseModalOpen}
+        title="Menunggu Persetujuan"
+        message="Permintaan mengakhiri sesi telah dikirim. Menunggu konfirmasi dari pasien..."
+        onConfirm={() => {}}
+        onDecline={() => {
+          setWaitingForResponseModalOpen(false);
+        }}
+        declineLabel="Tutup"
+        confirmLabel="Menunggu..."
+        isConfirming={true}
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Footer from "@/components/ui/footer";
 import Navbar from "@/components/ui/Navbar";
 import EmergencyBanner from "@/components/dashboard/Emergencybanner";
@@ -10,9 +11,31 @@ import TodayConsultationList from "@/components/dashboardpsikolog/Todayconsultat
 import ConsultationHistoryTable from "@/components/dashboardpsikolog/Consultationhistorytable";
 import ClientListSection from "@/components/dashboardpsikolog/Clientlistsection";
 import { usePsychologistDashboard } from "@/hooks/psychologist/usePsychologistDashboard";
+import { getPusherClient } from "@/lib/pusher/pusher-client";
 
 export default function DashboardPsikologPage() {
-  const { data, isLoading, error } = usePsychologistDashboard();
+  const { data, isLoading, error, refetch } = usePsychologistDashboard();
+
+  useEffect(() => {
+    if (!data?.psychologist?.id) return;
+
+    const pusher = getPusherClient();
+    const channelName = `user-${data.psychologist.id}`;
+    const channel = pusher.subscribe(channelName);
+
+    const handleBookingUpdate = () => {
+      refetch();
+    };
+
+    channel.bind("booking-requested", handleBookingUpdate);
+    channel.bind("booking-updated", handleBookingUpdate);
+
+    return () => {
+      channel.unbind("booking-requested", handleBookingUpdate);
+      channel.unbind("booking-updated", handleBookingUpdate);
+      pusher.unsubscribe(channelName);
+    };
+  }, [data?.psychologist?.id, refetch]);
 
   if (isLoading) {
     return (

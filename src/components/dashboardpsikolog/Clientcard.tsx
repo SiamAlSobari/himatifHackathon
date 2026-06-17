@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
 import { ClientItem } from "@/lib/types/dashboardpsikolog";
+import { useRespondToBooking } from "@/hooks/psychologist/useRespondToBooking";
+import { toast } from "sonner";
 
 const priorityStyles: Record<ClientItem["priority"], string> = {
   "Prioritas Tinggi": "bg-rose-500 text-white",
@@ -21,6 +23,24 @@ interface ClientCardProps {
 }
 
 export default function ClientCard({ client }: ClientCardProps) {
+  const { mutate: respond, isPending } = useRespondToBooking();
+
+  const handleRespond = (action: "ACCEPT" | "DECLINE") => {
+    if (!client.pendingAppointmentId) return;
+
+    respond(
+      { appointmentId: client.pendingAppointmentId, action },
+      {
+        onSuccess: () => {
+          toast.success(action === "ACCEPT" ? "Booking berhasil diterima!" : "Booking berhasil ditolak!");
+        },
+        onError: (err: any) => {
+          toast.error(err.message || "Gagal memproses booking.");
+        },
+      }
+    );
+  };
+
   return (
     <div className="group relative rounded-xl border border-slate-100 p-4">
       {/* Default content */}
@@ -69,23 +89,29 @@ export default function ClientCard({ client }: ClientCardProps) {
         </div>
       </div>
 
-      <div className="mt-4 flex gap-3">
-        <button
-          type="button"
-          className="flex-1 rounded-lg bg-emerald-100 py-2 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-200"
-        >
-          Accept
-        </button>
-        <button
-          type="button"
-          className="flex-1 rounded-lg bg-rose-100 py-2 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-200"
-        >
-          Decline
-        </button>
-      </div>
+      {client.pendingAppointmentId && (
+        <div className="mt-4 flex gap-3">
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => handleRespond("ACCEPT")}
+            className="flex-1 rounded-lg bg-emerald-100 py-2 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-200 disabled:opacity-50"
+          >
+            Accept
+          </button>
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => handleRespond("DECLINE")}
+            className="flex-1 rounded-lg bg-rose-100 py-2 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-200 disabled:opacity-50"
+          >
+            Decline
+          </button>
+        </div>
+      )}
 
       {/* Hover overlay */}
-      <div className="pointer-events-none absolute inset-0 z-10 flex flex-col gap-4 rounded-xl bg-white p-4 opacity-0 shadow-xl ring-1 ring-slate-100 transition-opacity duration-200 group-hover:pointer-events-auto group-hover:opacity-100">
+      <div className="pointer-events-none absolute top-full left-0 right-0 z-20 mt-2 flex flex-col gap-4 rounded-xl bg-white p-4 opacity-0 shadow-xl ring-1 ring-slate-200/50 transition-opacity duration-200 group-hover:pointer-events-auto group-hover:opacity-100">
         <div className="flex items-center gap-3">
           <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-slate-100">
             <Image

@@ -1,10 +1,12 @@
 import Image from "next/image";
 import { Video } from "lucide-react";
 import { TodayConsultation } from "@/lib/types/dashboardpsikolog";
+import Link from "next/link";
 
 const statusStyles: Record<TodayConsultation["status"], string> = {
   Berlangsung: "bg-emerald-100 text-emerald-600",
   Terjadwal: "bg-blue-100 text-blue-600",
+  Selesai: "bg-slate-100 text-slate-400 border border-slate-200",
 };
 
 interface TodayConsultationCardProps {
@@ -14,8 +16,10 @@ interface TodayConsultationCardProps {
 export default function TodayConsultationCard({
   consultation,
 }: TodayConsultationCardProps) {
-  return (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 p-3">
+  const isFinished = consultation.status === "Selesai";
+
+  const cardContent = (
+    <>
       <div className="flex items-center gap-3">
         <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-slate-100">
           <Image
@@ -26,10 +30,10 @@ export default function TodayConsultationCard({
           />
         </div>
         <div>
-          <p className="text-sm font-semibold text-slate-800">
+          <p className={`text-sm font-semibold ${isFinished ? "text-slate-400 line-through" : "text-slate-800"}`}>
             {consultation.clientName}
           </p>
-          <p className="text-xs text-slate-500">{consultation.clientRole}</p>
+          <p className={`text-xs ${isFinished ? "text-slate-400" : "text-slate-500"}`}>{consultation.clientRole}</p>
           <div className="mt-1 flex items-center gap-1 text-xs text-slate-400">
             <Video className="h-3.5 w-3.5" />
             <span>{consultation.schedule}</span>
@@ -42,6 +46,23 @@ export default function TodayConsultationCard({
       >
         {consultation.status}
       </span>
-    </div>
+    </>
+  );
+
+  if (isFinished) {
+    return (
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/60 bg-slate-50/50 p-3 select-none opacity-80">
+        {cardContent}
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href={`/psikolog/konsultasi?appointmentId=${consultation.id}`}
+      className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 p-3 hover:bg-slate-50 hover:shadow-sm transition-all duration-200 cursor-pointer"
+    >
+      {cardContent}
+    </Link>
   );
 }

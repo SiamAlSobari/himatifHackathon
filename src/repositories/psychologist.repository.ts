@@ -1,4 +1,6 @@
 import { db } from "@/lib/db";
+import { AppointmentStatus } from "../../generated/prisma/enums";
+
 
 class PsychologistRepository {
     async getPsychologistProfileByUserId(userId: string) {
@@ -32,7 +34,9 @@ class PsychologistRepository {
         return await db.appointment.findFirst({
             where: {
                 userId,
-                status: "SCHEDULED",
+                status: {
+                    in: [AppointmentStatus.APPROVED, AppointmentStatus.SCHEDULED],
+                },
             },
             include: {
                 psychologistProfile: {
@@ -82,7 +86,7 @@ class PsychologistRepository {
                     lte: endOfDay,
                 },
                 status: {
-                    in: ["SCHEDULED", "COMPLETED"],
+                    in: [AppointmentStatus.PENDING, AppointmentStatus.APPROVED, AppointmentStatus.SCHEDULED, AppointmentStatus.COMPLETED],
                 },
             },
         });
@@ -92,12 +96,14 @@ class PsychologistRepository {
         return await db.appointment.findFirst({
             where: {
                 userId,
-                status: "SCHEDULED",
+                status: {
+                    in: [AppointmentStatus.PENDING, AppointmentStatus.APPROVED, AppointmentStatus.SCHEDULED],
+                },
             },
         });
     }
 
-    async updateAppointmentStatus(id: string, status: "SCHEDULED" | "COMPLETED" | "CANCELLED") {
+    async updateAppointmentStatus(id: string, status: AppointmentStatus) {
         return await db.appointment.update({
             where: { id },
             data: { status },
@@ -110,7 +116,7 @@ class PsychologistRepository {
                 userId,
                 psychologistId,
                 scheduledAt,
-                status: "SCHEDULED",
+                status: AppointmentStatus.PENDING,
             },
             include: {
                 psychologistProfile: {
@@ -176,6 +182,46 @@ class PsychologistRepository {
             },
             orderBy: {
                 scheduledAt: "desc",
+            },
+        });
+    }
+
+    async getAppointmentByIdAndPsychologistId(id: string, psychologistId: string) {
+        return await db.appointment.findFirst({
+            where: {
+                id,
+                psychologistId,
+            },
+            include: {
+                user: true,
+                psychologistProfile: {
+                    include: {
+                        user: true,
+                    },
+                },
+            },
+        });
+    }
+
+    async getNearestScheduledAppointment(psychologistId: string) {
+        const { AppointmentStatus } = await import("../../generated/prisma/enums");
+        return await db.appointment.findFirst({
+            where: {
+                psychologistId,
+                status: {
+                    in: [AppointmentStatus.APPROVED, AppointmentStatus.SCHEDULED]
+                },
+            },
+            include: {
+                user: true,
+                psychologistProfile: {
+                    include: {
+                        user: true,
+                    },
+                },
+            },
+            orderBy: {
+                scheduledAt: "asc",
             },
         });
     }

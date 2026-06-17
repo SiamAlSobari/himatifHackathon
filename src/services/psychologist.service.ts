@@ -3,6 +3,7 @@ import psychologistRepository from "@/repositories/psychologist.repository"
 import screeningRepository from "@/repositories/screening.repository"
 import screeningService from "./screening.service"
 import { ScreeningResult } from "@/lib/types/dashboardpsikolog"
+import { AppointmentStatus } from "../../generated/prisma/enums"
 
 export class PsychologistService {
   async getUserProfile(id: string) {
@@ -80,7 +81,25 @@ export class PsychologistService {
       throw new Error("Appointment not found or unauthorized")
     }
 
-    return await psychologistRepository.updateAppointmentStatus(appointmentId, "COMPLETED")
+    const updated = await psychologistRepository.updateAppointmentStatus(appointmentId, AppointmentStatus.COMPLETED)
+
+    // Trigger Pusher notification that session has ended
+    const { pusherServer } = await import("@/lib/pusher/pusher-server");
+    await pusherServer.trigger(`appointment-${appointmentId}`, "session-ended", {});
+
+    return updated;
+  }
+
+  async requestEndSession(appointmentId: string, requester: "user" | "psychologist") {
+    const { pusherServer } = await import("@/lib/pusher/pusher-server");
+    await pusherServer.trigger(`appointment-${appointmentId}`, "end-session", {
+      requester,
+    });
+  }
+
+  async declineEndSession(appointmentId: string) {
+    const { pusherServer } = await import("@/lib/pusher/pusher-server");
+    await pusherServer.trigger(`appointment-${appointmentId}`, "end-session-declined", {});
   }
 
   async getLatestAiSessionConclusion(userId: string): Promise<string | null> {
@@ -191,7 +210,8 @@ export class PsychologistService {
     const todayStr = now.toDateString();
 
     const todayAppointments = appointments.filter((appt) => {
-      return new Date(appt.scheduledAt).toDateString() === todayStr;
+      return new Date(appt.scheduledAt).toDateString() === todayStr &&
+             (appt.status === "APPROVED" || appt.status === "SCHEDULED" || appt.status === "COMPLETED");
     });
 
     // Format today consultations
@@ -200,9 +220,9 @@ export class PsychologistService {
       const diffMs = Math.abs(now.getTime() - apptTime.getTime());
       const diffHours = diffMs / (1000 * 60 * 60);
       
-      const status: "Berlangsung" | "Terjadwal" = 
-        appt.status === "COMPLETED" ? "Berlangsung" :
-        (diffHours <= 1 && appt.status === "SCHEDULED") ? "Berlangsung" : "Terjadwal";
+      const status: "Berlangsung" | "Terjadwal" | "Selesai" = 
+        appt.status === "COMPLETED" ? "Selesai" :
+        (diffHours <= 1 && (appt.status === "APPROVED" || appt.status === "SCHEDULED")) ? "Berlangsung" : "Terjadwal";
 
       return {
         id: appt.id,
@@ -249,6 +269,9 @@ export class PsychologistService {
 
     const clientList = await Promise.all(
       Array.from(uniqueClientsMap.values()).map(async (user) => {
+        // Find if this client has a pending appointment with this psychologist
+        const pendingAppt = appointments.find((appt) => appt.userId === user.id && appt.status === "PENDING");
+
         // Fetch latest screening for client
         const latestScreening = await screeningRepository.getLatestScreeningResult(user.id);
         
@@ -314,18 +337,118 @@ export class PsychologistService {
           trend,
           screeningResults: screeningResultsArr,
           aiSummary,
+          pendingAppointmentId: pendingAppt?.id,
         };
       })
     );
 
     return {
       psychologist: {
+        id: profile.userId,
         name: profile.user.name || "Spesialis",
         image: profile.imageUrl,
       },
       todayConsultations,
       consultationHistory,
       clientList,
+    };
+  }
+
+  async respondToBooking(appointmentId: string, action: "ACCEPT" | "DECLINE", psychologistUserId: string) {
+    const appointment = await psychologistRepository.getAppointmentWithProfile(appointmentId);
+
+    if (!appointment) {
+      throw new Error("Jadwal janji temu tidak ditemukan");
+    }
+
+    // Verify the psychologist owns this appointment profile
+    if (appointment.psychologistProfile.userId !== psychologistUserId) {
+      throw new Error("Unauthorized - Anda bukan pemilik jadwal ini");
+    }
+
+    const profile = await psychologistRepository.getPsychologistProfileByUserId(psychologistUserId);
+    if (!profile) {
+      throw new Error("Profil psikolog tidak ditemukan");
+    }
+
+    const { AppointmentStatus } = await import("../../generated/prisma/enums");
+    const newStatus = action === "ACCEPT" ? AppointmentStatus.APPROVED : AppointmentStatus.DECLINED;
+    const updated = await psychologistRepository.updateAppointmentStatus(appointmentId, newStatus);
+
+    const { pusherServer } = await import("@/lib/pusher/pusher-server");
+
+    // Format payload for user view
+    const activeAppointmentPayload = action === "ACCEPT" ? {
+      id: updated.id,
+      scheduledAt: updated.scheduledAt.toISOString(),
+      psychologist: {
+        id: profile.id,
+        name: profile.user.name || "Psikolog",
+        role: profile.role,
+        imageUrl: profile.imageUrl,
+      }
+    } : null;
+
+    // Trigger Pusher notification for the client (realtime floating button countdown)
+    await pusherServer.trigger(`user-${updated.userId}`, "appointment-updated", {
+      activeAppointment: activeAppointmentPayload
+    });
+
+    // Also trigger self update for psychologist to refresh dashboard
+    await pusherServer.trigger(`user-${psychologistUserId}`, "booking-updated", {});
+
+    return updated;
+  }
+
+  async getPsychologistConsultationSession(userId: string, appointmentId?: string) {
+    const profile = await psychologistRepository.getPsychologistProfileByUserId(userId);
+    if (!profile) {
+      throw new Error("Profil psikolog tidak ditemukan");
+    }
+
+    let activeAppointment = null;
+    if (appointmentId) {
+      activeAppointment = await psychologistRepository.getAppointmentByIdAndPsychologistId(appointmentId, profile.id);
+    } else {
+      activeAppointment = await psychologistRepository.getNearestScheduledAppointment(profile.id);
+    }
+
+    if (!activeAppointment) {
+      return null;
+    }
+
+    const clientUser = activeAppointment.user;
+    const latestScreening = await this.getLatestScreening(clientUser.id);
+    const finalConclusion = await this.getLatestAiSessionConclusion(clientUser.id);
+
+    return {
+      activeAppointment: {
+        id: activeAppointment.id,
+        scheduledAt: activeAppointment.scheduledAt.toISOString(),
+        psychologist: {
+          id: activeAppointment.psychologistProfile.id,
+          name: activeAppointment.psychologistProfile.user.name || "Psikolog",
+          role: activeAppointment.psychologistProfile.role,
+          specialty: activeAppointment.psychologistProfile.specialty,
+          imageUrl: activeAppointment.psychologistProfile.imageUrl,
+          experienceYears: activeAppointment.psychologistProfile.experienceYears,
+          tags: activeAppointment.psychologistProfile.tags,
+        },
+      },
+      client: {
+        id: clientUser.id,
+        name: clientUser.name || clientUser.email || "Klien",
+        image: clientUser.image || undefined,
+        email: clientUser.email,
+        usia: clientUser.usia,
+        jenisKelamin: clientUser.jenisKelamin,
+      },
+      latestScreeningScore: latestScreening?.score || null,
+      finalConclusion,
+      psychologistUser: {
+        name: profile.user.name || "Psikolog",
+        image: profile.imageUrl,
+      },
     };
   }
 }
