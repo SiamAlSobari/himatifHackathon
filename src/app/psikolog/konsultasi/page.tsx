@@ -1,11 +1,11 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import PsychologistKonsultasiClient from "./konsultasi-client";
 import { usePsychologistConsultation } from "@/hooks/psychologist/usePsychologistConsultation";
 
-export default function PsychologistKonsultasiPage() {
+function PsychologistKonsultasiContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const appointmentId = searchParams.get("appointmentId") || undefined;
@@ -58,5 +58,17 @@ export default function PsychologistKonsultasiPage() {
       finalConclusion={data.finalConclusion}
       psychologistUser={data.psychologistUser}
     />
+  );
+}
+
+export default function PsychologistKonsultasiPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <span className="h-8 w-8 animate-spin rounded-full border-4 border-[#004349] border-t-transparent" />
+      </div>
+    }>
+      <PsychologistKonsultasiContent />
+    </Suspense>
   );
 }

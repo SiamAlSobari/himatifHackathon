@@ -7,6 +7,7 @@ import screeningService from "./screening.service";
 import screeningRepository from "@/repositories/screening.repository";
 import chatSessionRepository from "@/repositories/chatSessionRepository";
 import { pusherServer } from "@/lib/pusher/pusher-server";
+import sessionSummaryService from "./sessionSummary.service";
 
 export class ChatService {
     private async formatChatHistories(sessionId: string) {
@@ -84,6 +85,12 @@ export class ChatService {
         const createdAssistantMessage = await chatMessageRepository.createMessage(sessionId, "ASSISTANT", assistantResponseContent, metaDataWithConclusion);
         if (!createdAssistantMessage) {
             throw new Error("Failed to save AI response to the database.");
+        }
+
+        // Save session summary if finalConclusion is returned
+        const finalConclusion = formattedResponse.finalConclusion || (formattedResponse.metaData as any)?.finalConclusion;
+        if (finalConclusion) {
+            await sessionSummaryService.createOrUpdateSummary(sessionId, finalConclusion);
         }
 
         // Count how many USER messages are in this session

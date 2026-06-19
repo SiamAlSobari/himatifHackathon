@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import KonsultasiClient from "./konsultasi-client";
 import { useKonsultasi } from "@/hooks/konsultasi/useKonsultasi";
 
-export default function KonsultasiPage() {
+function KonsultasiContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const appointmentId = searchParams.get("appointmentId") || undefined;
@@ -35,5 +35,17 @@ export default function KonsultasiPage() {
       userProfile={data.dbUser}
       latestScreening={data.latestScreening}
     />
+  );
+}
+
+export default function KonsultasiPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <span className="h-8 w-8 animate-spin rounded-full border-4 border-[#004349] border-t-transparent" />
+      </div>
+    }>
+      <KonsultasiContent />
+    </Suspense>
   );
 }

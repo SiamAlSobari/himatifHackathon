@@ -4,6 +4,7 @@ import screeningRepository from "@/repositories/screening.repository"
 import screeningService from "./screening.service"
 import { ScreeningResult } from "@/lib/types/dashboardpsikolog"
 import { AppointmentStatus } from "../../generated/prisma/enums"
+import sessionSummaryRepository from "@/repositories/sessionSummary.repository"
 
 export class PsychologistService {
   async getUserProfile(id: string) {
@@ -103,6 +104,13 @@ export class PsychologistService {
   }
 
   async getLatestAiSessionConclusion(userId: string): Promise<string | null> {
+    // 1. Try to get summary from SessionSummary table first
+    const latestSummary = await sessionSummaryRepository.getLatestByUserId(userId);
+    if (latestSummary) {
+      return latestSummary.summary;
+    }
+
+    // 2. Fallback to parsing finalConclusion from metadata of latest completed session
     const latestCompleted = await psychologistRepository.getLatestCompletedChatSession(userId)
 
     if (!latestCompleted) return null
