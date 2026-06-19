@@ -30,6 +30,7 @@ interface ChatPanelProps {
   isLoading: boolean;
   refetch: () => void;
   activeTheme: string;
+  selectedHistorySession?: ChatSessionWithMessages | null;
 }
 
 export default function ChatPanel({
@@ -38,6 +39,7 @@ export default function ChatPanel({
   isLoading,
   refetch,
   activeTheme = "calm_blue",
+  selectedHistorySession = null,
 }: ChatPanelProps) {
   const session = useSession();
   const createSessionMutation = useCreateChatSession();
@@ -45,8 +47,8 @@ export default function ChatPanel({
   
   const chatContainerRef = useRef<HTMLDivElement>(null);
   
-  // Determine actual session to display (active session or completed session during cooldown)
-  const displaySession = activeSession || cooldown?.completedSession || null;
+  // Determine actual session to display (selected history session, active session, or completed session during cooldown)
+  const displaySession = selectedHistorySession || activeSession || cooldown?.completedSession || null;
   const messages = displaySession?.chatMessages || [];
 
   // Get message user is currently sending (for optimistic rendering)
@@ -54,12 +56,15 @@ export default function ChatPanel({
     ? sendMessageMutation.variables?.message
     : null;
 
+  const isReadOnly = !!selectedHistorySession || displaySession?.status === "COMPLETED" || displaySession?.status === "SEALED";
+
   // Determine if AI is currently typing (last message is from user OR user is sending a message)
   const isAiTyping =
-    (activeSession &&
+    !isReadOnly &&
+    ((activeSession &&
       messages.length > 0 &&
       messages[messages.length - 1].role === "USER") ||
-    !!pendingUserMessage;
+    !!pendingUserMessage);
 
   const [showCrisisModal, setShowCrisisModal] = useState(false);
   const [lastSeenCrisisId, setLastSeenCrisisId] = useState<string | null>(null);
@@ -215,7 +220,18 @@ export default function ChatPanel({
       </div>
 
       {/* Footer input area / Cooldown display */}
-      {cooldown?.active ? (
+      {isReadOnly ? (
+        <div className="border-t border-slate-100 bg-slate-50/70 p-6">
+          <div className="rounded-xl border border-slate-200 bg-slate-100/50 p-4 shadow-sm text-center">
+            <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+              Anda sedang melihat riwayat obrolan sesi sebelumnya. Sesi percakapan ini telah selesai dan bersifat arsip.
+            </p>
+          </div>
+          <div className="mt-4">
+            <ChatInput onSend={handleSend} disabled={true} activeTheme={activeTheme} />
+          </div>
+        </div>
+      ) : cooldown?.active ? (
         <div className="border-t border-slate-100 bg-slate-50/70 p-6">
           <div className="rounded-xl border border-amber-200/60 bg-amber-50/50 p-4 shadow-sm backdrop-blur-sm">
             <div className="flex flex-col items-center gap-4 text-center md:flex-row md:items-start md:text-left">

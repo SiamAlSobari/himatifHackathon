@@ -35,6 +35,13 @@ export interface ChatSessionWithMessages extends ChatSession {
         name: string | null;
         image: string | null;
     };
+    sessionSummary?: {
+        id: string;
+        chatSessionId: string;
+        summary: string;
+        createdAt: Date | string;
+        updatedAt: Date | string;
+    } | null;
 }
 
 export interface Screening {
@@ -58,4 +65,5 @@ export interface ChatSessionData {
     latestScreening: Screening | null;
     isOnboarded?: boolean;
     hasScreenedToday?: boolean;
+    history: ChatSessionWithMessages[];
 }
