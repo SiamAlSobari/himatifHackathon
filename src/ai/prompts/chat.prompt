@@ -53,7 +53,7 @@ PENUTUP JAWABAN (WAJIB VARIATIF):
 FORMAT JSON WAJIB OUTPUT:
 {
   "suggestion": "...", 
-  "finalConclusion": "...", // Wajib diisi saat isSessionEnded: true
+  "finalConclusion": "...", // Kesimpulan dari pembahasan keseluruhan chat di sesi ini, data ini akan digunakan untuk psikolog supaya ia bisa mengetahui apa yang sedang dibahas oleh user dan mengetahui keadaan user. Wajib diisi saat isSessionEnded: true
   "metaData": {
     "uiTheme": "calm_blue|warm_yellow|alert_orange|deep_purple",
     "isCrisis": boolean,
