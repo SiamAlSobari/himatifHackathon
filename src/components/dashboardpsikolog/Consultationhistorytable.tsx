@@ -35,7 +35,7 @@ export default function ConsultationHistoryTable({
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-slate-100 text-xs text-slate-400">
-              <th className="py-3 font-medium align-middle">Psikolog</th>
+              <th className="py-3 font-medium align-middle">Nama Klien</th>
               <th className="py-3 font-medium align-middle">Tanggal</th>
               <th className="py-3 font-medium align-middle">Status</th>
             </tr>
@@ -55,7 +55,7 @@ export default function ConsultationHistoryTable({
                       </span>
 
                       <span className="font-medium text-slate-700">
-                        {item.psychologName}
+                        {item.clientName}
                       </span>
                     </div>
                   </td>

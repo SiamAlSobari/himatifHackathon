@@ -29,7 +29,7 @@ export default function PsychologistSidebar({
 }: PsychologistSidebarProps) {
   // Derive score presentation from screening score (max 12 from constants)
   const scoreVal = latestScreeningScore !== null ? latestScreeningScore : 9;
-  const scoreMax = 12;
+  const scoreMax = 21;
   const percentage = Math.min(100, Math.round((scoreVal / scoreMax) * 100));
 
   // Determine category

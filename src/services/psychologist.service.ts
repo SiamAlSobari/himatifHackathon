@@ -261,6 +261,7 @@ export class PsychologistService {
       return {
         id: appt.id,
         psychologName: psychName,
+        clientName: appt.user.name || appt.user.email || "Klien",
         psychologInitials: initials,
         date: apptDate.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }),
         status,
