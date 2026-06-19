@@ -22,18 +22,46 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
   const [theme, setThemeState] = useState<AppTheme>("calm_blue");
   const { data: chatSessionData } = useChatSession();
 
-  // Load initial theme from sessionStorage, cookies, or latest screening score
+  // Load initial theme from query data first (source of truth) with session/cookie fallback
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // 1. Try sessionStorage
+    // 1. Try latest screening/session from database query data first
+    if (chatSessionData) {
+      let computedTheme: AppTheme | null = null;
+      const hasScreenedToday = chatSessionData.hasScreenedToday;
+      const activeSession = chatSessionData.activeSession;
+
+      if (hasScreenedToday && activeSession) {
+        // Find theme from latest assistant message
+        const assistantMsgs = activeSession.chatMessages.filter((m) => m.role === "ASSISTANT");
+        const latestAssistantMsg = assistantMsgs.length > 0 ? assistantMsgs[assistantMsgs.length - 1] : null;
+        if (latestAssistantMsg?.metaData?.uiTheme) {
+          computedTheme = latestAssistantMsg.metaData.uiTheme;
+        }
+      }
+
+      // Fallback to latest screening score theme
+      if (!computedTheme && chatSessionData.latestScreening) {
+        computedTheme = getThemeFromScore(chatSessionData.latestScreening.score);
+      }
+
+      if (computedTheme) {
+        setThemeState(computedTheme);
+        window.sessionStorage.setItem("app-theme", computedTheme);
+        document.cookie = `app-theme=${computedTheme}; path=/; max-age=31536000`;
+        return;
+      }
+    }
+
+    // 2. Try sessionStorage fallback
     const savedTheme = window.sessionStorage.getItem("app-theme") as AppTheme | null;
     if (savedTheme && ["calm_blue", "warm_yellow", "alert_orange", "deep_purple"].includes(savedTheme)) {
       setThemeState(savedTheme);
       return;
     }
 
-    // 2. Try cookies
+    // 3. Try cookies fallback
     const cookieValue = document.cookie
       .split("; ")
       .find((row) => row.startsWith("app-theme="))
@@ -41,16 +69,6 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
     if (cookieValue && ["calm_blue", "warm_yellow", "alert_orange", "deep_purple"].includes(cookieValue)) {
       setThemeState(cookieValue);
       return;
-    }
-
-    // 3. Try latest screening from query data
-    if (chatSessionData?.latestScreening) {
-      const computedTheme = getThemeFromScore(chatSessionData.latestScreening.score);
-      setThemeState(computedTheme);
-      
-      // Save it
-      window.sessionStorage.setItem("app-theme", computedTheme);
-      document.cookie = `app-theme=${computedTheme}; path=/; max-age=31536000`;
     }
   }, [chatSessionData]);
 
