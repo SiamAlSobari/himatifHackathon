@@ -4,6 +4,7 @@ import screeningRepository from "@/repositories/screening.repository"
 import screeningService from "./screening.service"
 import { ScreeningResult } from "@/lib/types/dashboardpsikolog"
 import { AppointmentStatus } from "../../generated/prisma/enums"
+import sessionSummaryRepository from "@/repositories/sessionSummary.repository"
 
 export class PsychologistService {
   async getUserProfile(id: string) {
@@ -103,6 +104,13 @@ export class PsychologistService {
   }
 
   async getLatestAiSessionConclusion(userId: string): Promise<string | null> {
+    // 1. Try to get summary from SessionSummary table first
+    const latestSummary = await sessionSummaryRepository.getLatestByUserId(userId);
+    if (latestSummary) {
+      return latestSummary.summary;
+    }
+
+    // 2. Fallback to parsing finalConclusion from metadata of latest completed session
     const latestCompleted = await psychologistRepository.getLatestCompletedChatSession(userId)
 
     if (!latestCompleted) return null
@@ -229,7 +237,7 @@ export class PsychologistService {
         clientName: appt.user.name || appt.user.email || "Klien",
         clientRole: appt.user.usia ? `Pasien · ${appt.user.usia} Tahun` : "Pasien",
         clientImage: appt.user.image || "https://i.pravatar.cc/150",
-        schedule: `Video Call · ${apptTime.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`,
+        schedule: `Sesi Chat · ${apptTime.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`,
         status,
       };
     });
@@ -253,6 +261,7 @@ export class PsychologistService {
       return {
         id: appt.id,
         psychologName: psychName,
+        clientName: appt.user.name || appt.user.email || "Klien",
         psychologInitials: initials,
         date: apptDate.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }),
         status,

@@ -164,7 +164,7 @@ export default function ClientCard({ client }: ClientCardProps) {
                   className="flex gap-1.5 text-[11px] leading-snug text-slate-500"
                 >
                   <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-slate-400" />
-                  <span>{point}</span>
+                  <span className="line-clamp-5">{point}</span>
                 </li>
               ))}
             </ul>

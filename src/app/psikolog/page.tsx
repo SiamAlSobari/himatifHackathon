@@ -67,13 +67,13 @@ export default function DashboardPsikologPage() {
         </div>
 
         <ClientListSection clients={data.clientList} />
-
+{/* 
         <EmergencyBanner
           title="Butuh bantuan segera?"
           description="Tim kami tersedia 24/7 untuk situasi darurat psikologis."
           ctaLabel="Panggil Bantuan"
           phoneNumber="119"
-        />
+        /> */}
       </main>
     </div>
   );

@@ -100,15 +100,26 @@ model ChatSession {
   // Relasi 1 -> M dengan User
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  chatMessages ChatMessage[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  chatMessages   ChatMessage[]
+  sessionSummary SessionSummary?
 }
 
 enum ChatSessionStatus {
   ACTIVE
   SEALED
   COMPLETED
+}
+
+model SessionSummary {
+  id            String      @id @default(cuid())
+  chatSessionId String      @unique
+  summary       String      @db.Text
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  chatSession   ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
 }
 
 model ChatMessage {
