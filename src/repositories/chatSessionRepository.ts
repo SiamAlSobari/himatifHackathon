@@ -15,7 +15,8 @@ export class ChatSessionRepository {
             include: {
                 chatMessages: {
                     orderBy: { createdAt: "asc" }
-                }
+                },
+                sessionSummary: true
             }
         })
     }
@@ -35,7 +36,8 @@ export class ChatSessionRepository {
             include: {
                 chatMessages: {
                     orderBy: { createdAt: "asc" }
-                }
+                },
+                sessionSummary: true
             }
         })
     }

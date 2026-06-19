@@ -10,7 +10,7 @@ export interface TodayConsultation {
 export interface ConsultationHistoryItem {
   id: string;
   psychologName: string;
-  clientName: string;
+  clientName?: string;
   psychologInitials: string;
   date: string;
   status: "Selesai" | "Dijadwalkan" | "Dibatalkan";

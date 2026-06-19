@@ -96,12 +96,17 @@ export async function GET(request: Request) {
 
         const hasScreenedToday = await screeningService.checkDailyScreeningStatus(userId);
 
+        // Fetch all completed/sealed sessions for history
+        const allSessions = await chatSessionService.getUserChatSessions(userId);
+        const history = allSessions.filter((s) => s.status !== "ACTIVE");
+
         return successResponse(200, "Active chat session retrieved successfully", {
             activeSession: activeChatSession,
             cooldown,
             latestScreening,
             isOnboarded: user?.isOnboarded ?? false,
-            hasScreenedToday
+            hasScreenedToday,
+            history
         });
     } catch (error) {
         console.error("Error in chat session route:", error);

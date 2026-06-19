@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import ChatPanel from "@/components/chat/ChatPanel";
 import SummarySidebar from "@/components/chat/SummarySidebar";
+import ChatHistorySidebar from "@/components/chat/ChatHistorySidebar";
 import { useSession } from "next-auth/react";
 import { useChatNotification } from "@/hooks/chat/useChatNotification";
 import { useChatSession } from "@/hooks/chat/useChatSession";
+import { useCreateChatSession } from "@/hooks/chat/useCreateChatSession";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { AppTheme } from "@/lib/types/theme";
 
@@ -22,7 +24,17 @@ export default function ChatPage() {
   const session = useSession();
   const router = useRouter();
   const { data, isLoading, refetch } = useChatSession();
+  const createSessionMutation = useCreateChatSession();
   const { setTheme } = useTheme();
+
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+
+  // Reset selected history session if active session becomes available
+  useEffect(() => {
+    if (data?.activeSession) {
+      setSelectedSessionId(null);
+    }
+  }, [data?.activeSession?.id]);
 
   useEffect(() => {
     if (!isLoading && data) {
@@ -40,7 +52,11 @@ export default function ChatPage() {
     }
   );
 
-  const messages = data?.activeSession?.chatMessages || [];
+  const selectedHistorySession = data?.history?.find((s) => s.id === selectedSessionId) || null;
+
+  // Determine actual session to display (selected history session, active session, or completed session during cooldown)
+  const displaySession = selectedHistorySession || data?.activeSession || null;
+  const messages = displaySession?.chatMessages || [];
   const assistantMessages = messages.filter((m) => m.role === "ASSISTANT");
   const latestAssistantMessage =
     assistantMessages.length > 0
@@ -67,11 +83,35 @@ export default function ChatPage() {
     }
   }, [activeTheme, setTheme]);
 
+  const handleCreateSession = () => {
+    createSessionMutation.mutate(undefined, {
+      onSuccess: () => {
+        setSelectedSessionId(null);
+        refetch();
+      },
+    });
+  };
+
   const themeBg = themeBgMap[activeTheme as keyof typeof themeBgMap] || "bg-slate-50";
 
   return (
     <div className={`flex h-[calc(100vh-64px)] flex-col transition-colors duration-500 ${themeBg}`}>
-      <main className="mx-auto grid w-full max-w-7xl flex-1 grid-cols-1 gap-4 overflow-hidden px-6 py-4 lg:grid-cols-3">
+      <main className="mx-auto grid w-full max-w-7xl flex-1 grid-cols-1 gap-4 overflow-hidden px-6 py-4 lg:grid-cols-4">
+        {/* Left Column: Sesi Sidebar */}
+        <div className="h-full min-h-0 lg:col-span-1">
+          <ChatHistorySidebar
+            history={data?.history || []}
+            activeSession={data?.activeSession || null}
+            selectedSessionId={selectedSessionId}
+            onSelectSession={setSelectedSessionId}
+            activeTheme={activeTheme as AppTheme}
+            isCreatingSession={createSessionMutation.isPending}
+            onCreateSession={handleCreateSession}
+            cooldownActive={data?.cooldown?.active}
+          />
+        </div>
+
+        {/* Middle Column: Chat Panel */}
         <div className="lg:col-span-2 h-full min-h-0">
           <ChatPanel
             activeSession={data?.activeSession || null}
@@ -79,10 +119,12 @@ export default function ChatPage() {
             isLoading={isLoading}
             refetch={refetch}
             activeTheme={activeTheme}
+            selectedHistorySession={selectedHistorySession}
           />
         </div>
 
-        <div className="h-full min-h-0">
+        {/* Right Column: Summary Sidebar */}
+        <div className="h-full min-h-0 lg:col-span-1">
           <SummarySidebar
             latestAssistantMessage={latestAssistantMessage}
             latestScreening={data?.latestScreening || null}
