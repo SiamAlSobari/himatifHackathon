@@ -1,11 +1,20 @@
+"use client";
+
+import { useState } from "react";
 import { ArrowRight, BookHeart, Wind } from "lucide-react";
 import { ActivityRecommendation } from "@/lib/types/dashboard";
+import { useTheme } from "@/components/providers/ThemeProvider";
+import ActivityModal from "./ActivityModal";
 
 interface ActivityCardProps {
   title: string;
   description: string;
   subtitle: string;
   items: ActivityRecommendation[];
+}
+
+interface ActivityTileProps extends ActivityRecommendation {
+  onSelect: () => void;
 }
 
 const ICONS: Record<ActivityRecommendation["icon"], typeof Wind> = {
@@ -23,7 +32,7 @@ const LINK_STYLES: Record<ActivityRecommendation["icon"], string> = {
   journal: "text-rose-500 hover:text-rose-600",
 };
 
-function ActivityTile({ title, description, ctaLabel, icon }: ActivityRecommendation) {
+function ActivityTile({ title, description, ctaLabel, icon, onSelect }: ActivityTileProps) {
   const Icon = ICONS[icon];
 
   return (
@@ -43,7 +52,8 @@ function ActivityTile({ title, description, ctaLabel, icon }: ActivityRecommenda
 
       <button
         type="button"
-        className={`mt-auto flex items-center gap-1 text-xs font-semibold transition-colors ${LINK_STYLES[icon]}`}
+        onClick={onSelect}
+        className={`mt-auto flex items-center gap-1 text-xs font-semibold transition-colors cursor-pointer ${LINK_STYLES[icon]}`}
       >
         {ctaLabel}
         <ArrowRight className="h-3.5 w-3.5" />
@@ -58,6 +68,9 @@ export default function ActivityCard({
   subtitle,
   items,
 }: ActivityCardProps) {
+  const { theme } = useTheme();
+  const [selectedActivity, setSelectedActivity] = useState<ActivityRecommendation | null>(null);
+
   return (
     <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
       <h2 className="text-base font-semibold text-slate-800">{title}</h2>
@@ -66,7 +79,11 @@ export default function ActivityCard({
       <div className="mt-5 flex flex-col gap-3 sm:flex-row">
         {items.length > 0 ? (
           items.map((item) => (
-            <ActivityTile key={item.id} {...item} />
+            <ActivityTile
+              key={item.id}
+              {...item}
+              onSelect={() => setSelectedActivity(item)}
+            />
           ))
         ) : (
           <div className="w-full rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center text-slate-500">
@@ -82,6 +99,16 @@ export default function ActivityCard({
           </div>
         )}
       </div>
+
+      {selectedActivity && (
+        <ActivityModal
+          isOpen={!!selectedActivity}
+          onClose={() => setSelectedActivity(null)}
+          title={selectedActivity.title}
+          description={selectedActivity.description}
+          activeTheme={theme}
+        />
+      )}
     </div>
   );
 }
