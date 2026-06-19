@@ -237,7 +237,7 @@ export class PsychologistService {
         clientName: appt.user.name || appt.user.email || "Klien",
         clientRole: appt.user.usia ? `Pasien · ${appt.user.usia} Tahun` : "Pasien",
         clientImage: appt.user.image || "https://i.pravatar.cc/150",
-        schedule: `Video Call · ${apptTime.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`,
+        schedule: `Sesi Chat · ${apptTime.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`,
         status,
       };
     });
