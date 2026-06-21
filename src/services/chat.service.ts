@@ -8,6 +8,7 @@ import screeningRepository from "@/repositories/screening.repository";
 import chatSessionRepository from "@/repositories/chatSessionRepository";
 import { pusherServer } from "@/lib/pusher/pusher-server";
 import sessionSummaryService from "./sessionSummary.service";
+import blockchainSyncService from "./blockchain-sync.service";
 
 export class ChatService {
     private async formatChatHistories(sessionId: string) {
@@ -99,6 +100,10 @@ export class ChatService {
 
         if (userMessagesCount >= 7 || formattedResponse.metaData.isSessionEnded) {
             await chatSessionRepository.updateStatus(sessionId, "COMPLETED");
+            // Trigger blockchain sync asynchronously in the background
+            blockchainSyncService.syncChatSession(sessionId).catch(err => {
+                console.error("Failed to sync completed chat session to blockchain:", err);
+            });
         }
 
         await pusherServer.trigger(

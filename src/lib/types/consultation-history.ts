@@ -6,6 +6,8 @@ export interface ConsultationHistoryListItem {
   otherPartyImage?: string | null;
   otherPartyRole?: string;
   otherPartyEmail?: string;
+  ipfsCid?: string | null;
+  txHash?: string | null;
 }
 
 export interface ConsultationHistoryMessage {

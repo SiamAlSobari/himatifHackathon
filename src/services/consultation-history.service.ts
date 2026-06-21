@@ -20,6 +20,8 @@ export class ConsultationHistoryService {
           otherPartyImage: appt.user.image,
           otherPartyRole: appt.user.usia ? `Pasien · ${appt.user.usia} Tahun` : "Pasien",
           otherPartyEmail: appt.user.email,
+          ipfsCid: appt.ipfsCid,
+          txHash: appt.txHash,
         };
       });
     } else {
@@ -33,6 +35,8 @@ export class ConsultationHistoryService {
           otherPartyImage: appt.psychologistProfile.imageUrl,
           otherPartyRole: appt.psychologistProfile.role,
           otherPartyEmail: appt.psychologistProfile.user.email,
+          ipfsCid: appt.ipfsCid,
+          txHash: appt.txHash,
         };
       });
     }

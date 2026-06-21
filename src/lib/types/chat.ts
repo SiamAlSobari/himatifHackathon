@@ -27,6 +27,8 @@ export interface ChatSession {
     status: "ACTIVE" | "SEALED" | "COMPLETED";
     createdAt: Date | string;
     updatedAt: Date | string;
+    ipfsCid?: string | null;
+    txHash?: string | null;
 }
 
 export interface ChatSessionWithMessages extends ChatSession {

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { ArrowLeft, MessageSquare, ShieldAlert, CheckCircle2, XCircle } from "lucide-react";
 import { ConsultationHistoryListItem, ConsultationHistoryMessage } from "@/lib/types/consultation-history";
+import VerificationBadge from "@/components/chat/VerificationBadge";
 
 interface ChatAreaProps {
   appointment: ConsultationHistoryListItem | null;
@@ -91,12 +92,21 @@ export default function ChatArea({
         </div>
 
         {/* Status Badge */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           {appointment.status === "COMPLETED" ? (
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 text-xs font-semibold">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              Selesai
-            </div>
+            <>
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 text-xs font-semibold">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Selesai
+              </div>
+              {(appointment.ipfsCid || appointment.txHash) && (
+                <VerificationBadge
+                  appointmentId={appointment.id}
+                  initialIpfsCid={appointment.ipfsCid}
+                  initialTxHash={appointment.txHash}
+                />
+              )}
+            </>
           ) : (
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-600 border border-rose-100 text-xs font-semibold">
               <XCircle className="h-3.5 w-3.5" />

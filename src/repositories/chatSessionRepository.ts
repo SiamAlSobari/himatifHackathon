@@ -66,6 +66,13 @@ export class ChatSessionRepository {
             orderBy: { updatedAt: "desc" }
         })
     }
+
+    async updateBlockchainData(sessionId: string, ipfsCid: string, txHash: string) {
+        return await db.chatSession.update({
+            where: { id: sessionId },
+            data: { ipfsCid, txHash }
+        })
+    }
 }
 
 export const chatSessionRepository = new ChatSessionRepository();

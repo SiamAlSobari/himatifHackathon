@@ -107,6 +107,20 @@ class AppointmentRepository {
             where: { userId },
         });
     }
+
+    async updateBlockchainData(appointmentId: string, ipfsCid: string, txHash: string) {
+        return await db.appointment.update({
+            where: { id: appointmentId },
+            data: { ipfsCid, txHash }
+        });
+    }
+
+    async updateStatus(appointmentId: string, status: AppointmentStatus) {
+        return await db.appointment.update({
+            where: { id: appointmentId },
+            data: { status }
+        });
+    }
 }
 
 const appointmentRepository = new AppointmentRepository();
