@@ -52,3 +52,42 @@ export function useUpdatePhoneNumber() {
     },
   });
 }
+
+export function useSendOtp() {
+  return useMutation({
+    mutationFn: async (phoneNumber: string) => {
+      const res = await fetch("/api/profile/otp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneNumber }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || "Gagal mengirim kode verifikasi");
+      }
+      return json.data;
+    },
+  });
+}
+
+export function useVerifyOtp() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: { phoneNumber: string; otpCode: string }) => {
+      const res = await fetch("/api/profile/otp/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || "Gagal memverifikasi kode OTP");
+      }
+      return json.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile-data"] });
+    },
+  });
+}
+
