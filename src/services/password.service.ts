@@ -2,6 +2,7 @@ import crypto from "crypto";
 import bcrypt from "bcrypt";
 import userRepository from "@/repositories/user.repository";
 import tokenRepository from "@/repositories/token.repository";
+import { sendEmail } from "@/lib/email";
 
 export class PasswordService {
   async updatePassword(userId: string, currentPass: string, newPass: string) {
@@ -58,14 +59,37 @@ export class PasswordService {
 
     const resetLink = `${origin}/reset-password?token=${token}&email=${encodeURIComponent(trimmedEmail)}`;
 
-    console.log(`[PASSWORD RESET DEBUG] Link generated for ${trimmedEmail}: ${resetLink}`);
+    // Build email templates
+    const htmlBody = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+        <h2 style="color: #004349; text-align: center; font-family: 'Sora', sans-serif;">Atur Ulang Kata Sandi</h2>
+        <p style="color: #2d3748; font-size: 14px; line-height: 1.6;">Halo ${user.name || "Pengguna Jembatan Aman"},</p>
+        <p style="color: #2d3748; font-size: 14px; line-height: 1.6;">Kami menerima permintaan untuk mengatur ulang kata sandi akun Jembatan Aman Anda. Silakan klik tombol di bawah ini untuk melanjutkan:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetLink}" style="background-color: #004349; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 14px;">Atur Ulang Sandi</a>
+        </div>
+        <p style="color: #4a5568; font-size: 13px; line-height: 1.6;">Tautan ini hanya berlaku selama 1 jam. Jika Anda tidak meminta pengaturan ulang ini, silakan abaikan email ini dengan aman.</p>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 25px 0;" />
+        <p style="font-size: 11px; color: #a0aec0; line-height: 1.5; word-break: break-all;">Jika tombol di atas tidak berfungsi, salin dan tempel tautan berikut ke browser Anda:<br /><a href="${resetLink}" style="color: #004349; text-decoration: underline;">${resetLink}</a></p>
+      </div>
+    `;
 
-    // Since we don't have a real email provider integrated for the MVP, 
-    // we log the link and send it in the API response (mock mode) so that it can be easily copied and tested.
+    const textBody = `Halo, silakan atur ulang kata sandi Anda dengan mengunjungi link berikut: ${resetLink}`;
+
+    // Send email using Nodemailer helper
+    const emailResult = await sendEmail({
+      to: trimmedEmail,
+      subject: "Atur Ulang Kata Sandi — Jembatan Aman",
+      html: htmlBody,
+      text: textBody,
+    });
+
+    console.log(`[PASSWORD RESET] Email dispatch result. Mocked: ${emailResult.mocked}`);
+
     return {
       success: true,
-      mocked: true,
-      resetLink,
+      mocked: emailResult.mocked,
+      resetLink, // Still return link for demo simulation page box
     };
   }
 

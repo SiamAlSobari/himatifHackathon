@@ -1,6 +1,7 @@
 import { formatToIndonesianNumber } from "@/lib/phone-helper";
 import { otpStore, generateOtpCode } from "@/lib/otp-store";
 import userRepository from "@/repositories/user.repository";
+import { sendWhatsApp } from "@/lib/fonnte";
 
 export class OtpService {
   async sendOtp(userId: string, rawPhone: string) {
@@ -18,47 +19,19 @@ export class OtpService {
       expiresAt,
       userId,
     });
-    // Call Fonnte API
-    const fonnteToken = process.env.FONNTE_TOKEN;
-    
-    // If token is missing, log a warning and succeed (for testing/demo fallback)
-    if (!fonnteToken || fonnteToken === "your_fonnte_token_here") {
-      console.warn("[FONNTE] Token is not configured. Falling back to Mock SMS/WhatsApp. OTP Code:", otpCode);
-      return {
-        success: true,
-        formattedPhone,
-        mocked: true,
-        code: otpCode,
-      };
-    }
 
-    try {
-      const response = await fetch("https://api.fonnte.com/send", {
-        method: "POST",
-        headers: {
-          Authorization: fonnteToken,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          target: formattedPhone,
-          message: `Kode verifikasi Jembatan Aman Anda adalah: ${otpCode}. Kode ini berlaku selama 5 menit. Jangan bagikan kode ini kepada siapapun.`,
-        }),
-      });
+    console.log(`[OTP DEBUG] Sent OTP ${otpCode} to ${formattedPhone} for user ${userId}`);
 
-      const resJson = await response.json();
-      if (!response.ok || !resJson.status) {
-        throw new Error(resJson.reason || "Fonnte API returned failure status");
-      }
+    // Call Fonnte WhatsApp helper
+    const message = `Kode verifikasi Jembatan Aman Anda adalah: ${otpCode}. Kode ini berlaku selama 5 menit. Jangan bagikan kode ini kepada siapapun.`;
+    const result = await sendWhatsApp(formattedPhone, message);
 
-      return {
-        success: true,
-        formattedPhone,
-        mocked: false,
-      };
-    } catch (err: any) {
-      console.error("[FONNTE ERROR]:", err);
-      throw new Error(`Gagal mengirim kode verifikasi ke ${formattedPhone}: ${err.message || "Provider error"}`);
-    }
+    return {
+      success: true,
+      formattedPhone,
+      mocked: result.mocked,
+      code: result.code, // Returned code if in mock mode for E2E testing ease
+    };
   }
 
   async verifyOtp(userId: string, rawPhone: string, code: string) {
