@@ -12,10 +12,10 @@ export default function PersonalInfoCard({
   phoneNumber,
 }: PersonalInfoCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md">
       <div className="mb-5 flex items-center gap-2">
         <User className="h-4.5 w-4.5 text-slate-400" />
-        <h2 className="text-base font-semibold text-slate-800">
+        <h2 className="text-base font-bold text-slate-800">
           Informasi Pribadi
         </h2>
       </div>
@@ -24,7 +24,7 @@ export default function PersonalInfoCard({
         <div>
           <label
             htmlFor="fullName"
-            className="mb-1.5 block text-xs font-medium text-slate-500"
+            className="mb-1.5 block text-xs font-semibold text-slate-400"
           >
             Nama Lengkap
           </label>
@@ -33,14 +33,14 @@ export default function PersonalInfoCard({
             name="fullName"
             type="text"
             defaultValue={fullName}
-            className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-teal-300 focus:ring-1 focus:ring-teal-200"
+            className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-medium text-slate-700 outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary/25"
           />
         </div>
 
         <div>
           <label
             htmlFor="email"
-            className="mb-1.5 block text-xs font-medium text-slate-500"
+            className="mb-1.5 block text-xs font-semibold text-slate-400"
           >
             Email
           </label>
@@ -49,14 +49,14 @@ export default function PersonalInfoCard({
             name="email"
             type="email"
             defaultValue={email}
-            className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors focus:border-teal-300 focus:ring-1 focus:ring-teal-200"
+            className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-medium text-slate-700 outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary/25"
           />
         </div>
 
         <div>
           <label
             htmlFor="phoneNumber"
-            className="mb-1.5 block text-xs font-medium text-slate-500"
+            className="mb-1.5 block text-xs font-semibold text-slate-400"
           >
             Nomor Telepon
           </label>
@@ -66,10 +66,10 @@ export default function PersonalInfoCard({
             type="tel"
             defaultValue={phoneNumber || ""}
             placeholder="+62 8xx-xxxx-xxxx"
-            className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 placeholder:text-slate-300 outline-none transition-colors focus:border-teal-300 focus:ring-1 focus:ring-teal-200"
+            className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-medium text-slate-700 placeholder:text-slate-300 outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary/25"
           />
         </div>
       </div>
     </div>
   );
-}
+}
