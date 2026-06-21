@@ -33,6 +33,13 @@ class UserRepository {
             data,
         });
     }
+
+    async updateUserPassword(id: string, passwordHash: string) {
+        return await db.user.update({
+            where: { id },
+            data: { passwordHash },
+        });
+    }
 }
 
 const userRepository = new UserRepository();

@@ -3,14 +3,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { X, User, Calendar, Smile, Send, CheckCircle2, ShieldAlert } from "lucide-react";
+import { X, User, Calendar, Smile, Send, CheckCircle2, ShieldAlert, Lock } from "lucide-react";
 import ProfileCard from "@/components/profile/Profilecard";
 import QuickHelpCard from "@/components/profile/Quickhelpcard";
 import PersonalInfoCard from "@/components/profile/Personainfocard";
 import AccountSettingsCard from "@/components/profile/Accountsettingcard";
 import ConsultationHistoryCard from "@/components/profile/Consultationhistorycard";
 import ScreeningTrendsCard from "@/components/profile/ScreeningTrendsCard";
-import { useProfile, useUpdateProfile, useSendOtp, useVerifyOtp } from "@/hooks/profile/useProfile";
+import { useProfile, useUpdateProfile, useSendOtp, useVerifyOtp, useUpdatePassword } from "@/hooks/profile/useProfile";
 import { quickHelpLinks } from "./data";
 
 export default function ProfilePage() {
@@ -20,23 +20,31 @@ export default function ProfilePage() {
   const updateProfileMutation = useUpdateProfile();
   const sendOtpMutation = useSendOtp();
   const verifyOtpMutation = useVerifyOtp();
+  const updatePasswordMutation = useUpdatePassword();
 
-  // Modal Visibility State
+  // Modal Visibility States
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
   // Phone verification state
   const [otpStep, setOtpStep] = useState<"input" | "verify">("input");
   const [otpCode, setOtpCode] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
-  const [modalError, setModalError] = useState<string | null>(null);
+  const [phoneModalError, setPhoneModalError] = useState<string | null>(null);
   const [demoCode, setDemoCode] = useState<string | null>(null);
 
-  // Form Input States
+  // Form Input States (Profile)
   const [editName, setEditName] = useState("");
   const [editAge, setEditAge] = useState<number | "">("");
   const [editGender, setEditGender] = useState("");
   const [editPhone, setEditPhone] = useState("");
+
+  // Password Input States
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [passwordModalError, setPasswordModalError] = useState<string | null>(null);
 
   // Sync state when data is loaded
   useEffect(() => {
@@ -101,9 +109,17 @@ export default function ProfilePage() {
     setEditPhone(data.dbUser.kontakDarurat || "");
     setOtpStep("input");
     setOtpCode("");
-    setModalError(null);
+    setPhoneModalError(null);
     setDemoCode(null);
     setIsPhoneModalOpen(true);
+  };
+
+  const handleOpenPasswordModal = () => {
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmNewPassword("");
+    setPasswordModalError(null);
+    setIsPasswordModalOpen(true);
   };
 
   const handleUpdateProfile = (e: React.FormEvent) => {
@@ -141,12 +157,12 @@ export default function ProfilePage() {
 
   const handleSendOtp = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    setModalError(null);
+    setPhoneModalError(null);
     setDemoCode(null);
     
     const rawInput = editPhone.trim();
     if (!rawInput) {
-      setModalError("Nomor telepon tidak boleh kosong.");
+      setPhoneModalError("Nomor telepon tidak boleh kosong.");
       return;
     }
 
@@ -164,17 +180,17 @@ export default function ProfilePage() {
         }
       },
       onError: (err: any) => {
-        setModalError(err.message || "Gagal mengirim kode verifikasi.");
+        setPhoneModalError(err.message || "Gagal mengirim kode verifikasi.");
       },
     });
   };
 
   const handleVerifyOtp = (e: React.FormEvent) => {
     e.preventDefault();
-    setModalError(null);
+    setPhoneModalError(null);
     const cleanCode = otpCode.trim();
     if (!cleanCode) {
-      setModalError("Kode verifikasi OTP tidak boleh kosong.");
+      setPhoneModalError("Kode verifikasi OTP tidak boleh kosong.");
       return;
     }
 
@@ -192,10 +208,46 @@ export default function ProfilePage() {
           setDemoCode(null);
         },
         onError: (err: any) => {
-          setModalError(err.message || "Gagal memverifikasi kode OTP.");
+          setPhoneModalError(err.message || "Gagal memverifikasi kode OTP.");
         },
       }
     );
+  };
+
+  const handleUpdatePassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordModalError(null);
+
+    if (!currentPassword) {
+      setPasswordModalError("Password saat ini wajib diisi.");
+      return;
+    }
+    if (!newPassword || newPassword.length < 6) {
+      setPasswordModalError("Password baru minimal 6 karakter.");
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      setPasswordModalError("Konfirmasi password baru tidak cocok.");
+      return;
+    }
+
+    updatePasswordMutation.mutate(
+      { currentPassword, newPassword },
+      {
+        onSuccess: () => {
+          toast.success("Kata sandi berhasil diperbarui!");
+          setIsPasswordModalOpen(false);
+        },
+        onError: (err: any) => {
+          setPasswordModalError(err.message || "Gagal memperbarui kata sandi.");
+        },
+      }
+    );
+  };
+
+  const handleForgotPasswordRedirect = () => {
+    setIsPasswordModalOpen(false);
+    router.push(`/forgot-password?email=${encodeURIComponent(data.dbUser.email)}`);
   };
 
   return (
@@ -221,7 +273,10 @@ export default function ProfilePage() {
               phoneNumber={phoneNumber}
               onEditPhone={handleOpenPhoneModal}
             />
-            <AccountSettingsCard initialNotificationsEnabled={false} />
+            <AccountSettingsCard 
+              initialNotificationsEnabled={false} 
+              onUpdatePassword={handleOpenPasswordModal}
+            />
           </div>
         </div>
       </div>
@@ -362,10 +417,10 @@ export default function ProfilePage() {
             </div>
 
             {/* Error Display inside Modal */}
-            {modalError && (
+            {phoneModalError && (
               <div className="mb-4 flex items-start gap-2 rounded-xl bg-rose-50 p-3 border border-rose-100/50 text-rose-600">
                 <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5" />
-                <p className="text-xs font-semibold leading-relaxed">{modalError}</p>
+                <p className="text-xs font-semibold leading-relaxed">{phoneModalError}</p>
               </div>
             )}
 
@@ -386,7 +441,7 @@ export default function ProfilePage() {
                     autoFocus
                   />
                   <p className="text-[10px] text-slate-400 mt-1">
-                    Format bebas (aplikasi akan memformat otomatis ke format negara, contoh: 62812xxx). Kode OTP akan dikirim via WhatsApp/SMS Fonte.
+                    Format bebas (backend akan memformat otomatis ke format negara, contoh: 62812xxx). Kode OTP akan dikirim via WhatsApp/SMS Fonte.
                   </p>
                 </div>
 
@@ -492,6 +547,121 @@ export default function ProfilePage() {
                 </div>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================ */}
+      {/* MODAL 3: UPDATE PASSWORD */}
+      {/* ============================================================ */}
+      {isPasswordModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 transition-all animate-fade-in">
+          <div className="bg-white rounded-3xl w-full max-w-[420px] p-6 soft-bloom animate-scale-in relative border border-slate-100 shadow-2xl">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary text-xl">shield_lock</span>
+                Ubah Kata Sandi
+              </h3>
+              <button
+                onClick={() => setIsPasswordModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 cursor-pointer p-1 rounded-full hover:bg-slate-50 transition-colors"
+                disabled={updatePasswordMutation.isPending}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Error Message */}
+            {passwordModalError && (
+              <div className="mb-4 flex items-start gap-2 rounded-xl bg-rose-50 p-3 border border-rose-100/50 text-rose-600">
+                <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5" />
+                <p className="text-xs font-semibold leading-relaxed">{passwordModalError}</p>
+              </div>
+            )}
+
+            {/* Form */}
+            <form onSubmit={handleUpdatePassword} className="space-y-4">
+              {/* Current Password */}
+              <div>
+                <div className="flex justify-between items-center mb-1.5">
+                  <label className="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
+                    <Lock className="h-3.5 w-3.5 text-slate-400" />
+                    Kata Sandi Saat Ini
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleForgotPasswordRedirect}
+                    className="text-[10px] font-bold text-primary hover:underline hover:opacity-85 cursor-pointer"
+                  >
+                    Lupa password?
+                  </button>
+                </div>
+                <input
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="Masukkan kata sandi saat ini"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold text-slate-700 outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary/25"
+                  disabled={updatePasswordMutation.isPending}
+                />
+              </div>
+
+              {/* New Password */}
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold text-slate-500 flex items-center gap-1.5">
+                  <Lock className="h-3.5 w-3.5 text-slate-400" />
+                  Kata Sandi Baru
+                </label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Minimal 6 karakter"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold text-slate-700 outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary/25"
+                  disabled={updatePasswordMutation.isPending}
+                />
+              </div>
+
+              {/* Confirm New Password */}
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold text-slate-500 flex items-center gap-1.5">
+                  <Lock className="h-3.5 w-3.5 text-slate-400" />
+                  Konfirmasi Kata Sandi Baru
+                </label>
+                <input
+                  type="password"
+                  value={confirmNewPassword}
+                  onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  placeholder="Ketik ulang kata sandi baru"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-semibold text-slate-700 outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary/25"
+                  disabled={updatePasswordMutation.isPending}
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4 border-t border-slate-50 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setIsPasswordModalOpen(false)}
+                  className="flex-1 rounded-xl border border-slate-200 py-2.5 text-xs font-bold text-slate-500 hover:bg-slate-50 transition-all cursor-pointer"
+                  disabled={updatePasswordMutation.isPending}
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 rounded-xl bg-primary py-2.5 text-xs font-bold text-white hover:bg-primary/95 transition-all cursor-pointer flex items-center justify-center gap-2"
+                  disabled={updatePasswordMutation.isPending}
+                >
+                  {updatePasswordMutation.isPending ? (
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  ) : (
+                    "Ubah Sandi"
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

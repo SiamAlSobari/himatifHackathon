@@ -91,3 +91,55 @@ export function useVerifyOtp() {
   });
 }
 
+export function useUpdatePassword() {
+  return useMutation({
+    mutationFn: async (data: { currentPassword?: string; newPassword?: string }) => {
+      const res = await fetch("/api/profile/password/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || "Gagal memperbarui kata sandi");
+      }
+      return json.data;
+    },
+  });
+}
+
+export function useRequestPasswordReset() {
+  return useMutation({
+    mutationFn: async (email: string) => {
+      const res = await fetch("/api/auth/password/reset-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || "Gagal mengirim link reset password");
+      }
+      return json.data;
+    },
+  });
+}
+
+export function useConfirmPasswordReset() {
+  return useMutation({
+    mutationFn: async (data: { token?: string; email?: string; newPassword?: string }) => {
+      const res = await fetch("/api/auth/password/reset-confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || "Gagal mengatur ulang kata sandi");
+      }
+      return json.data;
+    },
+  });
+}
+
+

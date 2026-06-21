@@ -4,7 +4,7 @@ import { NextResponse } from "next/server"
 export const runtime = "nodejs"
 
 // Route yang bisa diakses tanpa login
-const PUBLIC_PATHS = ["/login", "/register", "/psikolog/login", "/psikolog/register"]
+const PUBLIC_PATHS = ["/login", "/register", "/psikolog/login", "/psikolog/register", "/forgot-password", "/reset-password"]
 
 export default auth((req) => {
 

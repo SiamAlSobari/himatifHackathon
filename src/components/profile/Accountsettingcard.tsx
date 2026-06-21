@@ -5,10 +5,12 @@ import { useState } from "react";
 
 interface AccountSettingsCardProps {
   initialNotificationsEnabled?: boolean;
+  onUpdatePassword?: () => void;
 }
 
 export default function AccountSettingsCard({
   initialNotificationsEnabled = false,
+  onUpdatePassword,
 }: AccountSettingsCardProps) {
   const [notificationsEnabled, setNotificationsEnabled] = useState(
     initialNotificationsEnabled
@@ -48,7 +50,8 @@ export default function AccountSettingsCard({
 
         <button
           type="button"
-          className="flex items-center justify-between rounded-xl px-1 py-1 text-left transition-colors cursor-pointer hover:text-primary group"
+          onClick={onUpdatePassword}
+          className="flex items-center justify-between rounded-xl px-1 py-1 text-left transition-colors cursor-pointer hover:text-primary group w-full"
         >
           <span className="flex items-center gap-2 text-sm font-bold text-slate-700 transition-colors group-hover:text-primary">
             <ShieldCheck className="h-4 w-4 text-slate-400 transition-colors group-hover:text-primary" />
