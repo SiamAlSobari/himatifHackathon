@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { screeningQuestions, answerOptions } from "@/lib/constants/questions";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 // Custom styles that mimic the provided HTML styling configuration
 const colors = {
@@ -166,6 +167,8 @@ export default function ScreeningClient({
       })),
     ];
 
+    const toastId = toast.loading("Menyimpan hasil screening Anda...");
+
     try {
       setLoading(true);
       const screeningType = isOnboarded ? "DAILY" : "ONBOARDING";
@@ -206,10 +209,13 @@ export default function ScreeningClient({
 
       // Successful screening
       setIsSubmittedSuccessfully(true);
+      toast.success("Hasil screening berhasil disimpan!", { id: toastId });
       router.refresh();
     } catch (err) {
       console.error(err);
-      setErrorMsg(err instanceof Error ? err.message : "Terjadi kesalahan sistem.");
+      const errMsg = err instanceof Error ? err.message : "Terjadi kesalahan sistem.";
+      setErrorMsg(errMsg);
+      toast.error(errMsg, { id: toastId });
     } finally {
       setLoading(false);
     }

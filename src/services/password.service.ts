@@ -63,8 +63,8 @@ export class PasswordService {
     const htmlBody = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
         <h2 style="color: #004349; text-align: center; font-family: 'Sora', sans-serif;">Atur Ulang Kata Sandi</h2>
-        <p style="color: #2d3748; font-size: 14px; line-height: 1.6;">Halo ${user.name || "Pengguna Jembatan Aman"},</p>
-        <p style="color: #2d3748; font-size: 14px; line-height: 1.6;">Kami menerima permintaan untuk mengatur ulang kata sandi akun Jembatan Aman Anda. Silakan klik tombol di bawah ini untuk melanjutkan:</p>
+        <p style="color: #2d3748; font-size: 14px; line-height: 1.6;">Halo ${user.name || "Pengguna Verimind"},</p>
+        <p style="color: #2d3748; font-size: 14px; line-height: 1.6;">Kami menerima permintaan untuk mengatur ulang kata sandi akun Verimind Anda. Silakan klik tombol di bawah ini untuk melanjutkan:</p>
         <div style="text-align: center; margin: 30px 0;">
           <a href="${resetLink}" style="background-color: #004349; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 14px;">Atur Ulang Sandi</a>
         </div>
@@ -79,7 +79,7 @@ export class PasswordService {
     // Send email using Nodemailer helper
     const emailResult = await sendEmail({
       to: trimmedEmail,
-      subject: "Atur Ulang Kata Sandi — Jembatan Aman",
+      subject: "Atur Ulang Kata Sandi — Verimind",
       html: htmlBody,
       text: textBody,
     });

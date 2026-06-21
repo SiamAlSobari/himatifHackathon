@@ -21,7 +21,7 @@ export async function sendEmail({
   const port = process.env.SMTP_PORT;
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
-  const from = process.env.SMTP_FROM || "Jembatan Aman <noreply@jembatanaman.com>";
+  const from = process.env.SMTP_FROM || "Verimind <noreply@verimind.com>";
 
   // Check if SMTP configurations are set. Otherwise, fallback to mock mode.
   if (!host || !user || !pass) {

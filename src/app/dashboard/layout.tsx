@@ -3,7 +3,7 @@ import { auth } from "@/auth"
 import { db } from "@/lib/db"
 
 export const metadata = {
-  title: "Dashboard • Jembatan Aman",
+  title: "Dashboard • Verimind",
 }
 
 export default async function DashboardLayout({

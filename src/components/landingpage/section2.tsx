@@ -28,7 +28,7 @@ export default function Section2() {
           {/* Left: Text */}
           <div>
             <h2 className="text-5xl font-bold text-foreground mb-3 leading-tight">
-              Halo, Saya <span className="text-primary transition-colors duration-500">LOMBUT</span> AI
+              Halo, Saya <span className="text-primary transition-colors duration-500">VERY</span> AI
             </h2>
             <p className="text-sm font-semibold uppercase tracking-widest text-[#2D3748]/50 mb-6">
               Pendamping Refleksi Emosionalmu
@@ -69,7 +69,7 @@ export default function Section2() {
               >
                 <Image
                   src="/mommy.jpg"
-                  alt="LOMBUT AI"
+                  alt="VERY AI"
                   fill
                   className="object-cover object-top"
                 />

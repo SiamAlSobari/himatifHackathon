@@ -137,6 +137,8 @@ export default function ProfilePage() {
       return;
     }
 
+    const toastId = toast.loading("Memperbarui profil...");
+
     updateProfileMutation.mutate(
       {
         name: editName,
@@ -145,11 +147,11 @@ export default function ProfilePage() {
       },
       {
         onSuccess: () => {
-          toast.success("Profil berhasil diperbarui!");
+          toast.success("Profil berhasil diperbarui!", { id: toastId });
           setIsProfileModalOpen(false);
         },
         onError: (err: any) => {
-          toast.error(err.message || "Gagal memperbarui profil.");
+          toast.error(err.message || "Gagal memperbarui profil.", { id: toastId });
         },
       }
     );
@@ -166,6 +168,8 @@ export default function ProfilePage() {
       return;
     }
 
+    const toastId = toast.loading("Mengirim kode verifikasi OTP...");
+
     sendOtpMutation.mutate(rawInput, {
       onSuccess: (res) => {
         setOtpStep("verify");
@@ -174,13 +178,15 @@ export default function ProfilePage() {
         
         if (res.mocked && res.code) {
           setDemoCode(res.code);
-          toast.info(`[Demo Mode] OTP: ${res.code}`, { duration: 8000 });
+          toast.info(`[Demo Mode] OTP: ${res.code}`, { id: toastId, duration: 8000 });
         } else {
-          toast.success("Kode verifikasi telah dikirim!");
+          toast.success("Kode verifikasi telah dikirim!", { id: toastId });
         }
       },
       onError: (err: any) => {
-        setPhoneModalError(err.message || "Gagal mengirim kode verifikasi.");
+        const errMsg = err.message || "Gagal mengirim kode verifikasi.";
+        setPhoneModalError(errMsg);
+        toast.error(errMsg, { id: toastId });
       },
     });
   };
@@ -194,6 +200,8 @@ export default function ProfilePage() {
       return;
     }
 
+    const toastId = toast.loading("Memverifikasi nomor telepon...");
+
     verifyOtpMutation.mutate(
       {
         phoneNumber: editPhone,
@@ -201,14 +209,16 @@ export default function ProfilePage() {
       },
       {
         onSuccess: () => {
-          toast.success("Nomor telepon berhasil diverifikasi & diperbarui!");
+          toast.success("Nomor telepon berhasil diverifikasi & diperbarui!", { id: toastId });
           setIsPhoneModalOpen(false);
           setOtpStep("input");
           setOtpCode("");
           setDemoCode(null);
         },
         onError: (err: any) => {
-          setPhoneModalError(err.message || "Gagal memverifikasi kode OTP.");
+          const errMsg = err.message || "Gagal memverifikasi kode OTP.";
+          setPhoneModalError(errMsg);
+          toast.error(errMsg, { id: toastId });
         },
       }
     );
@@ -231,15 +241,19 @@ export default function ProfilePage() {
       return;
     }
 
+    const toastId = toast.loading("Memperbarui kata sandi...");
+
     updatePasswordMutation.mutate(
       { currentPassword, newPassword },
       {
         onSuccess: () => {
-          toast.success("Kata sandi berhasil diperbarui!");
+          toast.success("Kata sandi berhasil diperbarui!", { id: toastId });
           setIsPasswordModalOpen(false);
         },
         onError: (err: any) => {
-          setPasswordModalError(err.message || "Gagal memperbarui kata sandi.");
+          const errMsg = err.message || "Gagal memperbarui kata sandi.";
+          setPasswordModalError(errMsg);
+          toast.error(errMsg, { id: toastId });
         },
       }
     );

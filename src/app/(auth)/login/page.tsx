@@ -24,9 +24,10 @@ export default function LoginPage() {
         <div className="flex items-center justify-between mb-5">
           <Link
             href="/"
-            className="text-lg font-bold text-[#0D1B2A] tracking-tight"
+            className="flex items-center gap-2.5 text-lg font-bold text-[#0D1B2A] tracking-tight"
           >
-            Jembatan <span className="text-[#1A8A7A]">Aman</span>
+            <img src="/logo-app.png" alt="Verimind Logo" className="h-8 w-auto object-contain" />
+            <span>Veri<span className="text-[#1A8A7A]">mind</span></span>
           </Link>
           <div className="inline-flex items-center gap-1.5 bg-rose-100 border border-rose-200 rounded-full px-2.5 py-1">
             <Heart className="h-3 w-3 text-rose-500 fill-rose-500" />
@@ -69,7 +70,7 @@ export default function LoginPage() {
             <div className="flex justify-end">
               <div className="bg-white border border-black/5 rounded-2xl rounded-br-md px-3.5 py-2 shadow-sm max-w-[80%]">
                 <p className="text-xs text-[#0D1B2A]">
-                  hai LOMBUT, akhir-akhir ini agak kosong aja 😅
+                  hai Very, akhir-akhir ini agak kosong aja 😅
                 </p>
               </div>
             </div>
@@ -131,7 +132,7 @@ export default function LoginPage() {
                 <span className="text-[9px] font-bold text-[#0D1B2A]">4.9</span>
               </div>
               <p className="text-[10px] text-[#2D3748]/70 italic leading-snug">
-                &ldquo;ngobrol sama LOMBUT berasa kayak bestie. jadi lebih ngerti
+                &ldquo;ngobrol sama Very AI berasa kayak bestie. jadi lebih ngerti
                 perasaan sendiri ✨&rdquo;
               </p>
             </div>
@@ -143,9 +144,10 @@ export default function LoginPage() {
         <nav className="flex items-center justify-between px-6 py-5 shrink-0">
           <Link
             href="/"
-            className="text-base font-bold text-[#0D1B2A] tracking-tight"
+            className="flex items-center gap-2.5 text-base font-bold text-[#0D1B2A] tracking-tight"
           >
-            Jembatan <span className="text-[#1A8A7A]">Aman</span>
+            <img src="/logo-app.png" alt="Verimind Logo" className="h-8 w-auto object-contain" />
+            <span>Veri<span className="text-[#1A8A7A]">mind</span></span>
           </Link>
           <div className="text-xs text-[#2D3748]/70">
             belum punya akun?{" "}

@@ -23,7 +23,7 @@ export class OtpService {
     console.log(`[OTP DEBUG] Sent OTP ${otpCode} to ${formattedPhone} for user ${userId}`);
 
     // Call Fonnte WhatsApp helper
-    const message = `Kode verifikasi Jembatan Aman Anda adalah: ${otpCode}. Kode ini berlaku selama 5 menit. Jangan bagikan kode ini kepada siapapun.`;
+    const message = `Kode verifikasi Verimind Anda adalah: ${otpCode}. Kode ini berlaku selama 5 menit. Jangan bagikan kode ini kepada siapapun.`;
     const result = await sendWhatsApp(formattedPhone, message);
 
     return {

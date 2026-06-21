@@ -35,16 +35,20 @@ function ForgotPasswordContent() {
       return;
     }
 
+    const toastId = toast.loading("Mengirim link reset sandi...");
+
     resetRequestMutation.mutate(cleanEmail, {
       onSuccess: (res) => {
         setIsSuccess(true);
-        toast.success("Link reset password berhasil dikirim!");
+        toast.success("Link reset password berhasil dikirim!", { id: toastId });
         if (res.mocked && res.resetLink) {
           setResetLink(res.resetLink);
         }
       },
       onError: (err: any) => {
-        setErrorMsg(err.message || "Gagal mengirim link reset password.");
+        const errMsg = err.message || "Gagal mengirim link reset password.";
+        setErrorMsg(errMsg);
+        toast.error(errMsg, { id: toastId });
       },
     });
   };
