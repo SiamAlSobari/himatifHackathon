@@ -26,21 +26,19 @@ Dengan menyatukan teknologi **Empathetic AI** (didukung oleh Google Gemini) untu
 
 ---
 
-## ⚠️ Latar Belakang & Permasalahan
+## ⚠️ Permasalahan yang Diangkat
 
-Kesehatan mental sering kali diabaikan atau ditunda penanganannya karena beberapa hambatan utama:
-1. **Kebingungan & Keraguan Diri**: Banyak orang merasa ragu apakah tingkat kecemasan atau kesedihan yang dialami sudah "cukup serius" untuk dibawa ke psikolog.
-2. **Stigma Sosial & Hambatan Finansial**: Hambatan stigma sosial di masyarakat dan kekhawatiran biaya konsultasi membuat orang menunda mencari pertolongan.
-3. **Keterbatasan Konteks bagi Profesional**: Psikolog sering memulai sesi konsultasi dari nol tanpa adanya konteks atau riwayat kondisi emosional terstruktur dari klien, yang memakan waktu sesi untuk klarifikasi awal.
+Banyak orang yang mengalami tekanan psikologis ringan hingga menengah (stress, kecemasan, gejala awal masalah kesehatan mental) tidak mendapatkan pertolongan pertama secara cepat dan aman karena akses ke psikolog profesional terbatas, biaya konsultasi relatif tinggi, dan stigma sosial yang membuat seseorang enggan mencari bantuan sejak tahap awal. Dibutuhkan sebuah ruang aman yang dapat memberikan validasi emosi, melakukan deteksi dini risiko krisis, dan menjembatani pengguna ke psikolog profesional saat memang diperlukan.
 
 ---
 
-## 💡 Solusi & Nilai Tambah (Value Proposition)
+## 💡 Solusi yang Ditawarkan
 
-Verimind memecahkan masalah ini dengan menghadirkan alur onboarding bertahap yang ramah pengguna:
-* **Deteksi Ringan**: Mengidentifikasi kondisi awal tanpa kesan menghakimi melalui kuesioner interaktif.
-* **Pendampingan Anonim**: Menyediakan chatbot pendengar yang memvalidasi perasaan dan melacak fluktuasi mood pengguna secara mandiri.
-* **Integrasi Profesional**: Menyusun ringkasan kondisi klinis secara otomatis untuk mempercepat diagnosa psikolog mitra ketika pengguna dirujuk.
+Tim mengembangkan **“Verimind”**, platform pertolongan pertama psikologis berbasis web yang terdiri dari empat pilar utama:
+1. **Screening Awal & Harian**: Screening awal (*onboarding*) dan screening harian untuk memetakan kondisi emosi pengguna secara terstruktur.
+2. **Chatbot AI Emosional (Very AI)**: Chatbot AI didukung Google Gemini yang melakukan validasi, refleksi, dan deteksi krisis tanpa memberikan diagnosis medis.
+3. **Tema Visual Dinamis (Dynamic Theming)**: Menyesuaikan tampilan antarmuka chat dengan skor screening/tingkat emosi terkini agar terasa lebih personal dan menenangkan.
+4. **Pemesanan & Chat Real-time**: Pencarian dan pemesanan psikolog profesional secara langsung saat chatbot mendeteksi kebutuhan rujukan, dilengkapi sesi chat real-time (menggunakan Pusher) antara klien dan psikolog.
 
 ### Manfaat bagi Stakeholder
 
