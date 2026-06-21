@@ -35,3 +35,18 @@ export async function POST(request: Request) {
         return errorResponse(500, "Failed to calculate screening");
     }
 }
+
+export async function GET() {
+    const session = await auth();
+    if (!session?.user?.id) {
+        return errorResponse(401, "Unauthorized");
+    }
+
+    try {
+        const history = await screeningService.getScreeningHistory(session.user.id);
+        return successResponse(200, "Screening history retrieved successfully", history);
+    } catch (error) {
+        console.error("Error in GET /api/screening:", error);
+        return errorResponse(500, "Failed to retrieve screening history");
+    }
+}

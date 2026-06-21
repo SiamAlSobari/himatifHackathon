@@ -96,6 +96,46 @@ export class ScreeningService {
             return "Sangat Parah";
         }
     }
+
+    async getScreeningHistory(userId: string) {
+        const screenings = await screeningRepository.getScreeningsByUserId(userId);
+        return screenings.map((s) => {
+            let parsedAnswers = [];
+            try {
+                parsedAnswers = JSON.parse(s.answer);
+            } catch (e) {
+                console.error("Failed to parse answers for screening:", s.id, e);
+            }
+            
+            // Format GAD-7 and PSS category & scores for detailed page
+            const anxietyAns = parsedAnswers.filter((a: any) => a.qNumber === 3 || a.qNumber === 6 || a.qNumber === 7);
+            const anxietyScore = anxietyAns.reduce((sum: number, a: any) => sum + a.score, 0);
+            let anxietyStatus: "Rendah" | "Sedang" | "Tinggi" = "Rendah";
+            if (anxietyScore <= 2) anxietyStatus = "Rendah";
+            else if (anxietyScore <= 5) anxietyStatus = "Sedang";
+            else anxietyStatus = "Tinggi";
+
+            const stressAns = parsedAnswers.filter((a: any) => a.qNumber === 1 || a.qNumber === 2 || a.qNumber === 4 || a.qNumber === 5);
+            const stressScore = stressAns.reduce((sum: number, a: any) => sum + a.score, 0);
+            let stressStatus: "Rendah" | "Sedang" | "Tinggi" = "Rendah";
+            if (stressScore <= 3) stressStatus = "Rendah";
+            else if (stressScore <= 7) stressStatus = "Sedang";
+            else stressStatus = "Tinggi";
+
+            return {
+                id: s.id,
+                type: s.type,
+                score: s.score,
+                answers: parsedAnswers,
+                createdAt: s.createdAt.toISOString(),
+                anxietyScore,
+                anxietyStatus,
+                stressScore,
+                stressStatus,
+                category: this.getDepressionCategory(s.score),
+            };
+        });
+    }
 }
 
 const screeningService = new ScreeningService();
