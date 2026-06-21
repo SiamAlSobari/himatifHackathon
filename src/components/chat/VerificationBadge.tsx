@@ -255,26 +255,19 @@ export default function VerificationBadge({
             <Button
               onClick={handleSyncNow}
               disabled={isSyncing}
-              className={`w-full rounded-xl py-2.5 h-10 font-bold transition-all text-xs active:scale-95 bg-amber-600 hover:bg-amber-700 text-white flex items-center justify-center gap-1.5`}
+              className="w-full rounded-xl py-2.5 h-10 font-bold transition-all text-xs active:scale-95 bg-amber-600 hover:bg-amber-700 text-white flex items-center justify-center gap-1.5"
             >
               {isSyncing ? (
                 <>
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  Sedang Menyinkronkan...
+                  Menyinkronkan...
                 </>
               ) : (
                 <>
                   <RefreshCw className="h-3.5 w-3.5" />
-                  Sinkronisasikan Sekarang
+                  Sinkronkan
                 </>
               )}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-              className="rounded-xl px-4 h-10 text-xs font-bold border-slate-200 text-slate-600 hover:bg-slate-50"
-            >
-              Batal
             </Button>
           </div>
         </DialogContent>
@@ -346,7 +339,7 @@ export default function VerificationBadge({
                     <div>
                       <h4 className="text-sm font-extrabold text-emerald-800">Data Utuh & Terverifikasi</h4>
                       <p className="text-xs text-emerald-700/90 mt-1 leading-relaxed">
-                        Integritas data terjamin 100%. Riwayat chat lokal Anda di database PostgreSQL cocok sempurna dengan salinan terenkripsi yang dikunci di IPFS.
+                        Integritas data terjamin 100%. Riwayat chat lokal Anda di database cocok sempurna dengan salinan terenkripsi yang dikunci di IPFS.
                       </p>
                     </div>
                   </div>

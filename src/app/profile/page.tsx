@@ -306,6 +306,7 @@ export default function ProfilePage() {
         title="Riwayat Konsultasi"
         viewAllLabel="Lihat Semua"
         items={data.consultationHistory}
+        onViewAll={() => router.push("/riwayatkonsultasi")}
       />
 
       {/* ============================================================ */}
