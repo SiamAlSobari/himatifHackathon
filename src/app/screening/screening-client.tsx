@@ -96,6 +96,7 @@ export default function ScreeningClient({
 
   const handleMoodSelect = (moodId: string) => {
     setSelectedMood(moodId);
+    setErrorMsg(null);
   };
 
   const handleAnswerSelect = (qNumber: number, score: number) => {
@@ -103,14 +104,16 @@ export default function ScreeningClient({
       ...prev,
       [qNumber]: score,
     }));
+    setErrorMsg(null);
   };
 
   const handleNext = async () => {
     if (step === 1) {
       if (!selectedMood) {
-        alert("Silakan pilih salah satu perasaan Anda terlebih dahulu.");
+        setErrorMsg("Silakan pilih salah satu perasaan Anda terlebih dahulu sebelum melanjutkan.");
         return;
       }
+      setErrorMsg(null);
       setStep(2);
       return;
     }
@@ -119,10 +122,11 @@ export default function ScreeningClient({
     const currentAnswer = answers[currentQ.qNumber];
 
     if (currentAnswer === undefined) {
-      alert("Silakan pilih salah satu opsi jawaban terlebih dahulu.");
+      setErrorMsg("Silakan pilih salah satu opsi jawaban terlebih dahulu sebelum melanjutkan.");
       return;
     }
 
+    setErrorMsg(null);
     if (step < totalSteps) {
       setStep((prev) => prev + 1);
     } else {
@@ -132,6 +136,7 @@ export default function ScreeningClient({
   };
 
   const handleBack = () => {
+    setErrorMsg(null);
     // Onboarding users cannot exit/go back past step 1
     if (step === 1) {
       if (isOnboarded) {
@@ -536,7 +541,7 @@ export default function ScreeningClient({
                   {latestScreening ? (
                     <>
                       <p>
-                        <span className="font-semibold">Skor Terakhir:</span> {latestScreening.score} / 12
+                        <span className="font-semibold">Skor Terakhir:</span> {latestScreening.score} / 21
                       </p>
                       <p>
                         <span className="font-semibold">Tanggal:</span>{" "}
