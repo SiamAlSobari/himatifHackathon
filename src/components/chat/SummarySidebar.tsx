@@ -14,9 +14,9 @@ export default function SummarySidebar({
   latestAssistantMessage,
   latestScreening,
 }: SummarySidebarProps) {
-  // Wellbeing score calculation based on screening score (out of 12)
+  // Wellbeing score calculation based on screening score (out of 21)
   const score = latestScreening
-    ? Math.max(0, Math.round(((12 - latestScreening.score) / 12) * 100))
+    ? Math.max(0, Math.round(((21 - latestScreening.score) / 21) * 100))
     : 100;
 
   // Dynamic description for wellbeing score
@@ -24,13 +24,13 @@ export default function SummarySidebar({
     if (!latestScreening) {
       return "Lakukan screening kesehatan mental terlebih dahulu untuk mendapatkan skor kesejahteraan.";
     }
-    if (latestScreening.score <= 3) {
+    if (latestScreening.score <= 4) {
       return "Kondisi emosional Anda stabil. Pertahankan kebiasaan baik Anda.";
     }
-    if (latestScreening.score <= 6) {
+    if (latestScreening.score <= 9) {
       return "Ada sedikit tanda kelelahan atau stres. Luangkan waktu untuk istirahat.";
     }
-    if (latestScreening.score <= 9) {
+    if (latestScreening.score <= 13) {
       return "Membutuhkan perhatian pada manajemen stres dan kualitas tidur.";
     }
     return "Tingkat stres/kecemasan tinggi. Pertimbangkan untuk berbicara dengan profesional.";
@@ -47,21 +47,21 @@ export default function SummarySidebar({
         insomnia: "Rendah" as const,
       };
     }
-    if (scoreVal <= 3) {
+    if (scoreVal <= 4) {
       return {
         anxiety: "Rendah" as const,
         depression: "Rendah" as const,
         insomnia: "Rendah" as const,
       };
     }
-    if (scoreVal <= 6) {
+    if (scoreVal <= 9) {
       return {
         anxiety: "Sedang" as const,
         depression: "Rendah" as const,
         insomnia: "Rendah" as const,
       };
     }
-    if (scoreVal <= 9) {
+    if (scoreVal <= 13) {
       return {
         anxiety: "Sedang" as const,
         depression: "Sedang" as const,

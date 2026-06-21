@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Wind, Play, Pause, RotateCcw, Check, Sparkles, BookHeart, CheckCircle, ChevronRight, ChevronLeft, MapPin } from "lucide-react";
 import { AppTheme } from "@/lib/types/theme";
+import { toast } from "sonner";
 
 interface ActivityModalProps {
   isOpen: boolean;
@@ -418,7 +419,7 @@ function GratitudeJournal({ styles }: { styles: any }) {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputs.one.trim() || !inputs.two.trim() || !inputs.three.trim()) {
-      alert("Silakan isi ketiga hal baik hari ini.");
+      toast.error("Silakan isi ketiga hal baik hari ini.");
       return;
     }
 
@@ -441,6 +442,7 @@ function GratitudeJournal({ styles }: { styles: any }) {
     localStorage.setItem("gratitude-journal-entries", JSON.stringify(updatedHistory));
     setInputs({ one: "", two: "", three: "" });
     setSaved(true);
+    toast.success("Jurnal rasa syukur berhasil disimpan!");
 
     setTimeout(() => {
       setSaved(false);

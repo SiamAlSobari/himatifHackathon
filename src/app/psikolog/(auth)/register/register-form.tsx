@@ -108,7 +108,7 @@ export function RegisterForm() {
                                 id="email"
                                 name="email"
                                 type="email"
-                                placeholder="rian@jembatanaman.com"
+                                placeholder="rian@verimind.com"
                                 required
                                 className="h-9 pl-9 pr-3 text-xs border-black/10 focus-visible:border-[#1A8A7A] focus-visible:ring-[#1A8A7A]/15 rounded-xl transition-all"
                             />

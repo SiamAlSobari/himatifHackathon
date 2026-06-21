@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import ActivityCard from "@/components/dashboard/Activitycard";
 import DashboardHeader from "@/components/dashboard/Dashboardheader";
 import EmergencyBanner from "@/components/dashboard/Emergencybanner";
@@ -14,6 +14,9 @@ export default function DashboardPage() {
   const router = useRouter();
   const { data, isLoading } = useDashboard();
 
+  const [selectedResults, setSelectedResults] = useState<any[] | null>(null);
+  const [selectedDayLabel, setSelectedDayLabel] = useState<string | null>(null);
+
   useEffect(() => {
     if (!isLoading && data) {
       if (!data.user.usia || !data.user.jenisKelamin) {
@@ -23,6 +26,23 @@ export default function DashboardPage() {
       }
     }
   }, [data, isLoading, router]);
+
+  // Sync initial selections with fetched data
+  useEffect(() => {
+    if (data) {
+      // Find today's day data point
+      const todayPt = data.moodData.find((pt: any) => pt.isToday);
+      
+      // If today has data, use its results. Otherwise, use latest screeningResults or null
+      if (todayPt && todayPt.hasData) {
+        setSelectedResults(todayPt.screeningResults);
+        setSelectedDayLabel(todayPt.day);
+      } else {
+        setSelectedResults(data.screeningResults);
+        setSelectedDayLabel(todayPt ? todayPt.day : "Hari Ini");
+      }
+    }
+  }, [data]);
 
   if (isLoading || !data) {
     return (
@@ -35,6 +55,11 @@ export default function DashboardPage() {
   const displayName = data.user.name || "Pengguna";
   const firstName = displayName.split(" ")[0];
 
+  const handleBarClick = (day: string, value: number, screeningResults: any[] | null) => {
+    setSelectedDayLabel(day);
+    setSelectedResults(screeningResults);
+  };
+
   return (
     <main className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8">
       <DashboardHeader name={firstName} />
@@ -45,12 +70,16 @@ export default function DashboardPage() {
             title="Jejak Kesejahteraan"
             rangeLabel="7 Hari Terakhir"
             data={data.moodData}
+            selectedDay={selectedDayLabel}
+            onBarClick={handleBarClick}
           />
         </div>
         <ScreeningSummaryCard
           title="Ringkasan Kenali"
-          results={data.screeningResults}
+          results={selectedResults}
+          dayLabel={selectedDayLabel}
           ctaLabel="Lihat Detail Screening"
+          onCtaClick={() => router.push("/screening/detail")}
         />
       </div>
 

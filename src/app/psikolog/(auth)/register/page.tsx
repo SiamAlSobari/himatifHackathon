@@ -40,9 +40,10 @@ export default function PsychologistRegisterPage() {
             <div className="flex items-center justify-between mb-6">
               <Link
                 href="/"
-                className="text-lg font-bold text-[#0D1B2A] tracking-tight"
+                className="flex items-center gap-2.5 text-lg font-bold text-[#0D1B2A] tracking-tight"
               >
-                Jembatan <span className="text-[#1A8A7A]">Aman</span>
+                <img src="/logo-app.png" alt="Verimind Logo" className="h-8 w-auto object-contain" />
+                <span>Veri<span className="text-[#1A8A7A]">mind</span></span>
               </Link>
               <div className="inline-flex items-center gap-1.5 bg-teal-100 border border-teal-200 rounded-full px-3 py-1">
                 <Award className="h-3 w-3 text-teal-700" />
@@ -124,9 +125,10 @@ export default function PsychologistRegisterPage() {
           <div className="lg:hidden flex items-center justify-between mb-6">
             <Link
               href="/"
-              className="text-base font-bold text-[#0D1B2A] tracking-tight"
+              className="flex items-center gap-2.5 text-base font-bold text-[#0D1B2A] tracking-tight"
             >
-              Jembatan <span className="text-[#1A8A7A]">Aman</span>
+              <img src="/logo-app.png" alt="Verimind Logo" className="h-8 w-auto object-contain" />
+              <span>Veri<span className="text-[#1A8A7A]">mind</span></span>
             </Link>
             <div className="text-xs text-[#2D3748]/70">
               sudah bermitra?{" "}

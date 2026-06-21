@@ -2,6 +2,13 @@ export interface MoodDataPoint {
   day: string;
   value: number;
   isToday?: boolean;
+  dateStr?: string;
+  hasData?: boolean;
+  screeningResults?: {
+    label: string;
+    status: "Rendah" | "Sedang" | "Tinggi";
+    progress: number;
+  }[] | null;
 }
 
 export interface ScreeningResult {

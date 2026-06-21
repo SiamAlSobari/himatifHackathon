@@ -42,6 +42,8 @@ function ResetPasswordContent() {
       return;
     }
 
+    const toastId = toast.loading("Memperbarui kata sandi Anda...");
+
     confirmResetMutation.mutate(
       {
         token,
@@ -51,14 +53,16 @@ function ResetPasswordContent() {
       {
         onSuccess: () => {
           setIsSuccess(true);
-          toast.success("Kata sandi berhasil diperbarui!");
+          toast.success("Kata sandi berhasil diperbarui!", { id: toastId });
           // Wait 3 seconds, then redirect to login page
           setTimeout(() => {
             router.push("/login");
           }, 3000);
         },
         onError: (err: any) => {
-          setErrorMsg(err.message || "Gagal mengatur ulang kata sandi.");
+          const errMsg = err.message || "Gagal mengatur ulang kata sandi.";
+          setErrorMsg(errMsg);
+          toast.error(errMsg, { id: toastId });
         },
       }
     );

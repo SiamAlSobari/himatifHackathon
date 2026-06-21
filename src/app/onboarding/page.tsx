@@ -5,9 +5,9 @@ import OnboardingForm from "@/components/onboarding/OnboardingForm"
 import type { OnboardingFormData } from "@/lib/types/onboarding"
 
 export const metadata = {
-  title: "Onboarding • Jembatan Aman",
+  title: "Onboarding • Verimind",
   description:
-    "Bikin Ruang lebih kenal kamu. 5 pertanyaan ringan, ± 60 detik, 100% privat.",
+    "Bikin Verimind lebih kenal kamu. 5 pertanyaan ringan, ± 60 detik, 100% privat.",
 }
 
 export default async function OnboardingPage() {

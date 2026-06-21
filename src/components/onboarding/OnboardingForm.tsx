@@ -133,9 +133,10 @@ export default function OnboardingForm({
           {/* Logo */}
           <Link
             href="/"
-            className="text-lg font-bold tracking-tight text-white"
+            className="flex items-center gap-2.5 text-lg font-bold tracking-tight text-white"
           >
-            Jembatan <span className="text-[#1A8A7A]">Aman</span>
+            <img src="/logo-app.png" alt="Verimind Logo" className="h-8 w-auto object-contain brightness-0 invert" />
+            <span>Veri<span className="text-[#1A8A7A]">mind</span></span>
           </Link>
 
           {/* Center content */}
@@ -154,7 +155,7 @@ export default function OnboardingForm({
             </h2>
 
             <p className="max-w-md text-sm leading-relaxed text-white/70">
-              Bikin <strong className="font-bold text-white">Ruang</strong>{" "}
+              Bikin <strong className="font-bold text-white">Verimind</strong>{" "}
               ngerti kamu lebih baik, biar tiap percakapan terasa lebih personal
               &amp; bermakna. Semua data dienkripsi &amp; 100% privat.
             </p>
@@ -188,7 +189,7 @@ export default function OnboardingForm({
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/20">
                   <Image
                     src="/mommy.jpg"
-                    alt="LOMBUT AI"
+                    alt="Very AI"
                     width={28}
                     height={28}
                     className="h-full w-full object-cover"
@@ -205,7 +206,7 @@ export default function OnboardingForm({
             <div className="relative hidden h-32 w-28 shrink-0 overflow-hidden rounded-2xl border-2 border-white/20 shadow-2xl xl:block">
               <Image
                 src="/mommy.jpg"
-                alt="LOMBUT"
+                alt="Very AI"
                 fill
                 className="object-cover object-top"
                 sizes="120px"
@@ -222,9 +223,10 @@ export default function OnboardingForm({
         <nav className="flex items-center justify-between border-b border-black/5 bg-white/60 px-6 py-4 backdrop-blur md:px-10">
           <Link
             href="/"
-            className="text-base font-bold tracking-tight text-[#0D1B2A] lg:hidden"
+            className="flex items-center gap-2.5 text-base font-bold tracking-tight text-[#0D1B2A] lg:hidden"
           >
-            Jembatan <span className="text-[#1A8A7A]">Aman</span>
+            <img src="/logo-app.png" alt="Verimind Logo" className="h-7 w-auto object-contain" />
+            <span>Veri<span className="text-[#1A8A7A]">mind</span></span>
           </Link>
 
           <div className="hidden text-xs text-[#2D3748]/60 lg:block">
@@ -330,7 +332,7 @@ export default function OnboardingForm({
               >
                 Kebijakan Privasi
               </a>{" "}
-              Ruang. data kamu dienkripsi end-to-end.
+              Verimind. data kamu dienkripsi end-to-end.
             </p>
           </div>
         </div>

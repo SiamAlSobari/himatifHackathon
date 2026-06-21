@@ -12,7 +12,7 @@ export default function Footer({ linkGroups }: FooterProps) {
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <span className="text-lg font-bold text-teal-900">
-              Jembatan Aman
+              Verimind
             </span>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-slate-500">
               Platform pertolongan pertama psikologis yang menghubungkan Anda
@@ -77,7 +77,7 @@ export default function Footer({ linkGroups }: FooterProps) {
         </div>
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-slate-200 pt-6 text-xs text-slate-400 sm:flex-row">
-          <p>© 2024 Jembatan Aman. Psychological First Aid Platform.</p>
+          <p>© 2024 Verimind. Psychological First Aid Platform.</p>
           <p>Terdaftar di Kemenkes RI</p>
         </div>
       </div>

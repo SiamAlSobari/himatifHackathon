@@ -145,7 +145,7 @@ export default function ChatPanel({
           Mulai Percakapan Baru
         </h3>
         <p className="mb-6 max-w-md text-sm leading-relaxed text-slate-400">
-          Mari bercerita tentang perasaanmu hari ini secara pribadi dan aman bersama Lombut AI. Kami siap membantumu kapan saja.
+          Mari bercerita tentang perasaanmu hari ini secara pribadi dan aman bersama Very AI. Kami siap membantumu kapan saja.
         </p>
         <button
           onClick={handleCreateSession}

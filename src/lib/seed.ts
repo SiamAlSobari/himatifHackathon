@@ -12,7 +12,7 @@ export async function seedPsychologists() {
   const psychologists = [
     {
       name: "Dr. Aris Setiawan, M.Psi",
-      email: "aris@jembatanaman.com",
+      email: "aris@verimind.com",
       role: "Psikolog Klinis",
       specialty: "Penanganan Trauma & PTSD",
       rating: 4.9,
@@ -24,7 +24,7 @@ export async function seedPsychologists() {
     },
     {
       name: "Dr. Sarah Wijaya, Sp.KJ",
-      email: "sarah@jembatanaman.com",
+      email: "sarah@verimind.com",
       role: "Psikiater",
       specialty: "Gangguan Kecemasan & Mood",
       rating: 4.8,
@@ -36,7 +36,7 @@ export async function seedPsychologists() {
     },
     {
       name: "Dika Pratama, S.Psi",
-      email: "dika@jembatanaman.com",
+      email: "dika@verimind.com",
       role: "Konselor Sebaya",
       specialty: "Kesehatan Mental Remaja",
       rating: 4.7,

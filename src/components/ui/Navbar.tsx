@@ -40,9 +40,12 @@ export default function Navbar({ userName, userImage, isOnboarded: propIsOnboard
   return (
     <header className="w-full border-b border-slate-200 bg-white">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-6">
-        <span className="whitespace-nowrap text-lg font-bold text-teal-900">
-          Jembatan Aman
-        </span>
+        <Link href="/" className="flex items-center gap-2">
+          <img src="/logo-app.png" alt="Verimind Logo" className="h-8 w-auto object-contain" />
+          <span className="whitespace-nowrap text-lg font-bold text-teal-900 tracking-tight">
+            Verimind
+          </span>
+        </Link>
 
         {session?.data?.user && isOnboarded && (
           <nav className="hidden items-center gap-7 lg:flex">

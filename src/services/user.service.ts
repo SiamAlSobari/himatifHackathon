@@ -53,14 +53,6 @@ export class UserService {
       last7Days.push(d);
     }
     
-    let runningWellness = 100;
-    const startOfWindow = last7Days[0];
-    for (const screening of sortedScreenings) {
-      if (screening.createdAt < startOfWindow) {
-        runningWellness = Math.round(((21 - screening.score) / 21) * 100);
-      }
-    }
-    
     for (let i = 0; i < 7; i++) {
       const targetDay = last7Days[i];
       const targetDayStr = targetDay.toDateString();
@@ -69,14 +61,57 @@ export class UserService {
         return s.createdAt.toDateString() === targetDayStr;
       });
       
+      let wellnessValue = 0;
+      let dayScreeningResults = null;
+      
       if (screeningOnDay) {
-        runningWellness = Math.round(((21 - screeningOnDay.score) / 21) * 100);
+        wellnessValue = Math.round(((21 - screeningOnDay.score) / 21) * 100);
+        
+        try {
+          const answers = JSON.parse(screeningOnDay.answer) as { qNumber: number; score: number }[];
+          
+          // GAD-7 Anxiety sub-scale: Q3 (DASS-28), Q6 (GAD-1), Q7 (GAD-6)
+          const anxietyAns = answers.filter((a) => a.qNumber === 3 || a.qNumber === 6 || a.qNumber === 7);
+          const anxietyScore = anxietyAns.reduce((sum, a) => sum + a.score, 0);
+          const anxietyProgress = Math.round((anxietyScore / 9) * 100);
+          let anxietyStatus: "Rendah" | "Sedang" | "Tinggi" = "Rendah";
+          if (anxietyScore <= 2) {
+            anxietyStatus = "Rendah";
+          } else if (anxietyScore <= 5) {
+            anxietyStatus = "Sedang";
+          } else {
+            anxietyStatus = "Tinggi";
+          }
+          
+          // PSS Stress sub-scale: Q1 (DASS-13), Q2 (DASS-15), Q4 (DASS-33), Q5 (PHQ-1)
+          const stressAns = answers.filter((a) => a.qNumber === 1 || a.qNumber === 2 || a.qNumber === 4 || a.qNumber === 5);
+          const stressScore = stressAns.reduce((sum, a) => sum + a.score, 0);
+          const stressProgress = Math.round((stressScore / 12) * 100);
+          let stressStatus: "Rendah" | "Sedang" | "Tinggi" = "Rendah";
+          if (stressScore <= 3) {
+            stressStatus = "Rendah";
+          } else if (stressScore <= 7) {
+            stressStatus = "Sedang";
+          } else {
+            stressStatus = "Tinggi";
+          }
+          
+          dayScreeningResults = [
+            { label: "Kecemasan (GAD-7)", status: anxietyStatus, progress: anxietyProgress },
+            { label: "Stres (PSS)", status: stressStatus, progress: stressProgress },
+          ];
+        } catch (err) {
+          console.error("Failed to parse screening answers on day:", err);
+        }
       }
       
       moodData.push({
         day: dayLabels[targetDay.getDay()],
-        value: runningWellness,
+        value: wellnessValue,
         isToday: i === 6,
+        dateStr: targetDayStr,
+        hasData: !!screeningOnDay,
+        screeningResults: dayScreeningResults,
       });
     }
 

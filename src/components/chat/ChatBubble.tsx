@@ -45,7 +45,7 @@ export default function ChatBubble({
               <span className="h-2 w-2 animate-bounce rounded-full bg-white" style={{ animationDelay: "300ms" }} />
             </div>
             <span className="text-xs font-medium text-white/80 animate-pulse">
-              Lombut AI sedang berpikir...
+              Very AI sedang berpikir...
             </span>
           </div>
         ) : (

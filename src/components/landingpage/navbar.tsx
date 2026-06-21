@@ -56,9 +56,10 @@ export default function Navbar() {
         <a
           href="#hero"
           onClick={(e) => handleScrollTo(e, 'hero')}
-          className="text-[#0D1B2A] font-semibold text-lg tracking-tight cursor-pointer"
+          className="flex items-center gap-2 text-[#0D1B2A] font-semibold text-lg tracking-tight cursor-pointer"
         >
-          Jembatan <span className="text-[#1A8A7A]">Aman</span>
+          <img src="/logo-app.png" alt="Verimind Logo" className="h-8 w-auto object-contain" />
+          <span>Veri<span className="text-[#1A8A7A]">mind</span></span>
         </a>
 
         {/* Nav Links */}

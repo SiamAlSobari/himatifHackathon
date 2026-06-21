@@ -37,9 +37,10 @@ export default function RegisterPage() {
         <div className="flex items-center justify-between mb-4 shrink-0">
           <Link
             href="/"
-            className="text-lg font-bold text-[#0D1B2A] tracking-tight"
+            className="flex items-center gap-2.5 text-lg font-bold text-[#0D1B2A] tracking-tight"
           >
-            Jembatan <span className="text-[#1A8A7A]">Aman</span>
+            <img src="/logo-app.png" alt="Verimind Logo" className="h-8 w-auto object-contain" />
+            <span>Veri<span className="text-[#1A8A7A]">mind</span></span>
           </Link>
           <div className="inline-flex items-center gap-1.5 bg-emerald-100 border border-emerald-200 rounded-full px-2.5 py-1">
             <Sparkles className="h-3 w-3 text-emerald-700" />
@@ -83,7 +84,7 @@ export default function RegisterPage() {
               <div className="relative w-full h-full bg-gradient-to-br from-[#F0F4F8] to-[#E2E8F0] rounded-2xl overflow-hidden border-2 border-white shadow-lg">
                 <Image
                   src="/mommy.jpg"
-                  alt="LOMBUT AI"
+                  alt="Very AI"
                   fill
                   className="object-cover object-top"
                   priority
@@ -111,7 +112,7 @@ export default function RegisterPage() {
                 </span>
               </div>
               <p className="text-[10px] text-[#2D3748]/60 italic leading-snug">
-                &ldquo;ngobrol sama LOMBUT berasa kayak bestie. jadi lebih
+                &ldquo;ngobrol sama Very AI berasa kayak bestie. jadi lebih
                 ngerti perasaan sendiri ✨&rdquo;
               </p>
             </div>
@@ -122,7 +123,7 @@ export default function RegisterPage() {
               <div className="h-7 w-7 rounded-full overflow-hidden border-2 border-emerald-300 relative shrink-0">
                 <Image
                   src="/mommy.jpg"
-                  alt="LOMBUT"
+                  alt="Very AI"
                   fill
                   className="object-cover"
                   sizes="28px"
@@ -130,7 +131,7 @@ export default function RegisterPage() {
               </div>
               <div className="bg-white border border-emerald-200/60 rounded-2xl rounded-bl-md px-3.5 py-2 shadow-sm flex-1">
                 <p className="text-xs text-[#0D1B2A]/80 leading-relaxed">
-                  welcome bestie 🌱 aku LOMBUT, temen ngobrol lo. cerita aja, ga
+                  welcome bestie 🌱 aku Very AI, temen ngobrol lo. cerita aja, ga
                   ada yang ngehakimin di sini ✨
                 </p>
               </div>
@@ -138,7 +139,7 @@ export default function RegisterPage() {
             <div className="flex justify-end">
               <div className="bg-[#1A8A7A] text-white rounded-2xl rounded-br-md px-3.5 py-2 shadow-sm max-w-[80%]">
                 <p className="text-xs leading-relaxed">
-                  makasih LOMBUT! yuk mulai ✨
+                  makasih Very! yuk mulai ✨
                 </p>
               </div>
             </div>
@@ -200,9 +201,10 @@ export default function RegisterPage() {
         <nav className="lg:hidden flex items-center justify-between px-6 py-4 shrink-0">
           <Link
             href="/"
-            className="text-base font-bold text-[#0D1B2A] tracking-tight"
+            className="flex items-center gap-2.5 text-base font-bold text-[#0D1B2A] tracking-tight"
           >
-            Jembatan <span className="text-[#1A8A7A]">Aman</span>
+            <img src="/logo-app.png" alt="Verimind Logo" className="h-8 w-auto object-contain" />
+            <span>Veri<span className="text-[#1A8A7A]">mind</span></span>
           </Link>
           <div className="text-xs text-[#2D3748]/70">
             udah punya akun?{" "}
@@ -230,7 +232,7 @@ export default function RegisterPage() {
                   yok mulai di{" "}
                   <span className="relative inline-block">
                     <span className="bg-gradient-to-r from-[#1A8A7A] to-emerald-500 bg-clip-text text-transparent">
-                      Ruang
+                      Verimind
                     </span>
                     <svg
                       className="absolute -bottom-1 left-0 w-full"

@@ -13,7 +13,7 @@ export async function uploadToCloudinary(file: File, folder: string = "psycholog
   
   return new Promise((resolve, reject) => {
     cloudinary.uploader.upload_stream(
-      { folder: `jembatan-aman/${folder}` },
+      { folder: `verimind/${folder}` },
       (error, result) => {
         if (error) {
           reject(new Error("Cloudinary upload failed: " + error.message));
