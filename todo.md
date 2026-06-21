@@ -190,8 +190,8 @@
 
 > **Goal akhir fase:** End-to-end booking berjalan, demo siap dipresentasikan.
 
-### ⏸️ Smart Contract & Wallet Connect — SKIP (not MVP) ✅
-> Web3 dikerjakan post-hackathon. Fokus ke fitur utama dulu.
+### 🌐 Smart Contract & Web3 — DIALIHKAN KE FASE 5 (Fokus Utama Sekarang) 🔄
+> Fitur blockchain diaktifkan kembali sesuai rencana pengembangan terbaru.
 
 ### Schema Additions (RAB, 17/06) ⏳ 80% DONE
 - [x] Tambah `PsychologistProfile` model (1-to-1 ke `User` dengan `UserRole` enum) ✅
@@ -223,7 +223,7 @@
 - [x] Antrian janji (pending, upcoming, completed) — **SELESAI** (Kartu janji temu hari ini & daftar klien pending untuk di-Accept/Decline terintegrasi di dashboard psikolog `/psikolog`) ✅
 - [x] Detail klien + brief (screening + ringkasan AI) — halaman `/psychologist/konsultasi` sudah selesai dibuat dan berhasil menarik data finalConclusion dari AI chat sesi terakhir user secara fungsional ✅
 - [x] Redireksi otomatis jika sesi konsultasi dibatalkan secara real-time oleh klien ✅
-- [x] Tanda tangan digital sesi → **SKIP** (on-chain bukan MVP) ✅
+- [~] Tanda tangan digital & integrasi audit on-chain → **Dialihkan ke FASE 5** 🔄
 
 ### Polish & Demo Prep (Sab, 20/06) ⏳ 65% DONE
 - [~] **PUTUSKAN** nama produk: "Ruang" atau "Jembatan Aman"? Konsisten di semua file — **Sebagian Konsisten**: Nama "Jembatan Aman" digunakan di Landing Page, Navbar, Footer, & tab judul. Beberapa text onboarding/register masih menggunakan kata "Ruang".
@@ -244,6 +244,46 @@
 - [ ] Siapkan slide pitch deck (5–7 slide)
 - [ ] Rekam video demo (backup)
 - [ ] Final check deploy (Vercel)
+
+---
+
+## FASE 5 — Jumat, 19/06 – Jumat, 26/06: Integrasi Blockchain & Web3 🌐 ⏳ 30% DONE
+
+> **Goal akhir fase:** Verifikasi data chat (AI & Psikolog) terintegrasi asinkron dengan Pinata IPFS & Smart Contract Polygon Amoy, hash tersimpan di DB Postgres, dan siap dipresentasikan di Zoom.
+
+### Pembelajaran & Setup Awal
+- [x] **Jum, 19/06**: Belajar dasar-dasar Solidity & sesuaikan project non-blockchain ✅
+- [x] **Sab, 20/06**: Tulis smart contract sederhana (`SessionRegistry.sol`) ✅
+- [~] **Min, 21/06 (Hari ini)**: Checkpoint 1 (progress 50%) & mulai belajar deploy ke Polygon Amoy ✅
+
+### Uji Coba Integrasi (Sen, 22/06)
+- [ ] Buat backend sederhana terpisah untuk tes koneksi Ethers.js dengan smart contract
+- [ ] Tes integrasi REST API Pinata untuk upload file JSON dummy dan dapatkan CID IPFS
+- [ ] Hubungkan script backend sederhana dengan Smart Contract yang terdeploy di Amoy
+
+### Pembuatan Fitur Blockchain Utama (Sel, 23/06 – Rab, 24/06)
+- [ ] Update `prisma/schema.prisma` untuk menambahkan field `ipfsCid` dan `txHash` pada model `ChatSession` dan `Appointment`
+- [ ] Jalankan `bun run prisma db push` dan generate client terbaru
+- [ ] Deploy Smart Contract `SessionRegistry.sol` final ke Polygon Amoy Testnet melalui Remix IDE
+- [ ] Konfigurasi variable environment di file `.env` (Private key, contract address, Pinata JWT, RPC URL)
+- [ ] Helper utilitas backend untuk upload ke Pinata (`src/lib/pinata.ts` atau sejenisnya)
+- [ ] Helper utilitas backend untuk transaksi Ethers.js (`src/lib/blockchain.ts` atau sejenisnya)
+
+### Integrasi Alur Aplikasi (Kam, 25/06)
+- [ ] **Alur Chat AI**:
+  - [ ] Integrasi trigger turn ke-7 pada obrolan chatbot Lombut AI
+  - [ ] Kumpulkan riwayat pesan, konversi ke JSON, dan upload ke Pinata
+  - [ ] Kirim CID ke smart contract dan simpan `txHash` serta `ipfsCid` ke database
+- [ ] **Alur Chat Psikolog**:
+  - [ ] Integrasi status `COMPLETED` pada sesi konsultasi
+  - [ ] Kumpulkan riwayat `ConsultationMessage`, konversi ke JSON, dan upload ke Pinata
+  - [ ] Kirim CID ke smart contract dan simpan `txHash` serta `ipfsCid` ke database
+- [ ] Tampilkan tautan IPFS dan Polygonscan Transaction Hash di UI user & dashboard psikolog
+
+### Final Polish & Rehearsal (Jum, 26/06)
+- [ ] Uji coba menyeluruh (End-to-End Test) alur chat AI -> Pinata -> Blockchain -> DB
+- [ ] Uji coba menyeluruh alur chat Psikolog -> Pinata -> Blockchain -> DB
+- [ ] Siapkan demo presentasi Zoom (slide + workflow demo blockchain)
 
 ---
 
