@@ -5,6 +5,8 @@ import { PinataUploadPayload, PinataUploadResponse } from "./types/blockchain";
  */
 
 const PINATA_JWT = process.env.PINATA_JWT;
+const PINATA_API_KEY = process.env.PINATA_API_KEY;
+const PINATA_API_SECRET = process.env.PINATA_API_SECRET;
 const PINATA_API_URL = "https://api.pinata.cloud/pinning/pinJSONToIPFS";
 
 /**
@@ -15,8 +17,19 @@ const PINATA_API_URL = "https://api.pinata.cloud/pinning/pinJSONToIPFS";
 export async function uploadJsonToPinata(
   payload: PinataUploadPayload
 ): Promise<PinataUploadResponse> {
-  if (!PINATA_JWT) {
-    throw new Error("PINATA_JWT is not configured in the environment variables.");
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (PINATA_JWT) {
+    headers["Authorization"] = `Bearer ${PINATA_JWT}`;
+  } else if (PINATA_API_KEY && PINATA_API_SECRET) {
+    headers["pinata_api_key"] = PINATA_API_KEY;
+    headers["pinata_secret_api_key"] = PINATA_API_SECRET;
+  } else {
+    throw new Error(
+      "Pinata authentication is not configured. Please define PINATA_JWT or both PINATA_API_KEY and PINATA_API_SECRET in environment variables."
+    );
   }
 
   const filename = `verimind-session-${payload.sessionId}.json`;
@@ -24,10 +37,7 @@ export async function uploadJsonToPinata(
   try {
     const response = await fetch(PINATA_API_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${PINATA_JWT}`,
-      },
+      headers,
       body: JSON.stringify({
         pinataContent: payload,
         pinataMetadata: {
