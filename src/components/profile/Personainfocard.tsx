@@ -4,12 +4,14 @@ interface PersonalInfoCardProps {
   fullName: string;
   email: string;
   phoneNumber?: string | null;
+  onEditPhone?: () => void;
 }
 
 export default function PersonalInfoCard({
   fullName,
   email,
   phoneNumber,
+  onEditPhone,
 }: PersonalInfoCardProps) {
   return (
     <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md">
@@ -32,8 +34,9 @@ export default function PersonalInfoCard({
             id="fullName"
             name="fullName"
             type="text"
-            defaultValue={fullName}
-            className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-medium text-slate-700 outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary/25"
+            value={fullName}
+            disabled
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-medium text-slate-400 cursor-not-allowed outline-none"
           />
         </div>
 
@@ -48,8 +51,9 @@ export default function PersonalInfoCard({
             id="email"
             name="email"
             type="email"
-            defaultValue={email}
-            className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-medium text-slate-700 outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary/25"
+            value={email}
+            disabled
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-medium text-slate-400 cursor-not-allowed outline-none"
           />
         </div>
 
@@ -64,10 +68,18 @@ export default function PersonalInfoCard({
             id="phoneNumber"
             name="phoneNumber"
             type="tel"
-            defaultValue={phoneNumber || ""}
-            placeholder="+62 8xx-xxxx-xxxx"
-            className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-medium text-slate-700 placeholder:text-slate-300 outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary/25"
+            value={phoneNumber || ""}
+            placeholder="Belum ada nomor telepon"
+            disabled
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-medium text-slate-400 placeholder:text-slate-300 cursor-not-allowed outline-none"
           />
+          <button
+            type="button"
+            onClick={onEditPhone}
+            className="mt-2 text-xs font-bold text-primary hover:underline hover:opacity-85 cursor-pointer text-left inline-block"
+          >
+            {phoneNumber ? "Ubah nomor telepon?" : "Tambah nomor telepon?"}
+          </button>
         </div>
       </div>
     </div>

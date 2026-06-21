@@ -99,6 +99,7 @@ export class ProfileService {
         email: user.email,
         usia: user.usia,
         jenisKelamin: user.jenisKelamin,
+        kontakDarurat: user.kontakDarurat,
       },
       isOnboarded: user.isOnboarded,
       hasScreenedToday,
@@ -110,6 +111,21 @@ export class ProfileService {
         latestCondition,
       }
     };
+  }
+
+  async updateUserProfile(userId: string, data: { name?: string; usia?: number | string; jenisKelamin?: string }) {
+    const updatedData: any = {};
+    if (data.name !== undefined) updatedData.name = data.name;
+    if (data.usia !== undefined) updatedData.usia = typeof data.usia === "string" ? parseInt(data.usia, 10) : data.usia;
+    if (data.jenisKelamin !== undefined) updatedData.jenisKelamin = data.jenisKelamin;
+
+    return await userRepository.updateUserProfile(userId, updatedData);
+  }
+
+  async updateUserPhoneNumber(userId: string, phoneNumber: string) {
+    return await userRepository.updateUserProfile(userId, {
+      kontakDarurat: phoneNumber,
+    });
   }
 }
 

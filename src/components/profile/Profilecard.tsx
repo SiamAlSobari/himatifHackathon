@@ -8,6 +8,7 @@ interface ProfileCardProps {
   age?: number | null;
   location?: string | null;
   avatarUrl?: string | null;
+  onEdit?: () => void;
 }
 
 export default function ProfileCard({
@@ -15,6 +16,7 @@ export default function ProfileCard({
   age,
   location,
   avatarUrl,
+  onEdit,
 }: ProfileCardProps) {
   const subtitleParts = [
     age ? `${age} Tahun` : null,
@@ -57,7 +59,8 @@ export default function ProfileCard({
         <div className="mt-5 flex w-full items-center gap-2">
           <button
             type="button"
-            className="flex-1 rounded-xl bg-primary py-2.5 text-xs font-bold text-white transition-all duration-300 hover:bg-primary/90 hover:shadow-sm active:scale-98"
+            onClick={onEdit}
+            className="flex-1 rounded-xl bg-primary py-2.5 text-xs font-bold text-white transition-all duration-300 hover:bg-primary/90 hover:shadow-sm active:scale-98 cursor-pointer"
           >
             Edit Profil
           </button>
