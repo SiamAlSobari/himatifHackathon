@@ -21,7 +21,8 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   const isChatPath =
     pathname === "/validasi" ||
     pathname === "/konsultasi" ||
-    pathname === "/psikolog/konsultasi";
+    pathname === "/psikolog/konsultasi" ||
+    pathname === "/riwayatkonsultasi";
 
   if (isAuthPath) {
     return <>{children}</>;
