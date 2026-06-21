@@ -91,6 +91,9 @@ export default function VerificationBadge({
   const [currentCid, setCurrentCid] = useState<string | null>(initialIpfsCid || null);
   const [currentTxHash, setCurrentTxHash] = useState<string | null>(initialTxHash || null);
 
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
+
   // Query verification info from the API
   const {
     data: verifyResult,
@@ -126,13 +129,156 @@ export default function VerificationBadge({
     return `${hash.substring(0, 8)}...${hash.substring(hash.length - 8)}`;
   };
 
-  // If no CID/TxHash exists yet and the API also confirms it, display a sinking sync state
-  if (!hasBlockchainRecord) {
+  const handleSyncNow = async () => {
+    setIsSyncing(true);
+    setSyncError(null);
+    try {
+      const response = await fetch("/api/blockchain/sync", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sessionId,
+          appointmentId,
+        }),
+      });
+
+      const resData = await response.json();
+      if (!response.ok || !resData.success) {
+        throw new Error(resData.message || "Gagal menyinkronkan ke blockchain.");
+      }
+
+      if (resData.data?.ipfsCid) {
+        setCurrentCid(resData.data.ipfsCid);
+      }
+      if (resData.data?.txHash) {
+        setCurrentTxHash(resData.data.txHash);
+      }
+      await refetch();
+      setIsOpen(false);
+    } catch (err) {
+      console.error(err);
+      setSyncError((err as Error).message);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // If query is loading status
+  if (isLoading && !hasBlockchainRecord) {
     return (
       <div className="flex items-center gap-1.5 rounded-full bg-slate-50 border border-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-400 select-none">
         <Loader2 className="h-3 w-3 animate-spin text-slate-300" />
-        Sesi Sedang Disinkronisasikan...
+        Memeriksa Blockchain...
       </div>
+    );
+  }
+
+  // If syncing is triggered
+  if (isSyncing) {
+    return (
+      <div className="flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-100 px-3 py-1 text-[11px] font-semibold text-amber-600 select-none animate-pulse">
+        <Loader2 className="h-3 w-3 animate-spin text-amber-500" />
+        Menyinkronkan Sesi...
+      </div>
+    );
+  }
+
+  // If sync is not found (failed or not performed)
+  if (!hasBlockchainRecord) {
+    return (
+      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+        <DialogTrigger
+          render={
+            <button
+              className="flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold transition-all duration-300 active:scale-95 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700"
+            />
+          }
+        >
+          <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
+          Belum Sinkron (On-Chain)
+        </DialogTrigger>
+        
+        <DialogContent className="max-w-md rounded-2xl border-slate-100 bg-white p-6 shadow-xl sm:max-w-md">
+          <DialogHeader className="space-y-1">
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-slate-800">
+              <AlertTriangle className="h-6.5 w-6.5 text-amber-500 shrink-0" />
+              Sesi Belum Sinkron
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-400">
+              Sinkronisasi data medis dan riwayat chat ke blockchain Polygon Amoy.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="my-2 space-y-4">
+            <div className="rounded-xl border border-amber-100 bg-amber-50/40 p-4">
+              <div className="flex gap-3">
+                <AlertTriangle className="h-5.5 w-5.5 text-amber-500 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-sm font-extrabold text-amber-800">Belum Terintegrasi</h4>
+                  <p className="text-xs text-amber-700/90 mt-1 leading-relaxed">
+                    Sesi ini belum didaftarkan ke blockchain. Ini dapat terjadi jika node RPC Polygon Amoy mengalami kegagalan, atau jika gas fee pada wallet pengirim habis.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {syncError && (
+              <div className="rounded-xl border border-rose-100 bg-rose-50/50 p-3 text-xs text-rose-600 font-semibold">
+                Kesalahan Sinkronisasi: {syncError}
+              </div>
+            )}
+
+            <div className="space-y-3 rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
+              <h5 className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Status Sistem</h5>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-400 flex items-center gap-1.5">
+                  <RefreshCw className="h-3.5 w-3.5 text-slate-300" />
+                  Status
+                </span>
+                <span className="font-semibold text-amber-600">Gagal / Belum Sinkron</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-400 flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5 text-slate-300" />
+                  Sesi ID
+                </span>
+                <span className="font-mono text-slate-500 text-[10px]">
+                  {sessionId || appointmentId}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 flex gap-2">
+            <Button
+              onClick={handleSyncNow}
+              disabled={isSyncing}
+              className={`w-full rounded-xl py-2.5 h-10 font-bold transition-all text-xs active:scale-95 bg-amber-600 hover:bg-amber-700 text-white flex items-center justify-center gap-1.5`}
+            >
+              {isSyncing ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Sedang Menyinkronkan...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  Sinkronisasikan Sekarang
+                </>
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsOpen(false)}
+              className="rounded-xl px-4 h-10 text-xs font-bold border-slate-200 text-slate-600 hover:bg-slate-50"
+            >
+              Batal
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     );
   }
 

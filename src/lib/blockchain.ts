@@ -6,8 +6,14 @@ import { BlockchainSessionRecord, BlockchainSessionType } from "./types/blockcha
  */
 
 const RPC_URL = process.env.BLOCKCHAIN_RPC_URL || "https://rpc-amoy.polygon.technology";
-const PRIVATE_KEY = process.env.BLOCKCHAIN_PRIVATE_KEY;
 const CONTRACT_ADDRESS = process.env.BLOCKCHAIN_CONTRACT_ADDRESS || process.env.CONSULTATION_REGISTRY_ADDRESS;
+
+const PRIVATE_KEYS: string[] = [];
+if (process.env.BLOCKCHAIN_PRIVATE_KEYS) {
+  PRIVATE_KEYS.push(...process.env.BLOCKCHAIN_PRIVATE_KEYS.split(",").map(k => k.trim()).filter(Boolean));
+} else if (process.env.BLOCKCHAIN_PRIVATE_KEY) {
+  PRIVATE_KEYS.push(process.env.BLOCKCHAIN_PRIVATE_KEY);
+}
 
 // ABI matching the SessionRegistry solidity contract
 const CONTRACT_ABI = [
@@ -27,13 +33,15 @@ export function getProvider(): ethers.JsonRpcProvider {
 /**
  * Creates a Wallet signer using the configured backend private key.
  * @param provider The RPC provider to link to the wallet
+ * @param privateKey Optional specific private key to use
  * @returns Wallet Signer instance
  */
-export function getSigner(provider: ethers.JsonRpcProvider): ethers.Wallet {
-  if (!PRIVATE_KEY) {
-    throw new Error("BLOCKCHAIN_PRIVATE_KEY is not configured in the environment variables.");
+export function getSigner(provider: ethers.JsonRpcProvider, privateKey?: string): ethers.Wallet {
+  const key = privateKey || PRIVATE_KEYS[0];
+  if (!key) {
+    throw new Error("No blockchain private key configured. Define BLOCKCHAIN_PRIVATE_KEY or BLOCKCHAIN_PRIVATE_KEYS.");
   }
-  return new ethers.Wallet(PRIVATE_KEY, provider);
+  return new ethers.Wallet(key, provider);
 }
 
 /**
@@ -73,26 +81,53 @@ export async function registerSessionOnChain(
   sessionType: BlockchainSessionType,
   ipfsCid: string
 ): Promise<string> {
-  try {
-    const provider = getProvider();
-    const signer = getSigner(provider);
-    const contract = getSignedContract(signer);
+  const provider = getProvider();
 
-    // Call contract function
-    const tx = await contract.registerSession(sessionId, sessionType, ipfsCid);
-    
-    // Wait for the transaction to be mined (1 confirmation)
-    const receipt = await tx.wait();
-    
-    if (!receipt || receipt.status !== 1) {
-      throw new Error(`Transaction failed or reverted. Hash: ${tx.hash}`);
-    }
-
-    return receipt.hash;
-  } catch (error) {
-    console.error(`Failed to register session ${sessionId} on Polygon Amoy:`, error);
-    throw error;
+  if (PRIVATE_KEYS.length === 0) {
+    throw new Error("No blockchain private keys available for signing transactions.");
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let lastError: any = null;
+
+  // Try each private key in the pool sequentially (Wallet Rotation Failover)
+  for (let i = 0; i < PRIVATE_KEYS.length; i++) {
+    const key = PRIVATE_KEYS[i];
+    try {
+      console.log(`Attempting on-chain registration with Wallet ${i + 1}/${PRIVATE_KEYS.length}...`);
+      const signer = getSigner(provider, key);
+      
+      // Proactively check balance (prevents out-of-gas reverts)
+      const balance = await provider.getBalance(signer.address);
+      if (balance === BigInt(0)) {
+        console.warn(`Wallet ${i + 1} (${signer.address}) has 0 MATIC. Skipping to next wallet...`);
+        continue;
+      }
+
+      const contract = getSignedContract(signer);
+
+      // Call contract function
+      const tx = await contract.registerSession(sessionId, sessionType, ipfsCid);
+      
+      // Wait for the transaction to be mined (1 confirmation)
+      const receipt = await tx.wait();
+      
+      if (!receipt || receipt.status !== 1) {
+        throw new Error(`Transaction reverted on-chain. Hash: ${tx.hash}`);
+      }
+
+      console.log(`Successfully registered session on-chain using Wallet ${i + 1}! Hash: ${receipt.hash}`);
+      return receipt.hash;
+    } catch (error) {
+      console.warn(`Wallet ${i + 1} transaction failed:`, (error as Error).message);
+      lastError = error;
+      // Loop continues to attempt with the next wallet key
+    }
+  }
+
+  // If we reach here, all wallets failed
+  console.error(`All ${PRIVATE_KEYS.length} wallets failed to register session ${sessionId} on Polygon Amoy.`);
+  throw lastError || new Error("Failed to register session using any of the configured wallets.");
 }
 
 /**

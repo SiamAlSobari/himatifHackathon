@@ -13,6 +13,7 @@ interface ChatHeaderProps {
   sessionId?: string;
   ipfsCid?: string | null;
   txHash?: string | null;
+  status?: string;
 }
 
 export default function ChatHeader({
@@ -20,8 +21,10 @@ export default function ChatHeader({
   sessionId,
   ipfsCid,
   txHash,
+  status,
 }: ChatHeaderProps) {
   const avatarBg = headerAvatarColorMap[activeTheme as keyof typeof headerAvatarColorMap] || "bg-teal-900";
+  const isFinished = status === "COMPLETED" || status === "SEALED" || !!(ipfsCid || txHash);
 
   return (
     <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
@@ -39,7 +42,7 @@ export default function ChatHeader({
       </div>
 
       <div className="flex items-center gap-3">
-        {sessionId && (ipfsCid || txHash) && (
+        {sessionId && isFinished && (
           <VerificationBadge
             sessionId={sessionId}
             initialIpfsCid={ipfsCid}

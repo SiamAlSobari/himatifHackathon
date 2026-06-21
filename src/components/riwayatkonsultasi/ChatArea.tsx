@@ -99,13 +99,11 @@ export default function ChatArea({
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 Selesai
               </div>
-              {(appointment.ipfsCid || appointment.txHash) && (
-                <VerificationBadge
-                  appointmentId={appointment.id}
-                  initialIpfsCid={appointment.ipfsCid}
-                  initialTxHash={appointment.txHash}
-                />
-              )}
+              <VerificationBadge
+                appointmentId={appointment.id}
+                initialIpfsCid={appointment.ipfsCid}
+                initialTxHash={appointment.txHash}
+              />
             </>
           ) : (
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-600 border border-rose-100 text-xs font-semibold">

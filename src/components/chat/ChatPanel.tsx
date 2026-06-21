@@ -170,6 +170,7 @@ export default function ChatPanel({
         sessionId={displaySession?.id}
         ipfsCid={displaySession?.ipfsCid}
         txHash={displaySession?.txHash}
+        status={displaySession?.status}
       />
 
       {/* Messages list container */}
