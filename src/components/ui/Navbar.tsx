@@ -1,10 +1,10 @@
 "use client";
 
 import { signOutAction } from "@/app/actions/auth";
-import { Bell, LogOut, Search } from "lucide-react";
+import { Bell, LogOut, Search, User2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useChatSession } from "@/hooks/chat/useChatSession";
 import { useSession } from "next-auth/react";
@@ -24,7 +24,7 @@ interface NavbarProps {
 export default function Navbar({ userName, userImage, isOnboarded: propIsOnboarded }: NavbarProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
-  
+
   const { data } = useChatSession();
   const session = useSession();
   const isOnboarded = propIsOnboarded !== undefined ? propIsOnboarded : (data?.isOnboarded ?? true);
@@ -33,6 +33,10 @@ export default function Navbar({ userName, userImage, isOnboarded: propIsOnboard
   const finalUserName = userName || session?.data?.user?.name || "Pengguna";
   const finalUserImage = userImage || session?.data?.user?.image || "https://i.pravatar.cc/40?img=12";
 
+  const router = useRouter();
+  const profileAction = () => {
+    router.push("/profile");
+  }
   return (
     <header className="w-full border-b border-slate-200 bg-white">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-6">
@@ -44,9 +48,9 @@ export default function Navbar({ userName, userImage, isOnboarded: propIsOnboard
           <nav className="hidden items-center gap-7 lg:flex">
             {(role === "PSYCHOLOGY"
               ? [
-                  { label: "Dashboard", href: "/psikolog" },
-                  { label: "Konsultasi", href: "/psikolog/konsultasi" },
-                ]
+                { label: "Dashboard", href: "/psikolog" },
+                { label: "Konsultasi", href: "/psikolog/konsultasi" },
+              ]
               : navItems
             ).map((item) => {
               const isActive = pathname.startsWith(item.href) && item.href !== "/";
@@ -54,11 +58,10 @@ export default function Navbar({ userName, userImage, isOnboarded: propIsOnboard
                 <Link
                   key={item.label}
                   href={item.href}
-                  className={`text-sm font-medium transition-colors ${
-                    isActive
-                      ? "text-teal-700"
-                      : "text-slate-500 hover:text-teal-700"
-                  }`}
+                  className={`text-sm font-medium transition-colors ${isActive
+                    ? "text-teal-700"
+                    : "text-slate-500 hover:text-teal-700"
+                    }`}
                 >
                   {item.label}
                 </Link>
@@ -110,7 +113,16 @@ export default function Navbar({ userName, userImage, isOnboarded: propIsOnboard
                         {finalUserName}
                       </p>
                     </div>
+
                     <div className="my-1 border-t border-slate-100" />
+
+                    <button
+                      onClick={() => profileAction()}
+                      className="flex w-full items-center gap-2 px-4 py-2 text-sm text-slate-500 transition-colors hover:bg-slate-50 hover:text-rose-600"
+                    >
+                      <User2 className="h-4 w-4" />
+                      Profile
+                    </button>
                     <form action={signOutAction}>
                       <button
                         type="submit"

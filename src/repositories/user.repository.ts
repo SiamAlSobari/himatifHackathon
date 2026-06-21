@@ -5,7 +5,7 @@ class UserRepository {
     async getUserProfile(id: string) {
         return await db.user.findUnique({
             where: { id },
-            select: { name: true, image: true, email: true, usia: true, jenisKelamin: true, isOnboarded: true },
+            select: { name: true, image: true, email: true, usia: true, jenisKelamin: true, kontakDarurat: true, isOnboarded: true },
         });
     }
 
@@ -31,6 +31,13 @@ class UserRepository {
         return await db.user.update({
             where: { id },
             data,
+        });
+    }
+
+    async updateUserPassword(id: string, passwordHash: string) {
+        return await db.user.update({
+            where: { id },
+            data: { passwordHash },
         });
     }
 }
