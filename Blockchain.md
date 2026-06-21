@@ -331,3 +331,54 @@ async function registerOnChain(sessionId: string, sessionType: number, ipfsCid: 
 - Jalankan integrasi lokal dan pastikan API memproses turn chat ke-7 secara otomatis.
 - Periksa log konsol untuk memastikan file JSON terunggah ke Pinata IPFS.
 - Validasi transaksi masuk di [Amoy Polygonscan](https://amoy.polygonscan.com/) menggunakan transaction hash yang disimpan di DB PostgreSQL.
+
+---
+
+## 7. Strategi Penyimpanan & Alur Pengambilan Data (Hot vs Cold Storage)
+
+Dilema utama dalam mengintegrasikan IPFS/Blockchain untuk data chat adalah performa pembacaan data. Jika data chat di database lokal dihapus total dan setiap pembacaan riwayat harus memanggil IPFS (Pinata), aplikasi akan terasa lambat (high latency) dan memicu limit kuota gateway Pinata. 
+
+Berikut adalah analisis 3 strategi penanganan penyimpanan data beserta rekomendasi penerapannya:
+
+### 7.1 Analisis Opsi Strategi
+
+| Karakteristik | Opsi A: Full On-Chain Archive (Hapus Chat di DB) | Opsi B: Redundant Storage (Simpan di DB & IPFS) | Opsi C: Hybrid Hot/Cold Storage (Rekomendasi) |
+| :--- | :--- | :--- | :--- |
+| **Deskripsi** | Data chat langsung dihapus dari Postgres setelah diupload ke IPFS. UI history selalu fetch dari IPFS CID. | Data chat tetap ada di Postgres selamanya. IPFS & Blockchain hanya sebagai cadangan pasif. | Chat aktif disimpan di Postgres. Chat yang sudah selesai (`SEALED` / `COMPLETED`) dibaca dari Postgres, namun disediakan tombol verifikasi on-chain. Data lama dapat diarsipkan (arsip dinamis). |
+| **Performa Read** | **Sangat Lambat** (Terhambat network latency IPFS Gateway). | **Sangat Cepat** (Langsung dari indeks Postgres). | **Sangat Cepat** (Baca dari Postgres, request IPFS hanya terjadi jika melakukan verifikasi manual / download). |
+| **Beban Storage DB**| **Sangat Ringan** (Hanya simpan metadata & hash). | **Berat** (Seluruh isi teks obrolan disimpan selamanya). | **Optimal** (Hanya menyimpan data relasional & teks chat esensial. Bisa dikonfigurasi auto-delete chat lama). |
+| **Dampak Blockchain**| **Sangat Tinggi** (Membuktikan data lokal tidak disimpan, meminimalkan resiko kebocoran server utama). | **Rendah** (Hanya formalitas, karena data utama tidak pernah diverifikasi kebenarannya terhadap blockchain). | **Tinggi** (Menjamin *data integrity*. Pengguna dapat mencocokkan data DB dengan data IPFS kapan saja secara transparan). |
+| **Kompleksitas UI** | **Tinggi** (Perlu loader lambat, handle error jika IPFS down). | **Rendah** (Query database standar). | **Sedang** (Menambahkan fitur indikator "Verified" di UI). |
+
+---
+
+### 7.2 Rekomendasi Solusi: **Opsi C (Hybrid Hot/Cold Storage dengan Fitur Integritas)**
+
+Untuk menjaga performa aplikasi Next.js tetap instan (WOW factor UX) sekaligus memaksimalkan nilai tambah (value proposition) dari blockchain, kami merekomendasikan penerapan **Opsi C**. 
+
+#### Mekanisme Alur Kerja:
+
+1. **Penyimpanan di Database Utama (Postgres)**:
+   - Data pesan chat tetap disimpan di Postgres (tabel `ChatMessage` & `ConsultationMessage`) agar UI dapat memuat riwayat obrolan secara instan ketika halaman di-load.
+   
+2. **Penyimpanan di IPFS & Blockchain (Asinkron)**:
+   - Saat sesi selesai (turn ke-7 AI atau sesi konsultasi ditutup), backend Next.js melakukan trigger background job untuk:
+     1. Membuat ringkasan dan mengunggah JSON riwayat chat ke Pinata.
+     2. Mendaftarkan CID tersebut ke Smart Contract.
+     3. Menyimpan `ipfsCid` dan `txHash` ke baris database terkait.
+
+3. **Alur Pengambilan Data & Fitur "Verified"**:
+   - Saat user membuka riwayat chat, data ditarik secara instan dari Postgres (cepat & ringan).
+   - Di UI riwayat chat, tampilkan indikator lencana **"🛡️ Terverifikasi Aman (On-Chain)"** di sebelah status sesi.
+   - Jika pengguna/psikolog mengklik lencana tersebut, sistem akan memicu proses **Audit Transparansi**:
+     1. Backend mengambil data chat dari Postgres dan menghitung hash SHA-256 lokal dari data tersebut.
+     2. Backend/Frontend memanggil smart contract untuk mendapatkan `ipfsCid` resmi yang terkunci di blockchain untuk `sessionId` ini.
+     3. Mengunduh data JSON asli dari Pinata menggunakan `ipfsCid` tersebut.
+     4. Mencocokkan data di Postgres dengan data IPFS.
+     5. Jika cocok, tampilkan status: *"Data Utuh & Belum Dimanipulasi sejak [Timestamp Blockchain]"*.
+
+#### 7.3 Skema Arsip Opsional (Skalabilitas Jangka Panjang)
+Jika kapasitas penyimpanan server Postgres terbatas, kita bisa menambahkan scheduler (cron job) bulanan:
+- Setiap chat yang usianya **lebih dari 30 hari** dan statusnya sudah `COMPLETED` akan **dihapus baris pesannya** (`ChatMessage` / `ConsultationMessage`) dari PostgreSQL.
+- Database lokal hanya menyisakan metadata sesi, `ipfsCid`, dan `txHash`.
+- Jika user membuka chat berumur >30 hari tersebut, UI akan menampilkan ikon arsip 📂, dan Next.js secara dinamis mengunduh kontennya dari IPFS Pinata secara asinkron (*lazy loading*) hanya saat diklik.
