@@ -88,6 +88,12 @@ export class PsychologistService {
     const { pusherServer } = await import("@/lib/pusher/pusher-server");
     await pusherServer.trigger(`appointment-${appointmentId}`, "session-ended", {});
 
+    // Trigger blockchain sync in the background
+    const { blockchainSyncService } = await import("./blockchain-sync.service");
+    blockchainSyncService.syncAppointmentSession(appointmentId).catch(err => {
+      console.error("Failed to sync completed appointment session to blockchain:", err);
+    });
+
     return updated;
   }
 

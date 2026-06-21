@@ -165,7 +165,13 @@ export default function ChatPanel({
 
   return (
     <section className="flex h-full flex-col rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-      <ChatHeader activeTheme={activeTheme} />
+      <ChatHeader 
+        activeTheme={activeTheme} 
+        sessionId={displaySession?.id}
+        ipfsCid={displaySession?.ipfsCid}
+        txHash={displaySession?.txHash}
+        status={displaySession?.status}
+      />
 
       {/* Messages list container */}
       <div ref={chatContainerRef} className="flex-1 space-y-4 overflow-y-auto px-6 py-4 min-h-0">

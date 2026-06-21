@@ -1,4 +1,5 @@
 import { Bot, MoreVertical } from "lucide-react";
+import VerificationBadge from "./VerificationBadge";
 
 const headerAvatarColorMap = {
   calm_blue: "bg-teal-900",
@@ -9,10 +10,21 @@ const headerAvatarColorMap = {
 
 interface ChatHeaderProps {
   activeTheme?: string;
+  sessionId?: string;
+  ipfsCid?: string | null;
+  txHash?: string | null;
+  status?: string;
 }
 
-export default function ChatHeader({ activeTheme = "calm_blue" }: ChatHeaderProps) {
+export default function ChatHeader({
+  activeTheme = "calm_blue",
+  sessionId,
+  ipfsCid,
+  txHash,
+  status,
+}: ChatHeaderProps) {
   const avatarBg = headerAvatarColorMap[activeTheme as keyof typeof headerAvatarColorMap] || "bg-teal-900";
+  const isFinished = status === "COMPLETED" || status === "SEALED" || !!(ipfsCid || txHash);
 
   return (
     <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
@@ -29,13 +41,23 @@ export default function ChatHeader({ activeTheme = "calm_blue" }: ChatHeaderProp
         </div>
       </div>
 
-      <button
-        type="button"
-        aria-label="Opsi lainnya"
-        className="text-slate-400 hover:text-slate-600"
-      >
-        <MoreVertical className="h-5 w-5" />
-      </button>
+      <div className="flex items-center gap-3">
+        {sessionId && isFinished && (
+          <VerificationBadge
+            sessionId={sessionId}
+            initialIpfsCid={ipfsCid}
+            initialTxHash={txHash}
+          />
+        )}
+        
+        <button
+          type="button"
+          aria-label="Opsi lainnya"
+          className="text-slate-400 hover:text-slate-600"
+        >
+          <MoreVertical className="h-5 w-5" />
+        </button>
+      </div>
     </div>
   );
 }

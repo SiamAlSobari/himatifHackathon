@@ -1,9 +1,12 @@
+"use client"
+
 import { History } from "lucide-react";
 import { ConsultationHistoryItem } from "@/lib/types/profile";
 
 interface ConsultationHistoryCardProps {
   title: string;
   viewAllLabel: string;
+  onViewAll: () => void;
   items: ConsultationHistoryItem[];
 }
 
@@ -24,6 +27,7 @@ export default function ConsultationHistoryCard({
   title,
   viewAllLabel,
   items,
+  onViewAll
 }: ConsultationHistoryCardProps) {
   const hasHistory = items && items.length > 0;
 
@@ -36,6 +40,7 @@ export default function ConsultationHistoryCard({
         </div>
         {hasHistory && (
           <button
+            onClick={onViewAll}
             type="button"
             className="text-xs font-bold text-primary transition-colors hover:opacity-85"
           >
@@ -90,6 +95,7 @@ export default function ConsultationHistoryCard({
                   </td>
                   <td className="py-3.5 text-right">
                     <button
+                      onClick={onViewAll}
                       type="button"
                       className="text-xs font-bold text-primary transition-all duration-300 hover:underline hover:opacity-85"
                     >
@@ -104,4 +110,4 @@ export default function ConsultationHistoryCard({
       )}
     </div>
   );
-}
+}

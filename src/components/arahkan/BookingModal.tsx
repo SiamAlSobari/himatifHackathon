@@ -103,7 +103,7 @@ export default function BookingModal({
 
   if (!psychologist) return null
 
-  const timeSlots = ["09:00", "10:14", "13:00", "14:30", "16:00", "21:33"]
+  const timeSlots = ["09:00", "10:14", "13:00", "14:30", "16:00", "00:44"]
 
   // Get friendly clinical biography based on name/role
   const getBiography = (name: string) => {

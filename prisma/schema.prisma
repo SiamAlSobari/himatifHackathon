@@ -104,6 +104,8 @@ model ChatSession {
   updatedAt      DateTime        @updatedAt
   chatMessages   ChatMessage[]
   sessionSummary SessionSummary?
+  ipfsCid        String?         // CID IPFS untuk riwayat chat AI
+  txHash         String?         // Hash transaksi blockchain
 }
 
 enum ChatSessionStatus {
@@ -171,6 +173,8 @@ model Appointment {
   user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   psychologistProfile  PsychologistProfile   @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
   consultationMessages ConsultationMessage[]
+  ipfsCid              String?               // CID IPFS untuk riwayat chat konsultasi
+  txHash               String?               // Hash transaksi blockchain
 }
 
 model ConsultationMessage {
