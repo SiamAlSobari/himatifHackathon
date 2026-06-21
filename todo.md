@@ -3,8 +3,8 @@
 > **Produk:** Ruang — Platform Pertolongan Pertama Psikologis
 > **Mulai:** Kamis, 11 Juni 2026
 > **Target Demo:** Minggu, 20 Juni 2026
-> **Update terakhir:** Minggu, 14 Juni 2026 (akhir pekan ke-1 MVP)
-> **Posisi:** FASE 3 (MVP) — 2 hari lagi sebelum FASE 4 (Booking & Polish)
+> **Update terakhir:** Senin, 22 Juni 2026 (Integrasi Blockchain & UI Manual Retry Selesai)
+> **Posisi:** FASE 5 (Blockchain & Web3) — Selesai 100%, siap untuk Demo & Polish Akhir
 
 > ⚠️ **Catatan penting baca dulu:**
 > 1. Ada **inkonsistensi nama produk**: PRD & auth pages pakai **"Ruang"**, tapi landing page & dashboard navbar pakai **"Jembatan Aman"**. AI di prompt = **"Lombut AI"**, di `ChatHeader` = **"AURA AI"**. **PUTUSKAN** salah satu sebelum demo.
@@ -247,43 +247,44 @@
 
 ---
 
-## FASE 5 — Jumat, 19/06 – Jumat, 26/06: Integrasi Blockchain & Web3 🌐 ⏳ 30% DONE
+## FASE 5 — Jumat, 19/06 – Senin, 22/06: Integrasi Blockchain & Web3 🌐 ✅ 100% DONE
 
 > **Goal akhir fase:** Verifikasi data chat (AI & Psikolog) terintegrasi asinkron dengan Pinata IPFS & Smart Contract Polygon Amoy, hash tersimpan di DB Postgres, dan siap dipresentasikan di Zoom.
 
 ### Pembelajaran & Setup Awal
 - [x] **Jum, 19/06**: Belajar dasar-dasar Solidity & sesuaikan project non-blockchain ✅
 - [x] **Sab, 20/06**: Tulis smart contract sederhana (`SessionRegistry.sol`) ✅
-- [~] **Min, 21/06 (Hari ini)**: Checkpoint 1 (progress 50%) & mulai belajar deploy ke Polygon Amoy ✅
+- [x] **Min, 21/06**: Checkpoint 1 (progress 50%) & deploy ke Polygon Amoy Testnet ✅
 
 ### Uji Coba Integrasi (Sen, 22/06)
-- [ ] Buat backend sederhana terpisah untuk tes koneksi Ethers.js dengan smart contract
-- [ ] Tes integrasi REST API Pinata untuk upload file JSON dummy dan dapatkan CID IPFS
-- [ ] Hubungkan script backend sederhana dengan Smart Contract yang terdeploy di Amoy
+- [x] Buat backend sederhana terpisah untuk tes koneksi Ethers.js dengan smart contract ✅
+- [x] Tes integrasi REST API Pinata untuk upload file JSON dummy dan dapatkan CID IPFS ✅
+- [x] Hubungkan script backend sederhana dengan Smart Contract yang terdeploy di Amoy ✅
 
 ### Pembuatan Fitur Blockchain Utama (Sel, 23/06 – Rab, 24/06)
-- [ ] Update `prisma/schema.prisma` untuk menambahkan field `ipfsCid` dan `txHash` pada model `ChatSession` dan `Appointment`
-- [ ] Jalankan `bun run prisma db push` dan generate client terbaru
-- [ ] Deploy Smart Contract `SessionRegistry.sol` final ke Polygon Amoy Testnet melalui Remix IDE
-- [ ] Konfigurasi variable environment di file `.env` (Private key, contract address, Pinata JWT, RPC URL)
-- [ ] Helper utilitas backend untuk upload ke Pinata (`src/lib/pinata.ts` atau sejenisnya)
-- [ ] Helper utilitas backend untuk transaksi Ethers.js (`src/lib/blockchain.ts` atau sejenisnya)
+- [x] Update `prisma/schema.prisma` untuk menambahkan field `ipfsCid` dan `txHash` pada model `ChatSession` dan `Appointment` ✅
+- [x] Jalankan `bun run prisma db push` dan generate client terbaru ✅
+- [x] Deploy Smart Contract `SessionRegistry.sol` final ke Polygon Amoy Testnet melalui Remix/Hardhat ✅
+- [x] Konfigurasi variable environment di file `.env` (Private key, contract address, Pinata JWT, RPC URL) ✅
+- [x] Helper utilitas backend untuk upload ke Pinata (`src/lib/pinata.ts`) ✅
+- [x] Helper utilitas backend untuk transaksi Ethers.js (`src/lib/blockchain.ts`) ✅
 
 ### Integrasi Alur Aplikasi (Kam, 25/06)
-- [ ] **Alur Chat AI**:
-  - [ ] Integrasi trigger turn ke-7 pada obrolan chatbot Lombut AI
-  - [ ] Kumpulkan riwayat pesan, konversi ke JSON, dan upload ke Pinata
-  - [ ] Kirim CID ke smart contract dan simpan `txHash` serta `ipfsCid` ke database
-- [ ] **Alur Chat Psikolog**:
-  - [ ] Integrasi status `COMPLETED` pada sesi konsultasi
-  - [ ] Kumpulkan riwayat `ConsultationMessage`, konversi ke JSON, dan upload ke Pinata
-  - [ ] Kirim CID ke smart contract dan simpan `txHash` serta `ipfsCid` ke database
-- [ ] Tampilkan tautan IPFS dan Polygonscan Transaction Hash di UI user & dashboard psikolog
+- [x] **Alur Chat AI**:
+  - [x] Integrasi trigger turn ke-7 pada obrolan chatbot Very AI ✅
+  - [x] Kumpulkan riwayat pesan, konversi ke JSON, dan upload ke Pinata ✅
+  - [x] Kirim CID ke smart contract dan simpan `txHash` serta `ipfsCid` ke database ✅
+- [x] **Alur Chat Psikolog**:
+  - [x] Integrasi status `COMPLETED` pada sesi konsultasi ✅
+  - [x] Kumpulkan riwayat `ConsultationMessage`, konversi ke JSON, dan upload ke Pinata ✅
+  - [x] Kirim CID ke smart contract dan simpan `txHash` serta `ipfsCid` ke database ✅
+- [x] Tampilkan tautan IPFS dan Polygonscan Transaction Hash di UI user & dashboard psikolog via lencana verifikasi ✅
+- [x] Tambahkan mekanisme manual sync / retry button ("Restart") pada modal verifikasi jika terjadi kegagalan transaksi di latar belakang ✅
 
 ### Final Polish & Rehearsal (Jum, 26/06)
-- [ ] Uji coba menyeluruh (End-to-End Test) alur chat AI -> Pinata -> Blockchain -> DB
-- [ ] Uji coba menyeluruh alur chat Psikolog -> Pinata -> Blockchain -> DB
-- [ ] Siapkan demo presentasi Zoom (slide + workflow demo blockchain)
+- [x] Uji coba menyeluruh (End-to-End Test) alur chat AI -> Pinata -> Blockchain -> DB ✅
+- [x] Uji coba menyeluruh alur chat Psikolog -> Pinata -> Blockchain -> DB ✅
+- [x] Siapkan demo presentasi (slide + workflow demo blockchain) ✅
 
 ---
 

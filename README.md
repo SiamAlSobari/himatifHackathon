@@ -70,7 +70,7 @@ Verimind dibangun di atas tiga pilar utama yang saling terhubung secara runtut:
                                                    │
                                            (Mulai Curhat)
                                                    ▼
-[ Rujukan Profesional ] ◄──(Rekomendasi AI)── [ LOMBUT AI Chatbot ]
+[ Rujukan Profesional ] ◄──(Rekomendasi AI)── [ Very AI Chatbot ]
          │
     (Booking)
          ▼
@@ -89,7 +89,7 @@ Verimind dibangun di atas tiga pilar utama yang saling terhubung secara runtut:
   - `alert_orange` (🌧️ Kondisi Perlu Perhatian): Warna jingga lembut untuk menenangkan kecemasan dengan Space Grotesk & Plus Jakarta Sans.
   - `deep_purple` (⛈️ Kondisi Butuh Pendampingan): Palet ungu mendalam yang suportif dengan Playfair Display & DM Sans.
 
-### 2. Validasi (LOMBUT AI Chatbot)
+### 2. Validasi (Very AI Chatbot)
 * **Sapaan Awal Kontekstual**: AI (Google Gemini 2.5/3.1 Flash) memulai percakapan berdasarkan status mood dan hasil kuesioner terbaru pengguna, menciptakan interaksi yang sangat personal.
 * **Dukungan & Validasi Emosional**: Dirancang khusus menggunakan *system prompt* terstruktur untuk memvalidasi emosi (*active listening*), merefleksikan perasaan, dan melarang diagnosis medis mandiri oleh AI.
 * **Deteksi Krisis & Peringatan Darurat**: Jika AI mendeteksi pesan yang mengandung indikasi krisis (*self-harm* atau ideasi bunuh diri), sistem segera memicu **Modal Peringatan Darurat (Hotline Crisis Alert)** berwarna merah menyala secara otomatis selama 3 detik, lengkap dengan nomor telepon darurat nasional (Yayasan Pulih, Kemenkes 119 Ext 8, Into The Light).
@@ -102,7 +102,7 @@ Verimind dibangun di atas tiga pilar utama yang saling terhubung secara runtut:
 
 ### 4. Web3 & Blockchain (Integritas Data Sesi)
 Verimind menerapkan arsitektur penyimpanan hibrida untuk melindungi riwayat percakapan dari manipulasi internal maupun eksternal:
-* **Upload ke IPFS (Pinata)**: Ketika obrolan LOMBUT AI mencapai 7 turn atau chat Psikolog ditutup, backend Next.js mengonversi pesan ke format JSON terenkripsi dan mengunggahnya ke IPFS via Pinata untuk mendapatkan CID (Content Identifier) unik.
+* **Upload ke IPFS (Pinata)**: Ketika obrolan Very AI mencapai 7 turn atau chat Psikolog ditutup, backend Next.js mengonversi pesan ke format JSON terenkripsi dan mengunggahnya ke IPFS via Pinata untuk mendapatkan CID (Content Identifier) unik.
 * **Pencatatan Smart Contract**: Backend menandatangani transaksi gasless (sistem membayar gas fee menggunakan Admin Wallet) dan memanggil fungsi `registerSession` pada smart contract `SessionRegistry` di Polygon Amoy Testnet untuk mengunci CID, jenis sesi, dan timestamp.
 * **Sistem Audit Transparansi (Hot vs Cold Storage)**:
   - Data aktif tersimpan di PostgreSQL agar UI memuat halaman secara instan.
@@ -320,7 +320,7 @@ Buka browser Anda dan akses **[http://localhost:3000](http://localhost:3000)**.
 ### Fase 3: Pembangunan Core MVP (Selesai)
 * [x] Fitur screening multi-step (Mood + 4 Likert questions) & Daily Screening.
 * [x] Integrasi dynamic theming di client-side berdasarkan emosi/skor kuesioner.
-* [x] Chatbot LOMBUT AI dengan deteksi krisis & modal darurat otomatis.
+* [x] Chatbot Very AI dengan deteksi krisis & modal darurat otomatis.
 * [x] Listing psikolog dengan rating dan sistem pencarian spesialisasi.
 
 ### Fase 4: Real-time Consultation & Polish (Selesai)
@@ -329,12 +329,13 @@ Buka browser Anda dan akses **[http://localhost:3000](http://localhost:3000)**.
 * [x] Indikator pengetikan (*typing status*) dan status online/offline lawan bicara.
 * [x] Dashboard Psikolog: antrean janji, brief klien, dan integrasi catatan sesi.
 
-### Fase 5: Integrasi Blockchain & Web3 (Sedang Berjalan - 30% Done)
-* [ ] Integrasi trigger turn ke-7 chat AI untuk otomatisasi upload IPFS Pinata.
-* [ ] Integrasi aksi selesaikan chat psikolog untuk memicu upload IPFS Pinata.
-* [ ] Penyimpanan Ethers.js transaction hash (`txHash`) dan IPFS CID (`ipfsCid`) ke PostgreSQL.
-* [ ] Menampilkan badge dan link transaksi Polygonscan di halaman audit transparansi riwayat chat.
-* [ ] E2E testing alur transaksi gasless on-chain.
+### Fase 5: Integrasi Blockchain & Web3 (Selesai - 100% Done)
+* [x] Integrasi trigger turn ke-7 chat AI untuk otomatisasi upload IPFS Pinata.
+* [x] Integrasi aksi selesaikan chat psikolog untuk memicu upload IPFS Pinata.
+* [x] Penyimpanan Ethers.js transaction hash (`txHash`) dan IPFS CID (`ipfsCid`) ke PostgreSQL.
+* [x] Menampilkan badge, link transaksi Polygonscan, dan detail data IPFS pada modal audit transparansi.
+* [x] Menambahkan mekanisme sinkronisasi ulang manual (Retry / Restart Sync) pada UI badge untuk menangani kegagalan gas atau jaringan RPC.
+* [x] E2E testing alur transaksi gasless on-chain dengan wallet rotation failover.
 
 ---
 
