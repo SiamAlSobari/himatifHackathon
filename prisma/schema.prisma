@@ -23,7 +23,6 @@ model User {
   updatedAt     DateTime  @updatedAt
 
   accounts            Account[]
-  sessions            Session[]
   screenings          Screening[]
   chatSessions        ChatSession[]
   appointments        Appointment[]
@@ -55,13 +54,6 @@ model Account {
   @@unique([provider, providerAccountId])
 }
 
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
 
 model VerificationToken {
   identifier String

@@ -1,17 +1,18 @@
-import { auth } from "@/auth"
+import NextAuth from "next-auth"
+import { authConfig } from "@/auth.config"
 import { NextResponse } from "next/server"
 
-export const runtime = "nodejs"
+const { auth } = NextAuth(authConfig)
 
-// Route yang bisa diakses tanpa login
-const PUBLIC_PATHS = ["/login", "/register", "/psikolog/login", "/psikolog/register", "/forgot-password", "/reset-password"]
-
-export default auth((req) => {
-
+// Export a named function `proxy` for Next.js 16+
+export const proxy = auth((req) => {
   const { pathname } = req.nextUrl
   const isLoggedIn = !!req.auth
   const user = req.auth?.user as any
   const role = user?.role // "USER" | "PSYCHOLOGY"
+
+  // Route yang bisa diakses tanpa login
+  const PUBLIC_PATHS = ["/login", "/register", "/psikolog/login", "/psikolog/register", "/forgot-password", "/reset-password"]
 
   // Landing page ("/") dan auth pages = publik
   const isPublic =
@@ -69,6 +70,6 @@ export default auth((req) => {
 })
 
 export const config = {
-  // Jalankan middleware di semua route kecuali API, static files, dan favicon
+  // Jalankan proxy di semua route kecuali API, static files, dan favicon
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 }

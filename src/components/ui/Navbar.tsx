@@ -41,7 +41,11 @@ export default function Navbar({ userName, userImage, isOnboarded: propIsOnboard
 
   const router = useRouter();
   const profileAction = () => {
-    router.push("/profile");
+    if (role === "PSYCHOLOGY") {
+      router.push("/psikolog/profile");
+    } else {
+      router.push("/profile");
+    }
   }
   return (
     <header className="w-full border-b border-slate-200 bg-white">
