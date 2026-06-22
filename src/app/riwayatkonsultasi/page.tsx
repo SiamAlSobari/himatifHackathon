@@ -56,7 +56,7 @@ export default function RiwayatKonsultasiPage() {
       <div className="flex h-full w-full">
         {/* Left Sidebar Pane */}
         <div
-          className={`h-full w-full md:w-80 lg:w-96 shrink-0 ${
+          className={`h-full w-full md:w-80 lg:w-96 shrink-0 animate-slide-left duration-700 ${
             selectedId && !mobileShowSidebar ? "hidden md:block" : "block"
           }`}
         >
@@ -70,7 +70,7 @@ export default function RiwayatKonsultasiPage() {
 
         {/* Right Chat Detail Pane */}
         <div
-          className={`h-full flex-1 min-w-0 ${
+          className={`h-full flex-1 min-w-0 animate-fade-in duration-500 ${
             !selectedId || mobileShowSidebar ? "hidden md:block" : "block"
           }`}
         >

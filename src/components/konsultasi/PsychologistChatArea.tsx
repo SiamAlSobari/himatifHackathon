@@ -94,7 +94,7 @@ export default function PsychologistChatArea({
               }`}
             >
               <div
-                className={`p-4 rounded-2xl soft-bloom ${
+                className={`p-4 rounded-2xl soft-bloom animate-bubble-pop ${
                   isPsych
                     ? "bg-primary-fixed text-on-primary-fixed chat-bubble-psychologist"
                     : "bg-surface-container text-on-surface chat-bubble-user"

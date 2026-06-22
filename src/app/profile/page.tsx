@@ -263,53 +263,62 @@ export default function ProfilePage() {
     setIsPasswordModalOpen(false);
     router.push(`/forgot-password?email=${encodeURIComponent(data.dbUser.email)}`);
   };
-
   return (
-    <main className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8">
+    <main className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8 overflow-hidden">
       {/* Upper Cards Grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="flex flex-col gap-6 lg:col-span-1">
-          <ProfileCard
-            name={displayName}
-            age={age}
-            location={getGenderLabel(data.dbUser.jenisKelamin)}
-            avatarUrl={data.dbUser.image}
-            onEdit={handleOpenProfileModal}
-          />
-          <QuickHelpCard title="Butuh Bantuan?" links={quickHelpLinks} />
+        <div className="flex flex-col gap-6 lg:col-span-1 animate-slide-left duration-700">
+          <div className="hover-lift shadow-premium rounded-2xl">
+            <ProfileCard
+              name={displayName}
+              age={age}
+              location={getGenderLabel(data.dbUser.jenisKelamin)}
+              avatarUrl={data.dbUser.image}
+              onEdit={handleOpenProfileModal}
+            />
+          </div>
+          <div className="hover-lift shadow-premium rounded-2xl">
+            <QuickHelpCard title="Butuh Bantuan?" links={quickHelpLinks} />
+          </div>
         </div>
 
-        <div className="flex flex-col gap-6 lg:col-span-2">
+        <div className="flex flex-col gap-6 lg:col-span-2 animate-slide-right delay-100 duration-700">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 h-full">
-            <PersonalInfoCard
-              fullName={displayName}
-              email={email}
-              phoneNumber={phoneNumber}
-              onEditPhone={handleOpenPhoneModal}
-            />
-            <AccountSettingsCard 
-              initialNotificationsEnabled={false} 
-              onUpdatePassword={handleOpenPasswordModal}
-            />
+            <div className="hover-lift shadow-premium rounded-2xl">
+              <PersonalInfoCard
+                fullName={displayName}
+                email={email}
+                phoneNumber={phoneNumber}
+                onEditPhone={handleOpenPhoneModal}
+              />
+            </div>
+            <div className="hover-lift shadow-premium rounded-2xl">
+              <AccountSettingsCard 
+                initialNotificationsEnabled={false} 
+                onUpdatePassword={handleOpenPasswordModal}
+              />
+            </div>
           </div>
         </div>
       </div>
 
       {/* Real-time Screening Trends Graph */}
-      <ScreeningTrendsCard
-        trends={data.wellnessTrends}
-        metrics={data.metrics}
-      />
+      <div className="animate-fade-up delay-200 duration-700 hover-lift shadow-premium rounded-2xl">
+        <ScreeningTrendsCard
+          trends={data.wellnessTrends}
+          metrics={data.metrics}
+        />
+      </div>
 
       {/* Real-time Consultation History Table */}
-      <ConsultationHistoryCard
-        title="Riwayat Konsultasi"
-        viewAllLabel="Lihat Semua"
-        items={data.consultationHistory}
-        onViewAll={() => router.push("/riwayatkonsultasi")}
-      />
-
-      {/* ============================================================ */}
+      <div className="animate-fade-up delay-300 duration-700 hover-lift shadow-premium rounded-2xl">
+        <ConsultationHistoryCard
+          title="Riwayat Konsultasi"
+          viewAllLabel="Lihat Semua"
+          items={data.consultationHistory}
+          onViewAll={() => router.push("/riwayatkonsultasi")}
+        />
+      </div>      {/* ============================================================ */}
       {/* MODAL 1: UPDATE PROFILE (Name, Age, Gender) */}
       {/* ============================================================ */}
       {isProfileModalOpen && (

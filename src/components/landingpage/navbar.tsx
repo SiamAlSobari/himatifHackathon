@@ -42,10 +42,9 @@ export default function Navbar() {
     { id: 'kenali', label: 'Kenali' },
     { id: 'validasi', label: 'Validasi' },
   ]
-
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 animate-fade-in ${
         scrolled
           ? 'bg-white/90 backdrop-blur-md shadow-sm'
           : 'bg-transparent'
@@ -84,13 +83,13 @@ export default function Navbar() {
         <div className="flex items-center gap-4">
           <Link
             href="/login"
-            className="text-sm font-medium text-[#2D3748] hover:text-[#1A8A7A] transition-colors"
+            className="text-sm font-medium text-[#2D3748] hover:text-[#1A8A7A] transition-colors hover-lift-sm"
           >
             Login
           </Link>
           <Link
             href="/register"
-            className="text-sm font-medium bg-[#0D1B2A] text-white px-4 py-2 rounded-full hover:bg-[#1A8A7A] transition-colors"
+            className="text-sm font-medium bg-[#0D1B2A] text-white px-4 py-2 rounded-full hover:bg-[#1A8A7A] transition-colors hover-lift-sm"
           >
             Register
           </Link>

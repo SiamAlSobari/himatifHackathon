@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import PsychologistProfileClient from "./profile-client";
 
 export const metadata: Metadata = {
-  title: "Profil Mitra Psikolog — MindCare",
+  title: "Profil Mitra Psikolog",
   description: "Kelola profil, lihat tren sesi, dan perbarui informasi akun psikolog Anda.",
 };
 

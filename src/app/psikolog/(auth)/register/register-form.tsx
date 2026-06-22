@@ -77,7 +77,7 @@ export function RegisterForm() {
             )}
 
             {/* Account Info Section */}
-            <div className="space-y-2.5">
+            <div className="space-y-2.5 animate-fade-up" style={{ animationDelay: '150ms' }}>
                 <h3 className="text-[10px] font-black text-[#0D1B2A]/40 uppercase tracking-widest">
                     Informasi Akun
                 </h3>
@@ -163,7 +163,7 @@ export function RegisterForm() {
             </div>
 
             {/* Professional Role Dropdown Selection */}
-            <div className="space-y-2.5 pt-1 border-t border-black/5">
+            <div className="space-y-2.5 pt-1 border-t border-black/5 animate-fade-up" style={{ animationDelay: '250ms' }}>
                 <h3 className="text-[10px] font-black text-[#0D1B2A]/40 uppercase tracking-widest">
                     Informasi Profesional
                 </h3>
@@ -196,7 +196,8 @@ export function RegisterForm() {
             <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-10 mt-3 bg-[#0D1B2A] hover:bg-[#1A8A7A] text-white rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-[#1A8A7A]/25 text-xs font-semibold cursor-pointer flex items-center justify-center gap-2 group/btn"
+                className="w-full h-10 mt-3 bg-[#0D1B2A] hover:bg-[#1A8A7A] text-white rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-[#1A8A7A]/25 text-xs font-semibold cursor-pointer flex items-center justify-center gap-2 group/btn animate-fade-up"
+                style={{ animationDelay: '350ms' }}
             >
                 {loading ? (
                     "Mendaftarkan..."

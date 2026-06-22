@@ -24,7 +24,7 @@ export default function WellbeingScoreCard({
 
       <div className="mb-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
         <div
-          className="h-full rounded-full bg-teal-800"
+          className="h-full rounded-full bg-teal-800 origin-left animate-progress transition-all duration-500"
           style={{ width: `${percent}%` }}
         />
       </div>

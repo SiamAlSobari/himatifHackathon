@@ -28,6 +28,7 @@ export default function ChatPage() {
   const { setTheme } = useTheme();
 
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"history" | "chat" | "summary">("chat");
 
   // Reset selected history session if active session becomes available
   useEffect(() => {
@@ -96,9 +97,30 @@ export default function ChatPage() {
 
   return (
     <div className={`flex h-[calc(100vh-64px)] flex-col transition-colors duration-500 ${themeBg}`}>
+      {/* Mobile Tab Switcher */}
+      <div className="flex border-b border-slate-200/80 bg-white lg:hidden shrink-0">
+        {[
+          { id: "history", label: "Riwayat" },
+          { id: "chat", label: "Sesi Curhat" },
+          { id: "summary", label: "Analisis AI" },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`flex-1 py-3 text-center text-xs font-bold transition-all border-b-2 cursor-pointer ${
+              activeTab === tab.id
+                ? "border-teal-700 text-teal-800"
+                : "border-transparent text-slate-400 hover:text-slate-600"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       <main className="mx-auto grid w-full max-w-7xl flex-1 grid-cols-1 gap-4 overflow-hidden px-6 py-4 lg:grid-cols-4">
         {/* Left Column: Sesi Sidebar */}
-        <div className="h-full min-h-0 lg:col-span-1">
+        <div className={`h-full min-h-0 lg:col-span-1 animate-slide-left duration-700 ${activeTab !== "history" ? "hidden lg:block" : "block"}`}>
           <ChatHistorySidebar
             history={data?.history || []}
             activeSession={data?.activeSession || null}
@@ -112,7 +134,7 @@ export default function ChatPage() {
         </div>
 
         {/* Middle Column: Chat Panel */}
-        <div className="lg:col-span-2 h-full min-h-0">
+        <div className={`lg:col-span-2 h-full min-h-0 animate-fade-up delay-100 duration-700 ${activeTab !== "chat" ? "hidden lg:block" : "block"}`}>
           <ChatPanel
             activeSession={data?.activeSession || null}
             cooldown={data?.cooldown || null}
@@ -124,7 +146,7 @@ export default function ChatPage() {
         </div>
 
         {/* Right Column: Summary Sidebar */}
-        <div className="h-full min-h-0 lg:col-span-1">
+        <div className={`h-full min-h-0 lg:col-span-1 animate-slide-right delay-200 duration-700 ${activeTab !== "summary" ? "hidden lg:block" : "block"}`}>
           <SummarySidebar
             latestAssistantMessage={latestAssistantMessage}
             latestScreening={data?.latestScreening || null}

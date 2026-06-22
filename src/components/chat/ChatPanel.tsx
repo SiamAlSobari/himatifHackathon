@@ -287,16 +287,16 @@ export default function ChatPanel({
             </DialogDescription>
           </DialogHeader>
           <div className="mt-6 flex flex-col gap-3">
-            <button
+            <a
+              href="tel:119"
               onClick={() => {
                 setShowCrisisModal(false);
-                window.open("tel:119");
               }}
               className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg active:scale-95 transition-all shadow-md shadow-red-600/10 cursor-pointer flex justify-center items-center gap-2"
             >
               <HeartHandshake className="h-4 w-4" />
               Hubungi Crisis Center (119)
-            </button>
+            </a>
             <button
               onClick={() => setShowCrisisModal(false)}
               className="w-full py-2.5 border border-red-300 text-red-700 hover:bg-red-100/50 font-medium rounded-lg active:scale-95 transition-all cursor-pointer"

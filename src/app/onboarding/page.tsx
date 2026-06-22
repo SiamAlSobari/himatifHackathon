@@ -5,7 +5,7 @@ import OnboardingForm from "@/components/onboarding/OnboardingForm"
 import type { OnboardingFormData } from "@/lib/types/onboarding"
 
 export const metadata = {
-  title: "Onboarding • Verimind",
+  title: "Onboarding",
   description:
     "Bikin Verimind lebih kenal kamu. 5 pertanyaan ringan, ± 60 detik, 100% privat.",
 }

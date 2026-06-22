@@ -32,7 +32,7 @@ export default function PsychologistCard({
   const isAvailable = availability === "AVAILABLE"
 
   return (
-    <div className="bg-surface border border-outline-variant/60 rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row gap-5 transition-shadow hover:shadow-md">
+    <div className="bg-surface border border-outline-variant/60 rounded-2xl p-6 flex flex-col sm:flex-row gap-5 transition-all duration-300 hover-lift shadow-premium hover:border-primary/20">
       {/* Photo */}
       <div className="flex-shrink-0 self-start">
         <img

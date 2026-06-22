@@ -3,7 +3,8 @@ import { auth } from "@/auth"
 import { db } from "@/lib/db"
 
 export const metadata = {
-  title: "Dashboard • Verimind",
+  title: "Dashboard Klien",
+  description: "Pantau grafik perkembangan mood harian Anda, rekomendasi aktivitas, status konsultasi psikolog, dan riwayat keamanan on-chain.",
 }
 
 export default async function DashboardLayout({

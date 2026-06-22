@@ -59,13 +59,14 @@ export default function DashboardPage() {
     setSelectedDayLabel(day);
     setSelectedResults(screeningResults);
   };
-
   return (
-    <main className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8">
-      <DashboardHeader name={firstName} />
+    <main className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8 overflow-hidden">
+      <div className="animate-fade-up duration-500">
+        <DashboardHeader name={firstName} />
+      </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 animate-fade-up delay-100 duration-700 hover-lift shadow-premium rounded-2xl">
           <MoodChartCard
             title="Jejak Kesejahteraan"
             rangeLabel="7 Hari Terakhir"
@@ -74,35 +75,43 @@ export default function DashboardPage() {
             onBarClick={handleBarClick}
           />
         </div>
-        <ScreeningSummaryCard
-          title="Ringkasan Kenali"
-          results={selectedResults}
-          dayLabel={selectedDayLabel}
-          ctaLabel="Lihat Detail Screening"
-          onCtaClick={() => router.push("/screening/detail")}
-        />
+        <div className="animate-fade-up delay-200 duration-700 hover-lift shadow-premium rounded-2xl">
+          <ScreeningSummaryCard
+            title="Ringkasan Kenali"
+            results={selectedResults}
+            dayLabel={selectedDayLabel}
+            ctaLabel="Lihat Detail Screening"
+            onCtaClick={() => router.push("/screening/detail")}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <ScheduleCard
-          title="Jadwal Mendatang"
-          viewAllLabel="Lihat Semua"
-          items={data.scheduleItems}
-        />
-        <ActivityCard
-          title="Rekomendasi Aktivitas"
-          subtitle="Berdasarkan skor stresmu hari ini."
-          description=""
-          items={data.activityRecommendations}
-        />
+        <div className="animate-fade-up delay-300 duration-700 hover-lift shadow-premium rounded-2xl">
+          <ScheduleCard
+            title="Jadwal Mendatang"
+            viewAllLabel="Lihat Semua"
+            items={data.scheduleItems}
+          />
+        </div>
+        <div className="animate-fade-up delay-400 duration-700 hover-lift shadow-premium rounded-2xl">
+          <ActivityCard
+            title="Rekomendasi Aktivitas"
+            subtitle="Berdasarkan skor stresmu hari ini."
+            description=""
+            items={data.activityRecommendations}
+          />
+        </div>
       </div>
 
-      <EmergencyBanner
-        title="Butuh bantuan segera?"
-        description="Tim kami tersedia 24/7 untuk situasi darurat psikologis."
-        ctaLabel="Panggil Bantuan"
-        phoneNumber="119"
-      />
+      <div className="animate-fade-up delay-500 duration-700 hover-scale rounded-2xl overflow-hidden shadow-glow-theme">
+        <EmergencyBanner
+          title="Butuh bantuan segera?"
+          description="Tim kami tersedia 24/7 untuk situasi darurat psikologis."
+          ctaLabel="Panggil Bantuan"
+          phoneNumber="119"
+        />
+      </div>
     </main>
   );
 }

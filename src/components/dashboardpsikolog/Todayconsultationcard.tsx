@@ -60,7 +60,7 @@ export default function TodayConsultationCard({
   return (
     <Link
       href={`/psikolog/konsultasi?appointmentId=${consultation.id}`}
-      className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 p-3 hover:bg-slate-50 hover:shadow-sm transition-all duration-200 cursor-pointer"
+      className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 p-3 bg-white hover:bg-slate-50 transition-all duration-300 hover-lift-sm shadow-premium hover:border-primary/20 cursor-pointer"
     >
       {cardContent}
     </Link>

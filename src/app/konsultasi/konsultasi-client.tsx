@@ -255,7 +255,7 @@ export default function KonsultasiClient({
     <div className="bg-background text-on-surface font-body-md antialiased flex flex-col justify-between">
       <main className="mx-auto max-w-7xl w-full px-6 pt-24 pb-12 flex flex-col md:flex-row gap-gutter flex-1">
         {/* Left Side: Chat Panel */}
-        <div className="flex-1">
+        <div className="flex-1 animate-slide-left duration-700">
           {showPiP ? (
             <div className="flex flex-col items-center justify-center h-[750px] bg-white border border-outline-variant rounded-xl soft-bloom p-8 text-center">
               <span className="material-symbols-outlined text-teal-800 text-6xl animate-pulse">
@@ -291,13 +291,15 @@ export default function KonsultasiClient({
         </div>
 
         {/* Right Side: Context Info Sidebar */}
-        <ContextSidebar
-          durationString={formatTime(secondsLeft)}
-          onEndSession={handleEndSession}
-          psychologist={psychologist}
-          latestScreeningScore={latestScreening?.score || null}
-          complaints={psychologist.tags}
-        />
+        <div className="animate-slide-right delay-200 duration-700">
+          <ContextSidebar
+            durationString={formatTime(secondsLeft)}
+            onEndSession={handleEndSession}
+            psychologist={psychologist}
+            latestScreeningScore={latestScreening?.score || null}
+            complaints={psychologist.tags}
+          />
+        </div>
       </main>
 
       {/* Footer is rendered by parent LayoutWrapper */}

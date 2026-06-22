@@ -353,7 +353,7 @@ function WalkingTracker() {
             <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Menghitung Langkah...</p>
             <p className="text-3xl font-black text-slate-800">{steps} Langkah</p>
             <div className="w-48 bg-slate-200 h-2 rounded-full overflow-hidden mx-auto">
-              <div className="bg-teal-600 h-full transition-all duration-150" style={{ width: `${(steps / 2000) * 100}%` }} />
+              <div className="bg-teal-600 h-full transition-all duration-300 origin-left animate-progress" style={{ width: `${(steps / 2000) * 100}%` }} />
             </div>
           </div>
         ) : finished ? (
@@ -637,7 +637,7 @@ export default function ActivityModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="mt-4">
+        <div className="mt-4 animate-scale-in duration-300">
           {isBreathing && <BreathingExercise styles={styles} />}
           {isMuscle && <MuscleRelaxation />}
           {isMeditation && <FocusMeditation styles={styles} />}

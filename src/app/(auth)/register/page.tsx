@@ -12,6 +12,12 @@ import {
 import Link from "next/link"
 import Image from "next/image"
 import { RegisterForm } from "./register-form"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Daftar",
+  description: "Daftar akun baru di Verimind dan mulai perjalanan kesehatan mental Anda dengan screening emosi privat dan chatbot pendengar.",
+}
 
 const features = [
   { icon: MessageCircle, label: "AI 24/7" },
@@ -33,7 +39,7 @@ export default function RegisterPage() {
       <div className="absolute -top-32 -left-32 w-[28rem] h-[28rem] bg-emerald-200/30 rounded-full blur-3xl" />
       <div className="absolute -bottom-32 -right-32 w-[26rem] h-[26rem] bg-violet-200/25 rounded-full blur-3xl" />
 
-      <aside className="hidden lg:flex relative z-10 lg:w-[48%] flex-col p-7 xl:p-9 h-full overflow-hidden">
+      <aside className="hidden lg:flex relative z-10 lg:w-[48%] flex-col p-7 xl:p-9 h-full overflow-hidden animate-slide-left duration-700">
         <div className="flex items-center justify-between mb-4 shrink-0">
           <Link
             href="/"
@@ -197,7 +203,7 @@ export default function RegisterPage() {
         </div>
       </aside>
 
-      <main className="relative z-10 flex-1 flex flex-col h-full overflow-hidden">
+      <main className="relative z-10 flex-1 flex flex-col h-full overflow-hidden animate-fade-in duration-500">
         <nav className="lg:hidden flex items-center justify-between px-6 py-4 shrink-0">
           <Link
             href="/"
@@ -226,7 +232,7 @@ export default function RegisterPage() {
               </span>
             </div>
 
-            <div className="bg-white rounded-3xl p-7 md:p-8 border border-black/5 shadow-xl shadow-[#0D1B2A]/5">
+            <div className="bg-white rounded-3xl p-7 md:p-8 border border-black/5 shadow-xl hover-lift shadow-premium animate-fade-up delay-200 duration-700">
               <div className="mb-5">
                 <h1 className="font-serif text-3xl md:text-[2rem] font-bold text-[#0D1B2A] leading-[1.1] mb-1.5">
                   yok mulai di{" "}

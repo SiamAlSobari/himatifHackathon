@@ -55,25 +55,25 @@ export default function DashboardPsikologPage() {
 
   const displayName = data.psychologist.name;
   const userImage = data.psychologist.image || undefined;
-
   return (
-    <div className="bg-slate-50">
-      <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
-        <GreetingHeader name={displayName} />
-
-        <div className="grid gap-6 lg:grid-cols-2">
-          <TodayConsultationList consultations={data.todayConsultations} />
-          <ConsultationHistoryTable history={data.consultationHistory} />
+    <div className="bg-slate-50 min-h-screen">
+      <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8 animate-fade-in duration-500">
+        <div className="animate-fade-up duration-500">
+          <GreetingHeader name={displayName} />
         </div>
 
-        <ClientListSection clients={data.clientList} />
-{/* 
-        <EmergencyBanner
-          title="Butuh bantuan segera?"
-          description="Tim kami tersedia 24/7 untuk situasi darurat psikologis."
-          ctaLabel="Panggil Bantuan"
-          phoneNumber="119"
-        /> */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="animate-fade-up delay-100 duration-700">
+            <TodayConsultationList consultations={data.todayConsultations} />
+          </div>
+          <div className="animate-fade-up delay-200 duration-700">
+            <ConsultationHistoryTable history={data.consultationHistory} />
+          </div>
+        </div>
+
+        <div className="animate-fade-up delay-300 duration-700">
+          <ClientListSection clients={data.clientList} />
+        </div>
       </main>
     </div>
   );

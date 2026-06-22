@@ -15,7 +15,7 @@ export default function RecoveryFlow({
   formatDate,
 }: RecoveryFlowProps) {
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+    <div className="bg-white border border-slate-200 rounded-2xl p-6 hover-lift shadow-premium transition-all duration-300 hover:border-primary/20">
       <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-5">
         Alur Pemulihan Anda
       </h4>

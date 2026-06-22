@@ -67,11 +67,9 @@ function ResetPasswordContent() {
       }
     );
   };
-
   return (
     <div className="flex-1 flex items-center justify-center p-6 bg-slate-50 min-h-[calc(100vh-100px)]">
-      <div className="w-full max-w-[420px] bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-xl relative overflow-hidden transition-all duration-300">
-        
+      <div className="w-full max-w-[420px] bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-xl relative overflow-hidden transition-all duration-300 animate-fade-up duration-700 hover-lift shadow-premium">
         {/* Glow circles */}
         <div className="absolute -top-24 -left-24 h-48 w-48 rounded-full bg-primary/5 blur-2xl" />
         <div className="absolute -bottom-24 -right-24 h-48 w-48 rounded-full bg-primary/5 blur-2xl" />

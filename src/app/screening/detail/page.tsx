@@ -124,37 +124,48 @@ export default function ScreeningDetailPage() {
                 <p className="text-[10px] text-slate-400 mt-1">Lakukan screening di dashboard untuk memulai pencatatan.</p>
               </div>
             ) : (
-              history.map((item) => {
+              history.map((item, index) => {
                 const isSelected = item.id === selectedId;
+                const delayClass =
+                  index === 0 ? "delay-50" :
+                  index === 1 ? "delay-100" :
+                  index === 2 ? "delay-150" :
+                  index === 3 ? "delay-200" :
+                  index === 4 ? "delay-250" :
+                  "delay-300";
                 return (
-                  <button
+                  <div
                     key={item.id}
-                    onClick={() => handleSelectScreening(item.id)}
-                    className={`w-full flex flex-col p-3.5 rounded-xl border text-left outline-none transition-all cursor-pointer ${
-                      isSelected
-                        ? "bg-primary/5 border-primary/20 ring-1 ring-primary/10"
-                        : "bg-white hover:bg-slate-50 border-slate-100 hover:border-slate-200"
-                    }`}
+                    className={`animate-fade-up ${delayClass} duration-500`}
                   >
-                    <div className="flex justify-between items-start gap-2 mb-2">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        item.type === "ONBOARDING" 
-                          ? "bg-purple-50 text-purple-600 border border-purple-100" 
-                          : "bg-teal-50 text-teal-600 border border-teal-100"
-                      }`}>
-                        {item.type === "ONBOARDING" ? "Onboarding" : "Harian"}
+                    <button
+                      onClick={() => handleSelectScreening(item.id)}
+                      className={`w-full flex flex-col p-3.5 rounded-xl border text-left outline-none transition-all cursor-pointer hover-lift-sm shadow-premium ${
+                        isSelected
+                          ? "bg-primary/5 border-primary/20 ring-1 ring-primary/10"
+                          : "bg-white hover:bg-slate-50 border-slate-100 hover:border-slate-200"
+                      }`}
+                    >
+                      <div className="flex justify-between items-start gap-2 mb-2">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          item.type === "ONBOARDING" 
+                            ? "bg-purple-50 text-purple-600 border border-purple-100" 
+                            : "bg-teal-50 text-teal-600 border border-teal-100"
+                        }`}>
+                          {item.type === "ONBOARDING" ? "Onboarding" : "Harian"}
+                        </span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getScoreBadgeColor(item.score)}`}>
+                          Skor: {item.score} / 21
+                        </span>
+                      </div>
+                      <span className={`text-[13px] font-bold leading-tight ${isSelected ? "text-primary" : "text-slate-800"}`}>
+                        {item.category}
                       </span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getScoreBadgeColor(item.score)}`}>
-                        Skor: {item.score} / 21
+                      <span className="text-[10px] text-slate-400 font-medium mt-1">
+                        {formatDate(item.createdAt)}
                       </span>
-                    </div>
-                    <span className={`text-[13px] font-bold leading-tight ${isSelected ? "text-primary" : "text-slate-800"}`}>
-                      {item.category}
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-medium mt-1">
-                      {formatDate(item.createdAt)}
-                    </span>
-                  </button>
+                    </button>
+                  </div>
                 );
               })
             )}
@@ -168,7 +179,7 @@ export default function ScreeningDetailPage() {
           }`}
         >
           {selectedScreening ? (
-            <div className="flex-1 flex flex-col overflow-hidden bg-white md:bg-transparent">
+            <div key={selectedId || "empty"} className="flex-1 flex flex-col overflow-hidden bg-white md:bg-transparent animate-scale-in duration-300">
               {/* Toolbar header */}
               <div className="p-4 border-b border-slate-200 bg-white flex items-center gap-3">
                 <button
@@ -229,7 +240,7 @@ export default function ScreeningDetailPage() {
                     <div>
                       <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-3">
                         <div
-                          className={`h-full ${getSubscaleColor(selectedScreening.anxietyStatus)}`}
+                          className={`h-full origin-left animate-progress ${getSubscaleColor(selectedScreening.anxietyStatus)}`}
                           style={{ width: `${(selectedScreening.anxietyScore / 9) * 100}%` }}
                         />
                       </div>
@@ -259,7 +270,7 @@ export default function ScreeningDetailPage() {
                     <div>
                       <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-3">
                         <div
-                          className={`h-full ${getSubscaleColor(selectedScreening.stressStatus)}`}
+                          className={`h-full origin-left animate-progress ${getSubscaleColor(selectedScreening.stressStatus)}`}
                           style={{ width: `${(selectedScreening.stressScore / 12) * 100}%` }}
                         />
                       </div>

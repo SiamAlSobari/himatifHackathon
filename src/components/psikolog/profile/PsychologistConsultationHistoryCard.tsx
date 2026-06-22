@@ -26,7 +26,7 @@ export default function PsychologistConsultationHistoryCard({
   const hasHistory = items && items.length > 0;
 
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md">
+    <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-premium transition-all duration-300 hover-lift">
       <div className="mb-5 flex items-center gap-2">
         <History className="h-4 w-4 text-slate-400" />
         <h2 className="text-base font-bold text-slate-800">Riwayat Sesi Klien</h2>

@@ -25,13 +25,19 @@ export default function ChatBubble({
       }`}
     >
       {isAi && (
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-sm transition-transform hover:scale-105">
-          <Sparkles className="h-4 w-4" />
+        <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full border border-primary/20 shadow-sm transition-transform hover:scale-105">
+          <Image
+            src="/mommy.jpg"
+            alt="Very AI Avatar"
+            fill
+            className="object-cover object-top"
+            sizes="32px"
+          />
         </div>
       )}
 
       <div
-        className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm transition-all duration-300 ${
+        className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm transition-all duration-300 animate-bubble-pop ${
           isAi
             ? "bg-primary text-white rounded-tl-sm"
             : "bg-white border border-slate-200 text-slate-800 rounded-tr-sm"

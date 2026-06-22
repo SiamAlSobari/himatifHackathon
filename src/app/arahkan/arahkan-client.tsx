@@ -230,7 +230,7 @@ export default function ArahkanClient({
     <div className="bg-background text-foreground font-body-md antialiased transition-colors duration-500">
       <main className="mx-auto max-w-7xl px-6 pt-24 pb-32 md:px-12">
         {/* ── Search & Filter Bar ── */}
-        <div className="flex flex-col md:flex-row gap-4 items-center">
+        <div className="flex flex-col md:flex-row gap-4 items-center animate-fade-up duration-500">
           {/* Search input */}
           <div className="relative w-full md:flex-1">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">
@@ -279,7 +279,7 @@ export default function ArahkanClient({
         {/* ── Grid: cards + sidebar ── */}
         <div className="mt-10 grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left: psychologist list */}
-          <div className="lg:col-span-8 flex flex-col gap-5">
+          <div className="lg:col-span-8 flex flex-col gap-5 animate-slide-left duration-700">
             <h2 className="text-lg font-bold text-foreground">
               Psikolog & Psikiater Terverifikasi
             </h2>
@@ -293,35 +293,46 @@ export default function ArahkanClient({
                 </p>
               </div>
             ) : (
-              filteredPsychologists.map((psych) => {
+              filteredPsychologists.map((psych, index) => {
                 const isBooked = appointment?.psychologist.id === psych.id
+                const delayClass =
+                  index === 0 ? "delay-50" :
+                  index === 1 ? "delay-100" :
+                  index === 2 ? "delay-150" :
+                  index === 3 ? "delay-200" :
+                  index === 4 ? "delay-250" :
+                  "delay-300"
                 return (
-                  <PsychologistCard
+                  <div
                     key={psych.id}
-                    name={psych.name}
-                    role={psych.role}
-                    specialty={psych.specialty}
-                    rating={psych.rating}
-                    experienceYears={psych.experienceYears}
-                    imageUrl={psych.imageUrl}
-                    availability={psych.availability}
-                    busyUntil={psych.busyUntil}
-                    onBook={() => handleOpenBooking(psych)}
-                    onViewProfile={() => handleOpenProfile(psych)}
-                    onCancel={() => {
-                      if (appointment) {
-                        handleCancelAppointment(appointment.id)
-                      }
-                    }}
-                    isBooked={isBooked}
-                  />
+                    className={`animate-fade-up ${delayClass} duration-500`}
+                  >
+                    <PsychologistCard
+                      name={psych.name}
+                      role={psych.role}
+                      specialty={psych.specialty}
+                      rating={psych.rating}
+                      experienceYears={psych.experienceYears}
+                      imageUrl={psych.imageUrl}
+                      availability={psych.availability}
+                      busyUntil={psych.busyUntil}
+                      onBook={() => handleOpenBooking(psych)}
+                      onViewProfile={() => handleOpenProfile(psych)}
+                      onCancel={() => {
+                        if (appointment) {
+                          handleCancelAppointment(appointment.id)
+                        }
+                      }}
+                      isBooked={isBooked}
+                    />
+                  </div>
                 )
               })
             )}
           </div>
 
           {/* Right: sidebar widgets */}
-          <aside className="lg:col-span-4 space-y-6">
+          <aside className="lg:col-span-4 space-y-6 animate-slide-right duration-700 delay-100">
             <UrgentBanner onCall={() => setShowEmergencyModal(true)} />
 
             <RecoveryFlow

@@ -5,7 +5,7 @@ import OnboardingClient from "./onboarding-client";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Onboarding Mitra Spesialis • Verimind",
+  title: "Onboarding Mitra Spesialis",
   description: "Lengkapi profil mitra spesialis Anda untuk mulai melayani klien.",
 };
 
