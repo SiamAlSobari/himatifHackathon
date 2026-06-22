@@ -67,7 +67,22 @@ export async function POST(request: Request) {
           senderName = appointment.user.name || appointment.user.email || "Klien";
         }
 
-        if (recipientId) {
+        // Check if recipient is active on the page (within last 60 seconds)
+        let isRecipientActive = false;
+        const nowTime = Date.now();
+        if (sender === "psychologist") {
+          if (appointment.userLastActiveAt) {
+            const lastActive = new Date(appointment.userLastActiveAt).getTime();
+            isRecipientActive = (nowTime - lastActive) < 60000;
+          }
+        } else {
+          if (appointment.psychologistLastActiveAt) {
+            const lastActive = new Date(appointment.psychologistLastActiveAt).getTime();
+            isRecipientActive = (nowTime - lastActive) < 60000;
+          }
+        }
+
+        if (recipientId && !isRecipientActive) {
           await notificationService.createNotification(recipientId, {
             title: `Pesan baru dari ${senderName}`,
             message: text.length > 50 ? `${text.substring(0, 50)}...` : text,

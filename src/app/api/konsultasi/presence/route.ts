@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { pusherServer } from "@/lib/pusher/pusher-server";
 import { errorResponse, successResponse } from "@/lib/response";
+import appointmentRepository from "@/repositories/appointment.repository";
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -13,6 +14,14 @@ export async function POST(request: Request) {
 
     if (!appointmentId || !role || !type) {
       return errorResponse(400, "Missing required fields");
+    }
+
+    // Update presence in database
+    try {
+      const isOnline = type !== "leave";
+      await appointmentRepository.updatePresence(appointmentId, role, isOnline);
+    } catch (err) {
+      console.error("Failed to update database presence status:", err);
     }
 
     // Broadcast to Pusher for real-time delivery

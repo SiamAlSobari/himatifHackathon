@@ -121,6 +121,16 @@ class AppointmentRepository {
             data: { status }
         });
     }
+
+    async updatePresence(appointmentId: string, role: "user" | "psychologist", isOnline: boolean) {
+        const lastActiveValue = isOnline ? new Date() : null;
+        return await db.appointment.update({
+            where: { id: appointmentId },
+            data: role === "user" 
+                ? { userLastActiveAt: lastActiveValue } 
+                : { psychologistLastActiveAt: lastActiveValue }
+        });
+    }
 }
 
 const appointmentRepository = new AppointmentRepository();

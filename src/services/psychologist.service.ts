@@ -6,6 +6,7 @@ import screeningService from "./screening.service"
 import { ScreeningResult } from "@/lib/types/dashboardpsikolog"
 import { AppointmentStatus } from "../../generated/prisma/enums"
 import sessionSummaryRepository from "@/repositories/sessionSummary.repository"
+import { AppThemeEnum } from "@/lib/types/theme"
 
 export class PsychologistService {
   async getUserProfile(id: string) {
@@ -249,7 +250,7 @@ export class PsychologistService {
 
     const todayAppointments = appointments.filter((appt) => {
       return new Date(appt.scheduledAt).toDateString() === todayStr &&
-             (appt.status === "APPROVED" || appt.status === "SCHEDULED" || appt.status === "COMPLETED");
+        (appt.status === "APPROVED" || appt.status === "SCHEDULED" || appt.status === "COMPLETED");
     });
 
     // Format today consultations
@@ -257,10 +258,10 @@ export class PsychologistService {
       const apptTime = new Date(appt.scheduledAt);
       const diffMs = Math.abs(now.getTime() - apptTime.getTime());
       const diffHours = diffMs / (1000 * 60 * 60);
-      
-      const status: "Berlangsung" | "Terjadwal" | "Selesai" = 
+
+      const status: "Berlangsung" | "Terjadwal" | "Selesai" =
         appt.status === "COMPLETED" ? "Selesai" :
-        (diffHours <= 1 && (appt.status === "APPROVED" || appt.status === "SCHEDULED")) ? "Berlangsung" : "Terjadwal";
+          (diffHours <= 1 && (appt.status === "APPROVED" || appt.status === "SCHEDULED")) ? "Berlangsung" : "Terjadwal";
 
       return {
         id: appt.id,
@@ -275,10 +276,10 @@ export class PsychologistService {
     // Format consultation history
     const consultationHistory = appointments.map((appt) => {
       const apptDate = new Date(appt.scheduledAt);
-      
-      const status: "Selesai" | "Dijadwalkan" | "Dibatalkan" = 
+
+      const status: "Selesai" | "Dijadwalkan" | "Dibatalkan" =
         appt.status === "COMPLETED" ? "Selesai" :
-        appt.status === "CANCELLED" ? "Dibatalkan" : "Dijadwalkan";
+          appt.status === "CANCELLED" ? "Dibatalkan" : "Dijadwalkan";
 
       const psychName = profile.user.name || "Psikolog";
       const initials = psychName
@@ -356,28 +357,65 @@ export class PsychologistService {
     // Also trigger self update for psychologist to refresh dashboard
     await pusherServer.trigger(`user-${psychologistUserId}`, "booking-updated", {});
 
+    // Notify client if booking is accepted
+    if (action === "ACCEPT") {
+      const psychologistName = profile.user.name || "Psikolog";
+      const scheduledTimeStr = new Date(updated.scheduledAt).toLocaleString("id-ID", {
+        dateStyle: "medium",
+        timeStyle: "short"
+      });
+
+      await notificationService.createNotification(updated.userId, {
+        title: "Jadwal Konsultasi Disetujui",
+        message: `Permintaan sesi konsultasi Anda dengan ${psychologistName} telah disetujui untuk ${scheduledTimeStr}.`,
+        type: "BOOKING_DOCTOR",
+        metaData: {
+          appointmentId: updated.id,
+          psychologistName,
+          scheduledAt: updated.scheduledAt.toISOString()
+        }
+      }).catch(err => console.error("Failed to create booking approval notification:", err));
+    }
+
     return updated;
   }
 
   async getClientTheme(userId: string): Promise<string> {
     const latestSession = await psychologistRepository.getLatestChatSession(userId);
+    let computedTheme: string | null = null;
+
     if (latestSession) {
-      const lastMsg = latestSession.chatMessages.find(m => m.role === "ASSISTANT");
-      if (lastMsg && lastMsg.metaData && (lastMsg.metaData as any).uiTheme) {
-        return (lastMsg.metaData as any).uiTheme;
+      // Check if session was created today
+      const sessionDate = new Date(latestSession.createdAt);
+      const today = new Date();
+      const isToday = sessionDate.toDateString() === today.toDateString();
+
+      if (isToday) {
+        const lastMsg = latestSession.chatMessages.find(m => m.role === "ASSISTANT");
+        if (lastMsg && lastMsg.metaData && (lastMsg.metaData as any).uiTheme) {
+          computedTheme = (lastMsg.metaData as any).uiTheme;
+        }
       }
     }
 
-    const latestScreening = await this.getLatestScreening(userId);
-    if (latestScreening) {
-      const score = latestScreening.score;
-      if (score >= 0 && score <= 4) return "calm_blue";
-      if (score >= 5 && score <= 9) return "warm_yellow";
-      if (score >= 10 && score <= 13) return "alert_orange";
-      return "deep_purple";
+    if (!computedTheme) {
+      const latestScreening = await this.getLatestScreening(userId);
+      if (latestScreening) {
+        const score = latestScreening.score;
+
+        if (score >= 0 && score <= 4) {
+          computedTheme = AppThemeEnum.CALM_BLUE;
+        } else if (score >= 5 && score <= 9) {
+          computedTheme = AppThemeEnum.WARM_YELLOW;
+        } else if (score >= 10 && score <= 13) {
+          computedTheme = AppThemeEnum.ALERT_ORANGE;
+        } else if (score >= 14 && score <= 21) {
+          computedTheme = AppThemeEnum.DEEP_PURPLE;
+        }
+      }
     }
 
-    return "calm_blue";
+    return computedTheme || "calm_blue";
   }
 
   async getPsychologistClients(userId: string) {
@@ -405,7 +443,7 @@ export class PsychologistService {
 
         // Fetch latest screening for client
         const latestScreening = await screeningRepository.getLatestScreeningResult(user.id);
-        
+
         let priority: "Prioritas Tinggi" | "Prioritas Sedang" | "Prioritas Rendah" = "Prioritas Rendah";
         let mood = "Baik";
         let trend = "Stabil";
@@ -454,8 +492,8 @@ export class PsychologistService {
 
         // Get AI session conclusion
         const conclusion = await this.getLatestAiSessionConclusion(user.id);
-        const aiSummary = conclusion 
-          ? [conclusion] 
+        const aiSummary = conclusion
+          ? [conclusion]
           : ["Belum ada kesimpulan sesi curhat AI yang diselesaikan oleh pasien ini."];
 
         return {

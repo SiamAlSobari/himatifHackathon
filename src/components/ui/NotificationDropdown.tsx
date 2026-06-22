@@ -16,6 +16,7 @@ import type { AppNotification } from "@/lib/types/notification";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface NotificationDropdownProps {
   isOpen: boolean;
@@ -76,11 +77,11 @@ const themeStyles = {
 function NotificationItem({ 
   notification, 
   styles, 
-  onMarkRead 
+  onClick 
 }: { 
   notification: AppNotification; 
   styles: typeof themeStyles.calm_blue;
-  onMarkRead: (id: string) => void;
+  onClick: () => void;
 }) {
   const getIcon = (type: string) => {
     switch (type) {
@@ -104,11 +105,7 @@ function NotificationItem({
 
   return (
     <div 
-      onClick={() => {
-        if (!notification.read) {
-          onMarkRead(notification.id);
-        }
-      }}
+      onClick={onClick}
       className={`relative flex gap-3 px-4 py-3.5 border-b border-slate-50 transition-colors cursor-pointer ${
         !notification.read ? `${styles.hover} bg-slate-50/40` : "hover:bg-slate-50/30"
       }`}
@@ -155,6 +152,7 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
   const userId = session?.user?.id;
   const { theme } = useTheme();
   const styles = themeStyles[theme] || themeStyles.calm_blue;
+  const router = useRouter();
 
   const { data: notifications = [] } = useNotifications(userId);
   const markAsReadMutation = useMarkAsRead();
@@ -176,6 +174,52 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onClose]);
+
+  const handleItemClick = (notif: AppNotification) => {
+    // 1. Mark as read if not already
+    if (!notif.read) {
+      markAsReadMutation.mutate(notif.id);
+    }
+
+    // 2. Parse metaData safely
+    let meta: any = null;
+    if (notif.metaData) {
+      if (typeof notif.metaData === "string") {
+        try {
+          meta = JSON.parse(notif.metaData);
+        } catch (e) {
+          console.error("Failed to parse notification metadata", e);
+        }
+      } else {
+        meta = notif.metaData;
+      }
+    }
+
+    const isPsychologist = (session?.user as any)?.role === "PSYCHOLOGY";
+
+    // 3. Redirect logic based on type
+    if (notif.type === "UNREAD_CHAT" || notif.type === "APPOINTMENT_REMINDER") {
+      const appointmentId = meta?.appointmentId;
+      if (appointmentId) {
+        if (isPsychologist) {
+          router.push(`/psikolog/konsultasi?appointmentId=${appointmentId}`);
+        } else {
+          router.push(`/konsultasi?appointmentId=${appointmentId}`);
+        }
+      } else {
+        router.push(isPsychologist ? "/psikolog/konsultasi" : "/konsultasi");
+      }
+    } else if (notif.type === "BOOKING_DOCTOR") {
+      if (isPsychologist) {
+        router.push("/psikolog");
+      } else {
+        router.push("/riwayatkonsultasi");
+      }
+    }
+
+    // 4. Close dropdown
+    onClose();
+  };
 
   if (!isOpen) return null;
 
@@ -216,7 +260,7 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
               key={notif.id} 
               notification={notif} 
               styles={styles}
-              onMarkRead={(id) => markAsReadMutation.mutate(id)}
+              onClick={() => handleItemClick(notif)}
             />
           ))
         ) : (

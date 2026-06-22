@@ -168,8 +168,10 @@ model Appointment {
   psychologistId String
   scheduledAt    DateTime
   status         AppointmentStatus @default(SCHEDULED)
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+  userLastActiveAt       DateTime?
+  psychologistLastActiveAt DateTime?
 
   user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   psychologistProfile  PsychologistProfile   @relation(fields: [psychologistId], references: [id], onDelete: Cascade)

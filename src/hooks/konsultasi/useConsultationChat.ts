@@ -126,7 +126,13 @@ export function useConsultationChat(
     // Announce we joined
     sendPresence("join");
 
+    // Ping interval to keep user active in database
+    const pingInterval = setInterval(() => {
+      sendPresence("join");
+    }, 30000); // 30 seconds
+
     return () => {
+      clearInterval(pingInterval);
       // Announce we left
       sendPresence("leave");
       channel.unbind("message-sent", handleNewMessage);
