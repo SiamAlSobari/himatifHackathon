@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/job/complete-chats",
+      "schedule": "0 * * * *"
+    }
+  ]
+}

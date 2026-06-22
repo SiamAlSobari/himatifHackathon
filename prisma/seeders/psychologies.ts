@@ -1,8 +1,8 @@
-import { db } from "./db"
+import { PrismaClient } from "../../generated/prisma/client"
 import bcrypt from "bcrypt"
 
-export async function seedPsychologists() {
-  const count = await db.user.count({
+export async function seedPsychologists(prisma: PrismaClient) {
+  const count = await prisma.user.count({
     where: { role: "PSYCHOLOGY" }
   })
   if (count > 0) {
@@ -21,6 +21,7 @@ export async function seedPsychologists() {
       availability: "AVAILABLE",
       busyUntil: null,
       tags: ["Trauma"],
+      operationalHours: ["09:00", "10:00", "13:00", "14:00", "15:00"],
     },
     {
       name: "Dr. Sarah Wijaya, Sp.KJ",
@@ -33,6 +34,7 @@ export async function seedPsychologists() {
       availability: "AVAILABLE",
       busyUntil: null,
       tags: ["Depresi", "Kecemasan"],
+      operationalHours: ["08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "16:00"],
     },
     {
       name: "Dika Pratama, S.Psi",
@@ -45,13 +47,14 @@ export async function seedPsychologists() {
       availability: "BUSY",
       busyUntil: "16:00",
       tags: ["Remaja"],
+      operationalHours: ["13:00", "14:00", "15:00", "16:00", "17:00"],
     },
   ]
 
   const passwordHash = await bcrypt.hash("password123", 12)
 
   for (const psych of psychologists) {
-    const user = await db.user.create({
+    const user = await prisma.user.create({
       data: {
         name: psych.name,
         email: psych.email,
@@ -61,7 +64,7 @@ export async function seedPsychologists() {
       }
     })
 
-    await db.psychologistProfile.create({
+    await prisma.psychologistProfile.create({
       data: {
         userId: user.id,
         role: psych.role,
@@ -72,6 +75,7 @@ export async function seedPsychologists() {
         availability: psych.availability,
         busyUntil: psych.busyUntil,
         tags: psych.tags,
+        operationalHours: psych.operationalHours,
       }
     })
   }
