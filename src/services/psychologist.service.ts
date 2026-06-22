@@ -107,6 +107,10 @@ export class PsychologistService {
       throw new Error("Appointment not found or unauthorized")
     }
 
+    if (appointment.status === AppointmentStatus.COMPLETED) {
+      return appointment;
+    }
+
     const updated = await psychologistRepository.updateAppointmentStatus(appointmentId, AppointmentStatus.COMPLETED)
 
     // Trigger Pusher notification that session has ended
@@ -188,46 +192,74 @@ export class PsychologistService {
     passwordHash: string;
     name: string;
     roleTitle: string;
-    specialty: string;
-    experienceYears: number;
-    tags: string[];
-  }, imageFile?: File | null) {
+  }) {
     // 1. Cek if email exists
     const existing = await userRepository.getUserByEmail(payload.email);
     if (existing) {
       throw new Error("Email sudah terdaftar");
     }
 
-    // 2. Upload image to Cloudinary if file provided
-    let imageUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuCm0bcB0lzDcZlnjBA25NjhIN4_C42QMvYjxW33jb2jch1A0EQCRcaSsOQUnjy3rMikDcIowjhdMI910iiO8Mkanuvq4kRKzOGEYhvhpRZWqgMKTvJofZGbb1HCI4eoTv1Vn1qqKHhHo7gkufVpq6AlJorSOFs6fEUSvTqlYiY6ylLJ6PTn8i_qY38_KETmZ0HhV_7RTHSyI3bS_qCgyVjEfrcP-GyBylZacT3cErIG9i_P9NGyFCM6FCtBJVVioI0F3eKMqvM8HA";
-    if (imageFile) {
-      const { uploadToCloudinary } = await import("@/lib/cloudinary");
-      imageUrl = await uploadToCloudinary(imageFile, "psychologists");
-    }
+    // Default placeholder image
+    const imageUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuCm0bcB0lzDcZlnjBA25NjhIN4_C42QMvYjxW33jb2jch1A0EQCRcaSsOQUnjy3rMikDcIowjhdMI910iiO8Mkanuvq4kRKzOGEYhvhpRZWqgMKTvJofZGbb1HCI4eoTv1Vn1qqKHhHo7gkufVpq6AlJorSOFs6fEUSvTqlYiY6ylLJ6PTn8i_qY38_KETmZ0HhV_7RTHSyI3bS_qCgyVjEfrcP-GyBylZacT3cErIG9i_P9NGyFCM6FCtBJVVioI0F3eKMqvM8HA";
 
-    // 3. Create user
+    // 2. Create user with isOnboarded = false
     const user = await userRepository.createUser({
       email: payload.email,
       passwordHash: payload.passwordHash,
       name: payload.name,
       image: imageUrl,
       role: "PSYCHOLOGY",
-      isOnboarded: true,
+      isOnboarded: false,
     });
 
-    // 4. Create psychologist profile
+    // 3. Create psychologist profile with defaults
     await psychologistRepository.createPsychologistProfile({
       userId: user.id,
       role: payload.roleTitle,
-      specialty: payload.specialty,
+      specialty: "",
       rating: 5.0,
-      experienceYears: payload.experienceYears,
+      experienceYears: 0,
       imageUrl,
       availability: "AVAILABLE",
-      tags: payload.tags,
+      tags: [],
+      operationalHours: [],
     });
 
     return user;
+  }
+
+  async onboardPsychologist(
+    userId: string,
+    payload: {
+      specialty: string;
+      experienceYears: number;
+      tags: string[];
+      operationalHours: string[];
+    },
+    imageFile?: File | null
+  ) {
+    // 1. Get current profile to get default image
+    const profile = await psychologistRepository.getPsychologistProfileByUserId(userId);
+    if (!profile) {
+      throw new Error("Profil psikolog tidak ditemukan");
+    }
+
+    let imageUrl = profile.imageUrl;
+
+    // 2. Upload image to Cloudinary if file provided
+    if (imageFile) {
+      const { uploadToCloudinary } = await import("@/lib/cloudinary");
+      imageUrl = await uploadToCloudinary(imageFile, "psychologists");
+    }
+
+    // 3. Update profile in database
+    return await psychologistRepository.updateOnboardingProfile(userId, {
+      specialty: payload.specialty,
+      experienceYears: payload.experienceYears,
+      imageUrl,
+      tags: payload.tags,
+      operationalHours: payload.operationalHours,
+    });
   }
 
   async getPsychologistAppointments(profileId: string) {

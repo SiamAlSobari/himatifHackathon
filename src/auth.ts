@@ -46,6 +46,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           name: user.name,
           image: user.image,
           role: user.role, // Pastikan role disertakan di sini
+          isOnboarded: user.isOnboarded,
         }
       },
     }),
@@ -55,6 +56,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.id = user.id
         token.role = (user as any).role
+        token.isOnboarded = (user as any).isOnboarded
 
         if ((user as any).role === "PSYCHOLOGY") {
           const profile = await db.psychologistProfile.findUnique({
@@ -71,6 +73,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (session.user && token) {
         session.user.id = token.id as string;
         (session.user as any).role = token.role as string;
+        (session.user as any).isOnboarded = token.isOnboarded as boolean;
         if (token.picture) {
           session.user.image = token.picture as string;
         }

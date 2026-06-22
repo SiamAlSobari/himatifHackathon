@@ -164,7 +164,18 @@ export default function KonsultasiClient({
   // Timer Tick Down Effect
   useEffect(() => {
     if (secondsLeft <= 0) {
-      setIsFinished(true);
+      if (!isFinished) {
+        setIsFinished(true);
+        if (activeAppointment?.id) {
+          confirmEnd({ appointmentId: activeAppointment.id })
+            .then(() => {
+              toast.success("Waktu konsultasi habis! Sesi otomatis diakhiri dan disimpan ke Blockchain.");
+            })
+            .catch((err) => {
+              console.error("Gagal mengakhiri sesi otomatis:", err);
+            });
+        }
+      }
       return;
     }
     const timer = setInterval(() => {
@@ -178,7 +189,6 @@ export default function KonsultasiClient({
           const endTime = scheduledTime + 25 * 60 * 1000;
           const left = Math.max(0, Math.floor((endTime - now) / 1000));
           if (left <= 0) {
-            setIsFinished(true);
             clearInterval(timer);
           }
           return left;
@@ -188,7 +198,7 @@ export default function KonsultasiClient({
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [secondsLeft, activeAppointment]);
+  }, [secondsLeft, activeAppointment, isFinished]);
 
   // Format seconds to MM:SS
   const formatTime = (totalSeconds: number) => {

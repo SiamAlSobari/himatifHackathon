@@ -19,7 +19,8 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     pathname === "/register" ||
     pathname === "/psikolog/login" ||
     pathname === "/psikolog/register" ||
-    pathname === "/onboarding";
+    pathname === "/onboarding" ||
+    pathname === "/psikolog/onboarding";
 
   // Define paths where Footer should NOT be displayed (e.g. Chat pages to avoid scrolling the main page)
   const isChatPath =

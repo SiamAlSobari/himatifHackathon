@@ -29,6 +29,7 @@ interface Psychologist {
   availability: string
   busyUntil?: string
   tags: string[]
+  operationalHours?: string[]
 }
 
 interface ActiveAppointment {

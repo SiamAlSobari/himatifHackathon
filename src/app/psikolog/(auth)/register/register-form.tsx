@@ -33,11 +33,13 @@ export function RegisterForm() {
         setError("")
 
         const formData = new FormData(e.currentTarget)
-        try {
-            await mutateAsync(formData)
+        const email = formData.get("email") as string
+        const pwd = formData.get("password") as string
+        const name = formData.get("name") as string
+        const roleTitle = formData.get("roleTitle") as string
 
-            const email = formData.get("email") as string
-            const pwd = formData.get("password") as string
+        try {
+            await mutateAsync({ email, password: pwd, name, roleTitle })
 
             // Log in automatically after registration
             const signInResult = await signIn("credentials", {
@@ -53,7 +55,7 @@ export function RegisterForm() {
                 return
             }
 
-            router.push("/psikolog")
+            router.push("/psikolog/onboarding")
             router.refresh()
         } catch (err: any) {
             setError(err.message || "Terjadi kesalahan saat mendaftar.")
@@ -160,98 +162,33 @@ export function RegisterForm() {
                 </div>
             </div>
 
-            {/* Professional Profile Section */}
+            {/* Professional Role Dropdown Selection */}
             <div className="space-y-2.5 pt-1 border-t border-black/5">
                 <h3 className="text-[10px] font-black text-[#0D1B2A]/40 uppercase tracking-widest">
                     Informasi Profesional
                 </h3>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <div className="space-y-1">
-                        <Label htmlFor="roleTitle" className="text-[#0D1B2A] font-bold text-[10px] tracking-wider uppercase ml-1">
-                            Spesialisasi Role
-                        </Label>
-                        <div className="relative">
-                            <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#2D3748]/40 pointer-events-none" />
-                            <Input
-                                id="roleTitle"
-                                name="roleTitle"
-                                type="text"
-                                placeholder="Psikolog Klinis"
-                                required
-                                className="h-9 pl-9 pr-3 text-xs border-black/10 focus-visible:border-[#1A8A7A] focus-visible:ring-[#1A8A7A]/15 rounded-xl transition-all"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="space-y-1">
-                        <Label htmlFor="specialty" className="text-[#0D1B2A] font-bold text-[10px] tracking-wider uppercase ml-1">
-                            Fokus Bidang
-                        </Label>
-                        <div className="relative">
-                            <FileText className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#2D3748]/40 pointer-events-none" />
-                            <Input
-                                id="specialty"
-                                name="specialty"
-                                type="text"
-                                placeholder="Kecemasan, Trauma, Karir"
-                                required
-                                className="h-9 pl-9 pr-3 text-xs border-black/10 focus-visible:border-[#1A8A7A] focus-visible:ring-[#1A8A7A]/15 rounded-xl transition-all"
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <div className="space-y-1">
-                        <Label htmlFor="experienceYears" className="text-[#0D1B2A] font-bold text-[10px] tracking-wider uppercase ml-1">
-                            Pengalaman (Tahun)
-                        </Label>
-                        <div className="relative">
-                            <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#2D3748]/40 pointer-events-none" />
-                            <Input
-                                id="experienceYears"
-                                name="experienceYears"
-                                type="number"
-                                placeholder="5"
-                                min="0"
-                                required
-                                className="h-9 pl-9 pr-3 text-xs border-black/10 focus-visible:border-[#1A8A7A] focus-visible:ring-[#1A8A7A]/15 rounded-xl transition-all"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="space-y-1">
-                        <Label htmlFor="imageFile" className="text-[#0D1B2A] font-bold text-[10px] tracking-wider uppercase ml-1">
-                            Foto Profil
-                        </Label>
-                        <div className="relative">
-                            <ImageIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#2D3748]/40 pointer-events-none" />
-                            <Input
-                                id="imageFile"
-                                name="imageFile"
-                                type="file"
-                                accept="image/*"
-                                required
-                                className="h-9 pl-9 pr-3 py-1.5 text-xs border-black/10 focus-visible:border-[#1A8A7A] focus-visible:ring-[#1A8A7A]/15 rounded-xl transition-all"
-                            />
-                        </div>
-                    </div>
-                </div>
-
                 <div className="space-y-1">
-                    <Label htmlFor="tags" className="text-[#0D1B2A] font-bold text-[10px] tracking-wider uppercase ml-1">
-                        Tag Keahlian (Pisahkan dengan koma)
+                    <Label htmlFor="roleTitle" className="text-[#0D1B2A] font-bold text-[10px] tracking-wider uppercase ml-1">
+                        Spesialisasi Role
                     </Label>
                     <div className="relative">
-                        <Tag className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#2D3748]/40 pointer-events-none" />
-                        <Input
-                            id="tags"
-                            name="tags"
-                            type="text"
-                            placeholder="Trauma, Cemas, Depresi, Remaja"
-                            className="h-9 pl-9 pr-3 text-xs border-black/10 focus-visible:border-[#1A8A7A] focus-visible:ring-[#1A8A7A]/15 rounded-xl transition-all"
-                        />
+                        <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#2D3748]/40 pointer-events-none z-10" />
+                        <select
+                            id="roleTitle"
+                            name="roleTitle"
+                            required
+                            defaultValue={""}
+                            className="flex w-full h-9 pl-9 pr-8 text-xs border border-black/10 focus:border-[#1A8A7A] focus:ring-[#1A8A7A]/15 focus:ring-1 focus:outline-none rounded-xl transition-all bg-white text-slate-800 appearance-none cursor-pointer relative"
+                        >
+                            <option value="" disabled>Pilih Spesialisasi</option>
+                            <option value="Psikolog Klinis Dewasa">Psikolog Klinis Dewasa</option>
+                            <option value="Psikolog Klinis Anak & Remaja">Psikolog Klinis Anak & Remaja</option>
+                            <option value="Psikolog Klinis">Psikolog Klinis</option>
+                            <option value="Psikiater">Psikiater</option>
+                            <option value="Konselor Mental">Konselor Mental</option>
+                        </select>
+                        <span className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[10px]">▼</span>
                     </div>
                 </div>
             </div>
