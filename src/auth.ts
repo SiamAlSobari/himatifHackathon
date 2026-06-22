@@ -5,13 +5,11 @@ import Google from "next-auth/providers/google"
 import bcrypt from "bcrypt"
 import { db } from "@/lib/db"
 import { envConfig } from "./lib/constants/env"
+import { authConfig } from "./auth.config"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  ...authConfig,
   adapter: PrismaAdapter(db),
-  session: { strategy: "jwt" }, // Gunakan jwt strategy agar cocok dengan Credentials provider
-  pages: {
-    signIn: "/login",
-  },
   providers: [
     ...(envConfig.GoogleClientId && envConfig.GoogleClientSecret
       ? [
