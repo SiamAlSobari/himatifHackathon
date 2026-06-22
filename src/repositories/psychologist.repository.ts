@@ -222,7 +222,6 @@ class PsychologistRepository {
     }
 
     async getNearestScheduledAppointment(psychologistId: string) {
-        const { AppointmentStatus } = await import("../../generated/prisma/enums");
         return await db.appointment.findFirst({
             where: {
                 psychologistId,

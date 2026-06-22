@@ -7,6 +7,9 @@ import { ScreeningResult } from "@/lib/types/dashboardpsikolog"
 import { AppointmentStatus } from "../../generated/prisma/enums"
 import sessionSummaryRepository from "@/repositories/sessionSummary.repository"
 import { AppThemeEnum } from "@/lib/types/theme"
+import { pusherServer } from "@/lib/pusher/pusher-server"
+import blockchainSyncService from "./blockchain-sync.service"
+import { uploadToCloudinary } from "@/lib/cloudinary"
 
 export class PsychologistService {
   async getUserProfile(id: string) {
@@ -114,11 +117,9 @@ export class PsychologistService {
     const updated = await psychologistRepository.updateAppointmentStatus(appointmentId, AppointmentStatus.COMPLETED)
 
     // Trigger Pusher notification that session has ended
-    const { pusherServer } = await import("@/lib/pusher/pusher-server");
     await pusherServer.trigger(`appointment-${appointmentId}`, "session-ended", {});
 
     // Trigger blockchain sync in the background
-    const { blockchainSyncService } = await import("./blockchain-sync.service");
     blockchainSyncService.syncAppointmentSession(appointmentId).catch(err => {
       console.error("Failed to sync completed appointment session to blockchain:", err);
     });
@@ -127,14 +128,12 @@ export class PsychologistService {
   }
 
   async requestEndSession(appointmentId: string, requester: "user" | "psychologist") {
-    const { pusherServer } = await import("@/lib/pusher/pusher-server");
     await pusherServer.trigger(`appointment-${appointmentId}`, "end-session", {
       requester,
     });
   }
 
   async declineEndSession(appointmentId: string) {
-    const { pusherServer } = await import("@/lib/pusher/pusher-server");
     await pusherServer.trigger(`appointment-${appointmentId}`, "end-session-declined", {});
   }
 
@@ -248,7 +247,6 @@ export class PsychologistService {
 
     // 2. Upload image to Cloudinary if file provided
     if (imageFile) {
-      const { uploadToCloudinary } = await import("@/lib/cloudinary");
       imageUrl = await uploadToCloudinary(imageFile, "psychologists");
     }
 
@@ -363,11 +361,8 @@ export class PsychologistService {
       throw new Error("Profil psikolog tidak ditemukan");
     }
 
-    const { AppointmentStatus } = await import("../../generated/prisma/enums");
     const newStatus = action === "ACCEPT" ? AppointmentStatus.APPROVED : AppointmentStatus.DECLINED;
     const updated = await psychologistRepository.updateAppointmentStatus(appointmentId, newStatus);
-
-    const { pusherServer } = await import("@/lib/pusher/pusher-server");
 
     // Format payload for user view
     const activeAppointmentPayload = action === "ACCEPT" ? {
