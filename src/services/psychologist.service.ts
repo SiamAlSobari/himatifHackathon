@@ -1,10 +1,12 @@
 import userRepository from "@/repositories/user.repository"
 import psychologistRepository from "@/repositories/psychologist.repository"
+import notificationService from "./notification.service"
 import screeningRepository from "@/repositories/screening.repository"
 import screeningService from "./screening.service"
 import { ScreeningResult } from "@/lib/types/dashboardpsikolog"
 import { AppointmentStatus } from "../../generated/prisma/enums"
 import sessionSummaryRepository from "@/repositories/sessionSummary.repository"
+import { AppThemeEnum } from "@/lib/types/theme"
 
 export class PsychologistService {
   async getUserProfile(id: string) {
@@ -56,7 +58,30 @@ export class PsychologistService {
     }
 
     // Create new appointment
-    return await psychologistRepository.createAppointment(userId, psychologistId, scheduledAt)
+    const appointment = await psychologistRepository.createAppointment(userId, psychologistId, scheduledAt)
+
+    // Send notification to the psychologist
+    if (psych.userId) {
+      const clientUser = await userRepository.getUserById(userId)
+      const clientName = clientUser?.name || clientUser?.email || "Seorang pengguna"
+      const scheduledTimeStr = new Date(scheduledAt).toLocaleString("id-ID", {
+        dateStyle: "medium",
+        timeStyle: "short"
+      })
+
+      await notificationService.createNotification(psych.userId, {
+        title: "Booking Janji Temu Baru",
+        message: `${clientName} telah memesan sesi konsultasi dengan Anda pada ${scheduledTimeStr}.`,
+        type: "BOOKING_DOCTOR",
+        metaData: {
+          appointmentId: appointment.id,
+          clientName: clientName,
+          scheduledAt: scheduledAt.toISOString()
+        }
+      }).catch(err => console.error("Failed to create booking notification:", err))
+    }
+
+    return appointment
   }
 
   async cancelAppointment(appointmentId: string, userId: string) {
@@ -80,6 +105,10 @@ export class PsychologistService {
       (appointment.userId !== userId && appointment.psychologistProfile.userId !== userId)
     ) {
       throw new Error("Appointment not found or unauthorized")
+    }
+
+    if (appointment.status === AppointmentStatus.COMPLETED) {
+      return appointment;
     }
 
     const updated = await psychologistRepository.updateAppointmentStatus(appointmentId, AppointmentStatus.COMPLETED)
@@ -163,46 +192,74 @@ export class PsychologistService {
     passwordHash: string;
     name: string;
     roleTitle: string;
-    specialty: string;
-    experienceYears: number;
-    tags: string[];
-  }, imageFile?: File | null) {
+  }) {
     // 1. Cek if email exists
     const existing = await userRepository.getUserByEmail(payload.email);
     if (existing) {
       throw new Error("Email sudah terdaftar");
     }
 
-    // 2. Upload image to Cloudinary if file provided
-    let imageUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuCm0bcB0lzDcZlnjBA25NjhIN4_C42QMvYjxW33jb2jch1A0EQCRcaSsOQUnjy3rMikDcIowjhdMI910iiO8Mkanuvq4kRKzOGEYhvhpRZWqgMKTvJofZGbb1HCI4eoTv1Vn1qqKHhHo7gkufVpq6AlJorSOFs6fEUSvTqlYiY6ylLJ6PTn8i_qY38_KETmZ0HhV_7RTHSyI3bS_qCgyVjEfrcP-GyBylZacT3cErIG9i_P9NGyFCM6FCtBJVVioI0F3eKMqvM8HA";
-    if (imageFile) {
-      const { uploadToCloudinary } = await import("@/lib/cloudinary");
-      imageUrl = await uploadToCloudinary(imageFile, "psychologists");
-    }
+    // Default placeholder image
+    const imageUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuCm0bcB0lzDcZlnjBA25NjhIN4_C42QMvYjxW33jb2jch1A0EQCRcaSsOQUnjy3rMikDcIowjhdMI910iiO8Mkanuvq4kRKzOGEYhvhpRZWqgMKTvJofZGbb1HCI4eoTv1Vn1qqKHhHo7gkufVpq6AlJorSOFs6fEUSvTqlYiY6ylLJ6PTn8i_qY38_KETmZ0HhV_7RTHSyI3bS_qCgyVjEfrcP-GyBylZacT3cErIG9i_P9NGyFCM6FCtBJVVioI0F3eKMqvM8HA";
 
-    // 3. Create user
+    // 2. Create user with isOnboarded = false
     const user = await userRepository.createUser({
       email: payload.email,
       passwordHash: payload.passwordHash,
       name: payload.name,
       image: imageUrl,
       role: "PSYCHOLOGY",
-      isOnboarded: true,
+      isOnboarded: false,
     });
 
-    // 4. Create psychologist profile
+    // 3. Create psychologist profile with defaults
     await psychologistRepository.createPsychologistProfile({
       userId: user.id,
       role: payload.roleTitle,
-      specialty: payload.specialty,
+      specialty: "",
       rating: 5.0,
-      experienceYears: payload.experienceYears,
+      experienceYears: 0,
       imageUrl,
       availability: "AVAILABLE",
-      tags: payload.tags,
+      tags: [],
+      operationalHours: [],
     });
 
     return user;
+  }
+
+  async onboardPsychologist(
+    userId: string,
+    payload: {
+      specialty: string;
+      experienceYears: number;
+      tags: string[];
+      operationalHours: string[];
+    },
+    imageFile?: File | null
+  ) {
+    // 1. Get current profile to get default image
+    const profile = await psychologistRepository.getPsychologistProfileByUserId(userId);
+    if (!profile) {
+      throw new Error("Profil psikolog tidak ditemukan");
+    }
+
+    let imageUrl = profile.imageUrl;
+
+    // 2. Upload image to Cloudinary if file provided
+    if (imageFile) {
+      const { uploadToCloudinary } = await import("@/lib/cloudinary");
+      imageUrl = await uploadToCloudinary(imageFile, "psychologists");
+    }
+
+    // 3. Update profile in database
+    return await psychologistRepository.updateOnboardingProfile(userId, {
+      specialty: payload.specialty,
+      experienceYears: payload.experienceYears,
+      imageUrl,
+      tags: payload.tags,
+      operationalHours: payload.operationalHours,
+    });
   }
 
   async getPsychologistAppointments(profileId: string) {
@@ -225,7 +282,7 @@ export class PsychologistService {
 
     const todayAppointments = appointments.filter((appt) => {
       return new Date(appt.scheduledAt).toDateString() === todayStr &&
-             (appt.status === "APPROVED" || appt.status === "SCHEDULED" || appt.status === "COMPLETED");
+        (appt.status === "APPROVED" || appt.status === "SCHEDULED" || appt.status === "COMPLETED");
     });
 
     // Format today consultations
@@ -233,10 +290,10 @@ export class PsychologistService {
       const apptTime = new Date(appt.scheduledAt);
       const diffMs = Math.abs(now.getTime() - apptTime.getTime());
       const diffHours = diffMs / (1000 * 60 * 60);
-      
-      const status: "Berlangsung" | "Terjadwal" | "Selesai" = 
+
+      const status: "Berlangsung" | "Terjadwal" | "Selesai" =
         appt.status === "COMPLETED" ? "Selesai" :
-        (diffHours <= 1 && (appt.status === "APPROVED" || appt.status === "SCHEDULED")) ? "Berlangsung" : "Terjadwal";
+          (diffHours <= 1 && (appt.status === "APPROVED" || appt.status === "SCHEDULED")) ? "Berlangsung" : "Terjadwal";
 
       return {
         id: appt.id,
@@ -251,10 +308,10 @@ export class PsychologistService {
     // Format consultation history
     const consultationHistory = appointments.map((appt) => {
       const apptDate = new Date(appt.scheduledAt);
-      
-      const status: "Selesai" | "Dijadwalkan" | "Dibatalkan" = 
+
+      const status: "Selesai" | "Dijadwalkan" | "Dibatalkan" =
         appt.status === "COMPLETED" ? "Selesai" :
-        appt.status === "CANCELLED" ? "Dibatalkan" : "Dijadwalkan";
+          appt.status === "CANCELLED" ? "Dibatalkan" : "Dijadwalkan";
 
       const psychName = profile.user.name || "Psikolog";
       const initials = psychName
@@ -332,28 +389,65 @@ export class PsychologistService {
     // Also trigger self update for psychologist to refresh dashboard
     await pusherServer.trigger(`user-${psychologistUserId}`, "booking-updated", {});
 
+    // Notify client if booking is accepted
+    if (action === "ACCEPT") {
+      const psychologistName = profile.user.name || "Psikolog";
+      const scheduledTimeStr = new Date(updated.scheduledAt).toLocaleString("id-ID", {
+        dateStyle: "medium",
+        timeStyle: "short"
+      });
+
+      await notificationService.createNotification(updated.userId, {
+        title: "Jadwal Konsultasi Disetujui",
+        message: `Permintaan sesi konsultasi Anda dengan ${psychologistName} telah disetujui untuk ${scheduledTimeStr}.`,
+        type: "BOOKING_DOCTOR",
+        metaData: {
+          appointmentId: updated.id,
+          psychologistName,
+          scheduledAt: updated.scheduledAt.toISOString()
+        }
+      }).catch(err => console.error("Failed to create booking approval notification:", err));
+    }
+
     return updated;
   }
 
   async getClientTheme(userId: string): Promise<string> {
     const latestSession = await psychologistRepository.getLatestChatSession(userId);
+    let computedTheme: string | null = null;
+
     if (latestSession) {
-      const lastMsg = latestSession.chatMessages.find(m => m.role === "ASSISTANT");
-      if (lastMsg && lastMsg.metaData && (lastMsg.metaData as any).uiTheme) {
-        return (lastMsg.metaData as any).uiTheme;
+      // Check if session was created today
+      const sessionDate = new Date(latestSession.createdAt);
+      const today = new Date();
+      const isToday = sessionDate.toDateString() === today.toDateString();
+
+      if (isToday) {
+        const lastMsg = latestSession.chatMessages.find(m => m.role === "ASSISTANT");
+        if (lastMsg && lastMsg.metaData && (lastMsg.metaData as any).uiTheme) {
+          computedTheme = (lastMsg.metaData as any).uiTheme;
+        }
       }
     }
 
-    const latestScreening = await this.getLatestScreening(userId);
-    if (latestScreening) {
-      const score = latestScreening.score;
-      if (score >= 0 && score <= 4) return "calm_blue";
-      if (score >= 5 && score <= 9) return "warm_yellow";
-      if (score >= 10 && score <= 13) return "alert_orange";
-      return "deep_purple";
+    if (!computedTheme) {
+      const latestScreening = await this.getLatestScreening(userId);
+      if (latestScreening) {
+        const score = latestScreening.score;
+
+        if (score >= 0 && score <= 4) {
+          computedTheme = AppThemeEnum.CALM_BLUE;
+        } else if (score >= 5 && score <= 9) {
+          computedTheme = AppThemeEnum.WARM_YELLOW;
+        } else if (score >= 10 && score <= 13) {
+          computedTheme = AppThemeEnum.ALERT_ORANGE;
+        } else if (score >= 14 && score <= 21) {
+          computedTheme = AppThemeEnum.DEEP_PURPLE;
+        }
+      }
     }
 
-    return "calm_blue";
+    return computedTheme || "calm_blue";
   }
 
   async getPsychologistClients(userId: string) {
@@ -381,7 +475,7 @@ export class PsychologistService {
 
         // Fetch latest screening for client
         const latestScreening = await screeningRepository.getLatestScreeningResult(user.id);
-        
+
         let priority: "Prioritas Tinggi" | "Prioritas Sedang" | "Prioritas Rendah" = "Prioritas Rendah";
         let mood = "Baik";
         let trend = "Stabil";
@@ -430,8 +524,8 @@ export class PsychologistService {
 
         // Get AI session conclusion
         const conclusion = await this.getLatestAiSessionConclusion(user.id);
-        const aiSummary = conclusion 
-          ? [conclusion] 
+        const aiSummary = conclusion
+          ? [conclusion]
           : ["Belum ada kesimpulan sesi curhat AI yang diselesaikan oleh pasien ini."];
 
         return {

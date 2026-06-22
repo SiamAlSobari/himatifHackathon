@@ -12,6 +12,9 @@ export class UserService {
     }
 
     if (user.role === "PSYCHOLOGY") {
+      if (!user.isOnboarded) {
+        return "/psikolog/onboarding";
+      }
       return "/psikolog";
     }
 

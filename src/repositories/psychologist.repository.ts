@@ -116,7 +116,7 @@ class PsychologistRepository {
                 userId,
                 psychologistId,
                 scheduledAt,
-                status: AppointmentStatus.PENDING,
+                status: AppointmentStatus.PENDING,     
             },
             include: {
                 psychologistProfile: {
@@ -185,6 +185,7 @@ class PsychologistRepository {
         imageUrl: string;
         availability: string;
         tags: string[];
+        operationalHours?: string[];
     }) {
         return await db.psychologistProfile.create({
             data,
@@ -263,6 +264,33 @@ class PsychologistRepository {
             },
             orderBy: {
                 scheduledAt: "asc",
+            },
+        });
+    }
+
+    async updateOnboardingProfile(userId: string, data: {
+        specialty: string;
+        experienceYears: number;
+        imageUrl: string;
+        tags: string[];
+        operationalHours: string[];
+    }) {
+        await db.user.update({
+            where: { id: userId },
+            data: { 
+                image: data.imageUrl,
+                isOnboarded: true,
+            },
+        });
+
+        return await db.psychologistProfile.update({
+            where: { userId },
+            data: {
+                specialty: data.specialty,
+                experienceYears: data.experienceYears,
+                imageUrl: data.imageUrl,
+                tags: data.tags,
+                operationalHours: data.operationalHours,
             },
         });
     }

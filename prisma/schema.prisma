@@ -28,6 +28,7 @@ model User {
   chatSessions        ChatSession[]
   appointments        Appointment[]
   psychologistProfile PsychologistProfile?
+  notifications       Notification[]
 }
 
 enum UserRole {
@@ -154,6 +155,7 @@ model PsychologistProfile {
   availability    String        // e.g. "AVAILABLE", "BUSY" (or text message)
   busyUntil       String?       // e.g. "16:00"
   tags            String[]      // e.g. ["Trauma", "Depresi", "Kecemasan", "Remaja"]
+  operationalHours String[]     // e.g. ["09:00", "10:00", "13:00"]
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
@@ -167,8 +169,10 @@ model Appointment {
   psychologistId String
   scheduledAt    DateTime
   status         AppointmentStatus @default(SCHEDULED)
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+  userLastActiveAt       DateTime?
+  psychologistLastActiveAt DateTime?
 
   user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   psychologistProfile  PsychologistProfile   @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
@@ -194,4 +198,18 @@ enum AppointmentStatus {
   SCHEDULED
   COMPLETED
   CANCELLED
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      String   // "UNREAD_CHAT" | "BOOKING_DOCTOR" | "APPOINTMENT_REMINDER"
+  read      Boolean  @default(false)
+  metaData  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
