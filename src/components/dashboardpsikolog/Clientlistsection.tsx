@@ -10,7 +10,7 @@ export default function ClientListSection({
   clients,
 }: ClientListSectionProps) {
   return (
-    <section className="rounded-2xl bg-white p-5 shadow-sm">
+    <section className="rounded-2xl bg-white p-5 border border-slate-100 shadow-premium hover-lift transition-all duration-300 hover:border-primary/20">
       <div className="mb-1 flex items-center justify-between">
         <h2 className="text-base font-semibold text-slate-800">
           List Client

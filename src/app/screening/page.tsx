@@ -4,7 +4,7 @@ import { db } from "@/lib/db"
 import ScreeningClient from "./screening-client"
 
 export const metadata = {
-  title: "Screening • Verimind",
+  title: "Screening",
   description:
     "Kenali kondisi emosionalmu. Screening singkat ± 60 detik, 100% privat.",
 }

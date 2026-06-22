@@ -6,6 +6,12 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { LoginForm } from "./login-form"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Masuk",
+  description: "Masuk ke akun Verimind Anda untuk mengakses screening harian, chatbot Very AI, dan riwayat konsultasi medis.",
+}
 
 const stats = [
   { value: "1.2k+", label: "cerita" },
@@ -19,17 +25,16 @@ export default function LoginPage() {
       <div className="absolute inset-0 bg-gradient-to-br from-rose-50/60 via-[#F0F4F8] to-teal-50/50" />
       <div className="absolute -top-32 -left-32 w-[28rem] h-[28rem] bg-rose-200/30 rounded-full blur-3xl" />
       <div className="absolute -bottom-32 -right-32 w-[24rem] h-[24rem] bg-teal-200/30 rounded-full blur-3xl" />
-
-      <aside className="hidden lg:flex relative z-10 lg:w-[52%] xl:w-[50%] flex-col p-7 xl:p-9 h-full overflow-hidden">
-        <div className="flex items-center justify-between mb-5">
+      <aside className="hidden lg:flex relative z-10 lg:w-[52%] xl:w-[50%] flex-col p-7 xl:p-9 h-full overflow-hidden animate-slide-left duration-700">
+        <div className="flex items-center justify-between mb-5 animate-fade-in delay-100">
           <Link
             href="/"
-            className="flex items-center gap-2.5 text-lg font-bold text-[#0D1B2A] tracking-tight"
+            className="flex items-center gap-2.5 text-lg font-bold text-[#0D1B2A] tracking-tight hover-scale"
           >
             <img src="/logo-app.png" alt="Verimind Logo" className="h-8 w-auto object-contain" />
             <span>Veri<span className="text-[#1A8A7A]">mind</span></span>
           </Link>
-          <div className="inline-flex items-center gap-1.5 bg-rose-100 border border-rose-200 rounded-full px-2.5 py-1">
+          <div className="inline-flex items-center gap-1.5 bg-rose-100 border border-rose-200 rounded-full px-2.5 py-1 animate-pulse">
             <Heart className="h-3 w-3 text-rose-500 fill-rose-500" />
             <span className="text-[10px] font-black uppercase tracking-wider text-rose-700">
               we missed you
@@ -38,11 +43,11 @@ export default function LoginPage() {
         </div>
 
         <div className="flex-1 flex flex-col justify-between min-h-0 gap-4">
-          <div>
+          <div className="animate-fade-up delay-150 duration-700">
             <h2 className="font-serif text-3xl xl:text-4xl font-bold text-[#0D1B2A] leading-[1.05] mb-2.5">
               udah lama gak{" "}
               <span className="relative inline-block">
-                <span className="bg-gradient-to-r from-[#1A8A7A] to-rose-400 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-[#1A8A7A] to-rose-400 bg-clip-text text-transparent animate-pulse">
                   spill
                 </span>
                 <svg
@@ -66,16 +71,16 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <div className="space-y-2.5 max-w-md">
-            <div className="flex justify-end">
+          <div className="space-y-2.5 max-w-md animate-fade-up delay-200 duration-700">
+            <div className="flex justify-end hover-scale">
               <div className="bg-white border border-black/5 rounded-2xl rounded-br-md px-3.5 py-2 shadow-sm max-w-[80%]">
                 <p className="text-xs text-[#0D1B2A]">
                   hai Very, akhir-akhir ini agak kosong aja 😅
                 </p>
               </div>
             </div>
-            <div className="flex items-start gap-2">
-              <div className="h-7 w-7 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-sm shrink-0 shadow-sm">
+            <div className="flex items-start gap-2 hover-scale">
+              <div className="h-7 w-7 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-sm shrink-0 shadow-sm animate-bounce">
                 🌙
               </div>
               <div className="bg-white border border-rose-200/60 rounded-2xl rounded-bl-md px-3.5 py-2 shadow-sm max-w-[85%]">
@@ -85,7 +90,7 @@ export default function LoginPage() {
                 </p>
               </div>
             </div>
-            <div className="flex items-start gap-2">
+            <div className="flex items-start gap-2 hover-scale">
               <div className="h-7 w-7 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-sm shrink-0 shadow-sm">
                 🌙
               </div>
@@ -97,14 +102,15 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3 animate-fade-up delay-250 duration-700">
             <div className="grid grid-cols-3 gap-2 max-w-md">
-              {stats.map((s) => (
+              {stats.map((s, idx) => (
                 <div
                   key={s.label}
-                  className="bg-white/80 border border-rose-200/50 rounded-xl p-2.5 text-center"
+                  className="bg-white/80 border border-rose-200/50 rounded-xl p-2.5 text-center hover-lift-sm shadow-premium"
+                  style={{ transitionDelay: `${idx * 50}ms` }}
                 >
-                  <div className="text-sm font-black text-[#0D1B2A] leading-none">
+                  <div className="text-sm font-black text-[#0D1B2A] leading-none animate-pulse">
                     {s.value}
                   </div>
                   <div className="text-[9px] text-[#2D3748]/60 uppercase tracking-wider font-bold mt-1">
@@ -114,8 +120,8 @@ export default function LoginPage() {
               ))}
             </div>
 
-            <div className="bg-white/80 border border-black/5 rounded-2xl p-3 max-w-md">
-              <div className="flex items-center gap-2 mb-1.5">
+            <div className="bg-white/80 border border-black/5 rounded-2xl p-3 max-w-md hover-lift shadow-premium">
+              <div className="flex items-center gap-2 mb-1.5 animate-pulse">
                 <div className="flex -space-x-1.5">
                   <div className="h-5 w-5 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 border-2 border-white" />
                   <div className="h-5 w-5 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-white" />
@@ -140,36 +146,17 @@ export default function LoginPage() {
         </div>
       </aside>
 
-      <main className="relative z-10 flex-1 flex flex-col h-full overflow-hidden">
-        <nav className="flex items-center justify-between px-6 py-5 shrink-0">
-          <Link
-            href="/"
-            className="flex items-center gap-2.5 text-base font-bold text-[#0D1B2A] tracking-tight"
-          >
-            <img src="/logo-app.png" alt="Verimind Logo" className="h-8 w-auto object-contain" />
-            <span>Veri<span className="text-[#1A8A7A]">mind</span></span>
-          </Link>
-          <div className="text-xs text-[#2D3748]/70">
-            belum punya akun?{" "}
-            <Link
-              href="/register"
-              className="font-bold text-[#1A8A7A] hover:text-[#0D1B2A] transition-colors"
-            >
-              daftar yuk →
-            </Link>
-          </div>
-        </nav>
+      <main className="relative z-10 flex-1 flex flex-col h-full overflow-hidden animate-fade-in duration-500">
 
         <div className="flex-1 flex items-center justify-center px-6 min-h-0">
-          <div className="w-full max-w-md">
-            <div className="lg:hidden inline-flex items-center gap-1.5 bg-rose-100 border border-rose-200 rounded-full px-2.5 py-1 mb-3">
+          <div className="w-full max-w-md animate-fade-up delay-200 duration-700">
+            <div className="lg:hidden inline-flex items-center gap-1.5 bg-rose-100 border border-rose-200 rounded-full px-2.5 py-1 mb-3 animate-pulse">
               <Heart className="h-3 w-3 text-rose-500 fill-rose-500" />
               <span className="text-[10px] font-black uppercase tracking-wider text-rose-700">
                 we missed you
               </span>
             </div>
-
-            <div className="bg-white rounded-3xl p-7 md:p-8 border border-black/5 shadow-xl shadow-[#0D1B2A]/5">
+            <div className="bg-white rounded-3xl p-7 md:p-8 border border-black/5 shadow-xl hover-lift shadow-premium">
               <div className="mb-5">
                 <h1 className="font-serif text-3xl md:text-[2rem] font-bold text-[#0D1B2A] leading-[1.1] mb-1.5">
                   gas{" "}

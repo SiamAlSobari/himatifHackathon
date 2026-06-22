@@ -36,7 +36,7 @@ export default function ConsultationTrendsCard({ trends, metrics }: Consultation
   const hasData = trends.some((t) => t.sessionCount > 0);
 
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md">
+    <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-premium transition-all duration-300 hover-lift">
       {/* Header */}
       <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div className="flex items-center gap-3">

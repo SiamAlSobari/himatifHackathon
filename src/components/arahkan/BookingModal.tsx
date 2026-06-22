@@ -130,8 +130,8 @@ export default function BookingModal({
   const activeSlot = activeSlotMap[theme] || activeSlotMap.calm_blue
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fade-in duration-300">
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-2xl max-w-md w-full p-6 animate-scale-in duration-300">
         {/* Header */}
         <div className="flex justify-between items-start mb-4">
           <h3 className={`text-lg font-bold ${titleColor}`}>

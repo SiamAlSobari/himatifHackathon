@@ -42,7 +42,7 @@ export default function ClientCard({ client }: ClientCardProps) {
   };
 
   return (
-    <div className="group relative rounded-xl border border-slate-100 p-4">
+    <div className="group relative z-10 hover:z-30 rounded-xl border border-slate-100 p-4 bg-white shadow-premium hover-lift transition-all duration-300 hover:border-primary/20">
       {/* Default content */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">

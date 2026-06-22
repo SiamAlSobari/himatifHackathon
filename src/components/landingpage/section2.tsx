@@ -20,11 +20,11 @@ export default function Section2() {
   return (
     <section
       id="kenali"
-      className="bg-surface h-screen flex flex-col justify-center px-6 overflow-hidden transition-colors duration-500"
+      className="bg-surface min-h-screen lg:h-screen flex flex-col justify-center px-6 py-16 lg:py-0 overflow-hidden transition-colors duration-500"
     >
-      <div className="max-w-6xl mx-auto w-full flex flex-col gap-10 mt-16">
+      <div className="max-w-6xl mx-auto w-full flex flex-col gap-10 mt-8 lg:mt-16">
         {/* Two-column layout */}
-        <div className="grid grid-cols-2 gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           {/* Left: Text */}
           <div>
             <h2 className="text-5xl font-bold text-foreground mb-3 leading-tight">
@@ -60,25 +60,25 @@ export default function Section2() {
           </div>
 
           {/* Right: AI Character Image */}
-          <div className="flex justify-center">
-            <div className="relative w-full max-w-sm">
+          <div className="flex justify-center md:justify-end">
+            <div className="relative w-full max-w-sm animate-float">
               {/* Card */}
               <div
-                className="relative bg-background rounded-2xl overflow-hidden border border-primary/10 transition-colors duration-500"
+                className="relative bg-background rounded-2xl overflow-hidden border border-primary/10 transition-all duration-500 hover-lift shadow-premium"
                 style={{ height: "420px" }}
               >
                 <Image
                   src="/mommy.jpg"
                   alt="VERY AI"
                   fill
-                  className="object-cover object-top"
+                  className="object-cover object-top transition-transform duration-700 hover:scale-105"
                 />
                 {/* Teal accent corner */}
                 <div className="absolute bottom-0 right-0 w-14 h-14 bg-primary rounded-tl-2xl z-10 transition-colors duration-500" />
               </div>
 
               {/* Floating badge */}
-              <div className="absolute -bottom-4 -left-4 bg-white border border-[#E2E8F0] rounded-xl px-4 py-3 shadow-lg z-20">
+              <div className="absolute -bottom-4 -left-4 bg-white border border-[#E2E8F0] rounded-xl px-4 py-3 shadow-lg z-20 hover-scale cursor-default transition-all duration-300">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                   <span className="text-xs font-semibold text-[#0D1B2A]">
@@ -91,11 +91,12 @@ export default function Section2() {
         </div>
 
         {/* Feature Cards — persis seperti Figma: border hitam, bg putih, radius besar, teks bold besar */}
-        <div className="grid grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           {features.map((f, i) => (
             <div
               key={i}
-              className="bg-white rounded-3xl px-8 py-8 text-center border-2 border-black/10 hover:border-primary transition-all duration-300"
+              className={`bg-white rounded-3xl px-8 py-8 text-center border-2 border-black/10 hover-lift shadow-premium hover:border-primary animate-fade-up duration-700`}
+              style={{ animationDelay: `${(i + 1) * 150}ms` }}
             >
               <p className="text-3xl font-black text-[#0D1B2A] mb-3 whitespace-pre-line leading-tight tracking-tight">
                 {f.label}
@@ -105,6 +106,5 @@ export default function Section2() {
           ))}
         </div>
       </div>
-    </section>
-  );
+    </section>)
 }

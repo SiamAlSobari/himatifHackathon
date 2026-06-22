@@ -124,7 +124,7 @@ export default function OnboardingForm({
   return (
     <div className="flex min-h-screen flex-col bg-[#F0F4F8] lg:flex-row">
       {/* Left brand panel (matches landing page aesthetic) */}
-      <aside className="relative hidden overflow-hidden bg-[#0D1B2A] lg:flex lg:w-[44%] xl:w-[40%]">
+      <aside className="relative hidden overflow-hidden bg-[#0D1B2A] lg:flex lg:w-[44%] xl:w-[40%] animate-slide-left duration-700">
         <div className="absolute -top-32 -left-32 h-[28rem] w-[28rem] rounded-full bg-[#1A8A7A]/25 blur-3xl" />
         <div className="absolute -bottom-32 -right-32 h-[26rem] w-[26rem] rounded-full bg-[#1A8A7A]/15 blur-3xl" />
         <div className="absolute inset-0 bg-gradient-to-br from-[#0D1B2A] via-[#0D1B2A] to-[#1A8A7A]/30" />
@@ -218,7 +218,7 @@ export default function OnboardingForm({
       </aside>
 
       {/* Right form panel */}
-      <main className="relative flex flex-1 flex-col">
+      <main className="relative flex flex-1 flex-col animate-fade-in duration-500">
         {/* Top bar */}
         <nav className="flex items-center justify-between border-b border-black/5 bg-white/60 px-6 py-4 backdrop-blur md:px-10">
           <Link
@@ -269,7 +269,7 @@ export default function OnboardingForm({
             )}
 
             {/* Card container */}
-            <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-xl shadow-[#0D1B2A]/5 md:p-9">
+            <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-xl shadow-[#0D1B2A]/5 md:p-9 animate-fade-up duration-700 hover-lift shadow-premium">
               {step === "welcome" && (
                 <WelcomeStep
                   userName={userName}

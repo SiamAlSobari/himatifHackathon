@@ -313,7 +313,7 @@ function PasswordModal({ userEmail, onClose }: { userEmail: string; onClose: () 
 // ─── Account settings card (inline) ──────────────────────────────────────────
 function AccountSettingsCard({ onUpdatePassword }: { onUpdatePassword: () => void }) {
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md">
+    <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-premium transition-all duration-300 hover-lift">
       <div className="mb-5 flex items-center gap-2">
         <Settings className="h-4 w-4 text-slate-400" />
         <h2 className="text-base font-bold text-slate-800">Pengaturan Akun</h2>
@@ -362,7 +362,7 @@ export default function PsychologistProfileClient() {
       {/* ── Upper Grid ── */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Left column */}
-        <div className="flex flex-col gap-6 lg:col-span-1">
+        <div className="flex flex-col gap-6 lg:col-span-1 animate-slide-left">
           <PsychologistProfileCard
             user={user}
             profile={profile}
@@ -372,7 +372,7 @@ export default function PsychologistProfileClient() {
         </div>
 
         {/* Right column */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 animate-slide-right">
           <PsychologistPersonalInfoCard
             user={user}
             profile={profile}
@@ -382,10 +382,14 @@ export default function PsychologistProfileClient() {
       </div>
 
       {/* ── Trends Chart ── */}
-      <ConsultationTrendsCard trends={sessionTrends} metrics={metrics} />
+      <div className="animate-fade-up delay-150">
+        <ConsultationTrendsCard trends={sessionTrends} metrics={metrics} />
+      </div>
 
       {/* ── Session History ── */}
-      <PsychologistConsultationHistoryCard items={consultationHistory} />
+      <div className="animate-fade-up delay-300">
+        <PsychologistConsultationHistoryCard items={consultationHistory} />
+      </div>
 
       {/* ── Modals ── */}
       {profileModalOpen && (

@@ -6,7 +6,7 @@ interface UrgentBannerProps {
 
 export default function UrgentBanner({ onCall }: UrgentBannerProps) {
   return (
-    <div className="bg-[#FCE6ED] rounded-2xl p-6 border border-[#b9003e]/10">
+    <div className="bg-[#FCE6ED] rounded-2xl p-6 border border-[#b9003e]/10 transition-all duration-300 hover-lift shadow-premium hover:border-[#b9003e]/30">
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <span

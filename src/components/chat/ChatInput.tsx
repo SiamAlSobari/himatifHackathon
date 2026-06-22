@@ -39,15 +39,6 @@ export default function ChatInput({ onSend, disabled, activeTheme = "calm_blue" 
   return (
     <div className="border-t border-slate-200 px-6 py-4">
       <div className={`flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-2 ${disabled ? "opacity-60 bg-slate-50" : ""}`}>
-        <button
-          type="button"
-          aria-label="Tambah lampiran"
-          disabled={disabled}
-          className={`text-slate-400 ${disabled ? "cursor-not-allowed" : "hover:text-slate-600"}`}
-        >
-          <Plus className="h-5 w-5" />
-        </button>
-
         <input
           type="text"
           value={value}
@@ -57,15 +48,6 @@ export default function ChatInput({ onSend, disabled, activeTheme = "calm_blue" 
           placeholder={disabled ? "Sesi chat dinonaktifkan..." : "Ketik pesan Anda di sini..."}
           className={`flex-1 bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none ${disabled ? "cursor-not-allowed" : ""}`}
         />
-
-        <button
-          type="button"
-          aria-label="Rekam suara"
-          disabled={disabled}
-          className={`text-slate-400 ${disabled ? "cursor-not-allowed" : "hover:text-slate-600"}`}
-        >
-          <Mic className="h-5 w-5" />
-        </button>
 
         <button
           type="button"

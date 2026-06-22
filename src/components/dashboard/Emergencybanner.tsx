@@ -25,13 +25,13 @@ export default function EmergencyBanner({
         </div>
       </div>
 
-      <button
-        type="button"
-        className="flex items-center gap-2 whitespace-nowrap rounded-xl bg-rose-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-rose-600"
+      <a
+        href={`tel:${phoneNumber}`}
+        className="flex items-center gap-2 whitespace-nowrap rounded-xl bg-rose-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-rose-600 active:scale-[0.98] transition-transform cursor-pointer"
       >
         <Phone className="h-4 w-4" />
         {ctaLabel} ({phoneNumber})
-      </button>
+      </a>
     </section>
   );
 }

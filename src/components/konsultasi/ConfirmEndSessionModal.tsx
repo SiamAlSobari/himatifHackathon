@@ -26,8 +26,8 @@ export default function ConfirmEndSessionModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-2xl max-w-sm w-full p-6 animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fade-in duration-300">
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-2xl max-w-sm w-full p-6 animate-scale-in duration-300">
         {/* Icon Header */}
         <div className="w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center mb-4">
           <span className="material-symbols-outlined text-rose-600 text-2xl">

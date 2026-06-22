@@ -12,8 +12,8 @@ export default function EmergencyHotlineModal({
   if (!visible) return null
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fade-in duration-300">
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-2xl max-w-md w-full p-6 animate-scale-in duration-300">
         <div className="flex items-center gap-3 mb-4 text-[#b9003e]">
           <span className="material-symbols-outlined text-4xl font-bold">emergency</span>
           <h3 className="text-lg font-bold">Hotline Darurat 24/7</h3>

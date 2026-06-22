@@ -24,7 +24,7 @@ export default function ProgressHeader({
 
       <div className="mb-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
         <div
-          className="h-full rounded-full bg-teal-700 transition-all duration-300"
+          className="h-full rounded-full bg-teal-700 transition-all duration-500 origin-left animate-progress"
           style={{ width: `${progressPercent}%` }}
         />
       </div>

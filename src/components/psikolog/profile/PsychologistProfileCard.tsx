@@ -12,7 +12,7 @@ interface PsychologistProfileCardProps {
 
 export default function PsychologistProfileCard({ user, profile, onEdit }: PsychologistProfileCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md">
+    <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-premium transition-all duration-300 hover-lift">
       <div className="flex flex-col items-center text-center">
         {/* Avatar */}
         <div className="relative group cursor-pointer">

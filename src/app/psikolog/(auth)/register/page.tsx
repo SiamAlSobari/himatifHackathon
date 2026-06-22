@@ -9,6 +9,12 @@ import {
 import Link from "next/link"
 import { RegisterForm } from "./register-form"
 import { StatItem } from "../types"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Pendaftaran Mitra Psikolog",
+  description: "Bergabunglah sebagai mitra spesialis psikolog di Verimind dan berikan pertolongan pertama psikologis yang aman kepada mereka yang membutuhkan.",
+}
 
 const features = [
   { icon: MessageCircle, label: "Platform Chat Realtime" },
@@ -32,10 +38,10 @@ export default function PsychologistRegisterPage() {
       <div className="absolute -bottom-32 -right-32 w-[26rem] h-[26rem] bg-violet-200/25 rounded-full blur-3xl pointer-events-none" />
 
       {/* Main Container */}
-      <div className="relative z-10 w-full max-w-5xl max-h-[90vh] bg-white/40 backdrop-blur-md border border-white/50 rounded-[2.5rem] shadow-2xl shadow-indigo-950/5 p-6 md:p-8 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12 overflow-hidden">
+      <div className="relative z-10 w-full max-w-5xl max-h-[90vh] bg-white/40 backdrop-blur-md border border-white/50 rounded-[2.5rem] shadow-2xl shadow-indigo-950/5 p-6 md:p-8 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12 overflow-hidden animate-scale-in">
         
         {/* Left Side: Stats & Description */}
-        <aside className="hidden lg:flex lg:w-[48%] flex-col justify-between self-stretch">
+        <aside className="hidden lg:flex lg:w-[48%] flex-col justify-between self-stretch animate-slide-left">
           <div>
             <div className="flex items-center justify-between mb-6">
               <Link
@@ -85,10 +91,11 @@ export default function PsychologistRegisterPage() {
           <div className="my-4 space-y-2.5 max-w-sm">
             <h3 className="text-[10px] font-bold text-[#0D1B2A]/40 uppercase tracking-wider">Keunggulan Platform</h3>
             <div className="grid grid-cols-2 gap-2">
-              {features.map((f) => (
+              {features.map((f, i) => (
                 <div
                   key={f.label}
-                  className="flex items-center gap-2 bg-white/70 border border-teal-200/30 rounded-xl p-2.5"
+                  className="flex items-center gap-2 bg-white/70 border border-teal-200/30 rounded-xl p-2.5 hover-lift-sm animate-fade-up"
+                  style={{ animationDelay: `${150 + i * 50}ms` }}
                 >
                   <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-100">
                     <f.icon className="h-3.5 w-3.5 text-teal-700" />
@@ -103,12 +110,13 @@ export default function PsychologistRegisterPage() {
 
           {/* Stats Bar */}
           <div className="grid grid-cols-3 gap-2.5">
-            {stats.map((stat) => (
+            {stats.map((stat, i) => (
               <div
                 key={stat.label}
-                className="bg-white/80 border border-teal-200/40 rounded-xl p-2.5 text-center"
+                className="bg-white/80 border border-teal-200/40 rounded-xl p-2.5 text-center hover-lift-sm animate-fade-up shadow-premium"
+                style={{ animationDelay: `${350 + i * 50}ms` }}
               >
-                <div className="text-xs font-black text-teal-700 leading-none">
+                <div className="text-xs font-black text-teal-700 leading-none animate-pulse">
                   {stat.value}
                 </div>
                 <div className="text-[9px] text-[#2D3748]/60 uppercase tracking-wider font-bold mt-1">
@@ -120,7 +128,7 @@ export default function PsychologistRegisterPage() {
         </aside>
 
         {/* Right Side: Form Card */}
-        <main className="w-full lg:w-[48%] max-h-full overflow-y-auto pr-1 flex flex-col justify-center my-auto">
+        <main className="w-full lg:w-[48%] max-h-full overflow-y-auto pr-1 flex flex-col justify-center my-auto animate-slide-right delay-200">
           {/* Header Mobile Nav */}
           <div className="lg:hidden flex items-center justify-between mb-6">
             <Link
@@ -141,7 +149,7 @@ export default function PsychologistRegisterPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl p-6 md:p-8 border border-black/5 shadow-xl shadow-indigo-950/5 w-full">
+          <div className="bg-white rounded-3xl p-6 md:p-8 border border-black/5 shadow-xl shadow-indigo-950/5 w-full hover-lift transition-all duration-300">
             <div className="mb-5">
               <div className="hidden lg:flex justify-end mb-3">
                 <Link

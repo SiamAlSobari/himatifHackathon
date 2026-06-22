@@ -226,7 +226,7 @@ export default function ScreeningClient({
     return (
       <div className="min-h-screen bg-background font-body-md antialiased text-on-surface">
         <main className="mx-auto max-w-xl px-6 pt-24 pb-32 text-center">
-          <div className="rounded-3xl border border-black/5 bg-white p-8 shadow-xl shadow-[#0D1B2A]/5 md:p-12">
+          <div className="rounded-3xl border border-black/5 bg-white p-8 shadow-xl shadow-[#0D1B2A]/5 md:p-12 animate-fade-up duration-700 hover-lift shadow-premium">
             <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[#f0f7f8] text-[#0d5c63]">
               <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>
                 check_circle
@@ -292,7 +292,7 @@ export default function ScreeningClient({
       <main className="mx-auto max-w-7xl px-6 pt-24 pb-32 md:px-12">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
           {/* Main Content Area */}
-          <div className="lg:col-span-8">
+          <div className="lg:col-span-8 animate-fade-in duration-500">
             {/* Stepper */}
             <div className="mb-12">
               <div className="mb-3 flex items-end justify-between">
@@ -310,7 +310,7 @@ export default function ScreeningClient({
               </div>
               <div className="w-full h-1 bg-[#bfc8c9]/30 rounded-full overflow-hidden">
                 <div
-                  className="stepper-progress h-full bg-[#004349]"
+                  className="stepper-progress h-full bg-[#004349] origin-left animate-progress transition-all duration-500"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
@@ -346,7 +346,7 @@ export default function ScreeningClient({
                     <button
                       key={opt.id}
                       onClick={() => handleMoodSelect(opt.id)}
-                      className={`mood-card flex items-center p-5 bg-white border border-[#bfc8c9]/60 rounded-xl text-left transition-all duration-300 group cursor-pointer ${
+                      className={`mood-card flex items-center p-5 bg-white border border-[#bfc8c9]/60 rounded-xl text-left transition-all duration-300 group cursor-pointer hover-lift-sm shadow-premium ${
                         isActive ? "active-card" : ""
                       }`}
                     >
@@ -390,7 +390,7 @@ export default function ScreeningClient({
                     <button
                       key={idx}
                       onClick={() => handleAnswerSelect(currentQuestion!.qNumber, opt.score)}
-                      className={`mood-card flex items-center p-5 bg-white border border-[#bfc8c9]/60 rounded-xl text-left transition-all duration-300 group cursor-pointer ${
+                      className={`mood-card flex items-center p-5 bg-white border border-[#bfc8c9]/60 rounded-xl text-left transition-all duration-300 group cursor-pointer hover-lift-sm shadow-premium ${
                         isActive ? "active-card" : ""
                       }`}
                     >
@@ -458,9 +458,9 @@ export default function ScreeningClient({
           </div>
 
           {/* Sidebar */}
-          <aside className="lg:col-span-4 space-y-6">
+          <aside className="lg:col-span-4 space-y-6 animate-fade-in delay-200 duration-700">
             {/* Trust Card */}
-            <div className="bg-white p-7 rounded-2xl border border-[#bfc8c9]/40 shadow-sm">
+            <div className="bg-white p-7 rounded-2xl border border-[#bfc8c9]/40 hover-lift-sm shadow-premium">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-[#0d5c63]/10 rounded-lg">
                   <span
@@ -521,7 +521,7 @@ export default function ScreeningClient({
             </div>
 
             {/* User Details & Last Screening Card (Replacing Expert Card) */}
-            <div className="bg-[#eff4ff]/50 p-6 rounded-2xl border border-[#bfc8c9]/30">
+            <div className="bg-[#eff4ff]/50 p-6 rounded-2xl border border-[#bfc8c9]/30 hover-lift-sm shadow-premium">
               <div className="flex items-center gap-4 mb-4">
                 <div className="h-12 w-12 rounded-full bg-[#004349] flex items-center justify-center text-white text-lg font-bold">
                   {userProfile.name.charAt(0).toUpperCase()}
@@ -570,7 +570,7 @@ export default function ScreeningClient({
             </div>
 
             {/* Support Card */}
-            <div className="bg-[#FCE6ED]/40 p-6 rounded-2xl border border-[#b9003e]/10">
+            <div className="bg-[#FCE6ED]/40 p-6 rounded-2xl border border-[#b9003e]/10 hover-lift-sm shadow-premium">
               <div className="flex items-center gap-3 mb-3">
                 <span
                   className="material-symbols-outlined text-[#b9003e]"

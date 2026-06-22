@@ -116,7 +116,7 @@ export default function ContextSidebar({
             </div>
             <div className="w-full bg-surface-container rounded-full h-1.5">
               <div
-                className={`h-1.5 rounded-full ${scoreVal > 9 ? "bg-secondary" : scoreVal > 5 ? "bg-amber-500" : "bg-green-500"}`}
+                className={`h-1.5 rounded-full origin-left animate-progress ${scoreVal > 9 ? "bg-secondary" : scoreVal > 5 ? "bg-amber-500" : "bg-green-500"}`}
                 style={{ width: `${percentage}%` }}
               ></div>
             </div>
