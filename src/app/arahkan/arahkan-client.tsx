@@ -154,7 +154,7 @@ export default function ArahkanClient({
     setIsSubmitting(true)
     try {
       const dt = new Date(`${selectedDate}T${selectedTime}:00`)
-      await bookAppointment(bookingPsych.id, dt)
+      await bookAppointment(bookingPsych.id, dt.toISOString())
       setBookingPsych(null)
       toast.success(`Berhasil mengajukan jadwal dengan ${bookingPsych.name}! Menunggu konfirmasi psikolog.`)
     } catch (err: any) {

@@ -28,6 +28,7 @@ model User {
   chatSessions        ChatSession[]
   appointments        Appointment[]
   psychologistProfile PsychologistProfile?
+  notifications       Notification[]
 }
 
 enum UserRole {
@@ -194,4 +195,18 @@ enum AppointmentStatus {
   SCHEDULED
   COMPLETED
   CANCELLED
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      String   // "UNREAD_CHAT" | "BOOKING_DOCTOR" | "APPOINTMENT_REMINDER"
+  read      Boolean  @default(false)
+  metaData  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

@@ -1,5 +1,6 @@
 import userRepository from "@/repositories/user.repository"
 import psychologistRepository from "@/repositories/psychologist.repository"
+import notificationService from "./notification.service"
 import screeningRepository from "@/repositories/screening.repository"
 import screeningService from "./screening.service"
 import { ScreeningResult } from "@/lib/types/dashboardpsikolog"
@@ -56,7 +57,30 @@ export class PsychologistService {
     }
 
     // Create new appointment
-    return await psychologistRepository.createAppointment(userId, psychologistId, scheduledAt)
+    const appointment = await psychologistRepository.createAppointment(userId, psychologistId, scheduledAt)
+
+    // Send notification to the psychologist
+    if (psych.userId) {
+      const clientUser = await userRepository.getUserById(userId)
+      const clientName = clientUser?.name || clientUser?.email || "Seorang pengguna"
+      const scheduledTimeStr = new Date(scheduledAt).toLocaleString("id-ID", {
+        dateStyle: "medium",
+        timeStyle: "short"
+      })
+
+      await notificationService.createNotification(psych.userId, {
+        title: "Booking Janji Temu Baru",
+        message: `${clientName} telah memesan sesi konsultasi dengan Anda pada ${scheduledTimeStr}.`,
+        type: "BOOKING_DOCTOR",
+        metaData: {
+          appointmentId: appointment.id,
+          clientName: clientName,
+          scheduledAt: scheduledAt.toISOString()
+        }
+      }).catch(err => console.error("Failed to create booking notification:", err))
+    }
+
+    return appointment
   }
 
   async cancelAppointment(appointmentId: string, userId: string) {

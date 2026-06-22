@@ -5,10 +5,15 @@ import psychologistService from "@/services/psychologist.service"
 import { revalidatePath } from "next/cache"
 import { pusherServer } from "@/lib/pusher/pusher-server"
 
-export async function bookAppointment(psychologistId: string, scheduledAt: Date) {
+export async function bookAppointment(psychologistId: string, scheduledAtStr: string) {
   const session = await auth()
   if (!session?.user?.id) {
     throw new Error("Unauthorized")
+  }
+
+  const scheduledAt = new Date(scheduledAtStr)
+  if (isNaN(scheduledAt.getTime())) {
+    throw new Error("Format tanggal tidak valid")
   }
 
   const appointment = await psychologistService.bookAppointment(

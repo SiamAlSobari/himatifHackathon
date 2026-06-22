@@ -8,6 +8,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useChatSession } from "@/hooks/chat/useChatSession";
 import { useSession } from "next-auth/react";
+import { useNotifications } from "@/hooks/useNotifications";
+import NotificationDropdown from "./NotificationDropdown";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard" },
@@ -27,6 +29,10 @@ export default function Navbar({ userName, userImage, isOnboarded: propIsOnboard
 
   const { data } = useChatSession();
   const session = useSession();
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const { data: notifications = [] } = useNotifications(session?.data?.user?.id);
+  const unreadCount = notifications.filter(n => !n.read).length;
+
   const isOnboarded = propIsOnboarded !== undefined ? propIsOnboarded : (data?.isOnboarded ?? true);
   const role = (session?.data?.user as any)?.role;
 
@@ -85,13 +91,25 @@ export default function Navbar({ userName, userImage, isOnboarded: propIsOnboard
 
           {session?.data?.user ? (
             <>
-              <button
-                type="button"
-                aria-label="Notifikasi"
-                className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-              >
-                <Bell className="h-5 w-5" />
-              </button>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setNotificationsOpen((prev) => !prev)}
+                  aria-label="Notifikasi"
+                  className="relative rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
+                >
+                  <Bell className="h-5 w-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[8px] font-bold text-white ring-2 ring-white">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+                <NotificationDropdown 
+                  isOpen={notificationsOpen} 
+                  onClose={() => setNotificationsOpen(false)} 
+                />
+              </div>
 
               <div className="relative">
                 <button

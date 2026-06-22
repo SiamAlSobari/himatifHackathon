@@ -2,6 +2,8 @@ import { auth } from "@/auth";
 import { pusherServer } from "@/lib/pusher/pusher-server";
 import { errorResponse, successResponse } from "@/lib/response";
 import psychologistService from "@/services/psychologist.service";
+import appointmentRepository from "@/repositories/appointment.repository";
+import notificationService from "@/services/notification.service";
 
 export async function GET(request: Request) {
   const session = await auth();
@@ -50,6 +52,37 @@ export async function POST(request: Request) {
       "message-sent",
       newMessage
     );
+
+    // Create notification for recipient
+    try {
+      const appointment = await appointmentRepository.getAppointmentWithParticipants(appointmentId);
+      if (appointment) {
+        let recipientId = "";
+        let senderName = "";
+        if (sender === "psychologist") {
+          recipientId = appointment.userId;
+          senderName = appointment.psychologistProfile.user.name || appointment.psychologistProfile.user.email || "Psikolog";
+        } else {
+          recipientId = appointment.psychologistProfile.userId;
+          senderName = appointment.user.name || appointment.user.email || "Klien";
+        }
+
+        if (recipientId) {
+          await notificationService.createNotification(recipientId, {
+            title: `Pesan baru dari ${senderName}`,
+            message: text.length > 50 ? `${text.substring(0, 50)}...` : text,
+            type: "UNREAD_CHAT",
+            metaData: {
+              appointmentId,
+              sender,
+              senderName,
+            }
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Failed to create chat message notification:", err);
+    }
 
     return successResponse(201, "Message created and broadcasted", newMessage);
   } catch (error) {

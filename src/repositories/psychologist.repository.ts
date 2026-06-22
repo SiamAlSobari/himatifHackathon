@@ -116,7 +116,7 @@ class PsychologistRepository {
                 userId,
                 psychologistId,
                 scheduledAt,
-                status: AppointmentStatus.PENDING,
+                status: AppointmentStatus.PENDING,     
             },
             include: {
                 psychologistProfile: {

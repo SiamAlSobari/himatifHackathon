@@ -5,9 +5,13 @@ import { usePathname } from "next/navigation";
 import Navbar from "./Navbar";
 import Footer from "./footer";
 import { footerLinkGroups } from "@/app/dashboard/data";
+import { useSession } from "next-auth/react";
+import NotificationMobileToast from "./NotificationMobileToast";
+import NotificationSimulator from "./NotificationSimulator";
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   // Define paths where Navbar and Footer should NOT be displayed
   const isAuthPath =
@@ -33,6 +37,8 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
       <Navbar />
       <div className="flex-1 w-full min-h-0">{children}</div>
       {!isChatPath && <Footer linkGroups={footerLinkGroups} />}
+      <NotificationMobileToast />
+      <NotificationSimulator />
     </div>
   );
 }
