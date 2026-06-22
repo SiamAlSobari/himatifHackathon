@@ -8,6 +8,14 @@ export class ChatSessionRepository {
             data: { status }
         })
     }
+    async updateManyStatus(sessionIds: string[], status: ChatSessionStatus) {
+        return await db.chatSession.updateMany({
+            where: {
+                id: { in: sessionIds }
+            },
+            data: { status }
+        })
+    }
     async getByUserId(userId: string) {
         return await db.chatSession.findMany({
             where: { userId },
@@ -71,6 +79,20 @@ export class ChatSessionRepository {
         return await db.chatSession.update({
             where: { id: sessionId },
             data: { ipfsCid, txHash }
+        })
+    }
+
+    async getActiveSessionsOlderThan(cutoff: Date) {
+        return await db.chatSession.findMany({
+            where: {
+                status: "ACTIVE",
+                createdAt: {
+                    lt: cutoff
+                }
+            },
+            select: {
+                id: true
+            }
         })
     }
 }
