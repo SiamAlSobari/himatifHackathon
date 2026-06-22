@@ -294,6 +294,48 @@ class PsychologistRepository {
             },
         });
     }
+
+    async updatePsychologistProfileDetails(userId: string, data: {
+        name?: string;
+        roleTitle?: string;
+        specialty?: string;
+        experienceYears?: number;
+        kontakDarurat?: string;
+    }) {
+        const { name, kontakDarurat, roleTitle, specialty, experienceYears } = data;
+
+        // Update user record
+        if (name !== undefined || kontakDarurat !== undefined) {
+            await db.user.update({
+                where: { id: userId },
+                data: {
+                    ...(name !== undefined && { name }),
+                    ...(kontakDarurat !== undefined && { kontakDarurat }),
+                },
+            });
+        }
+
+        // Update psychologist profile record
+        if (roleTitle !== undefined || specialty !== undefined || experienceYears !== undefined) {
+            await db.psychologistProfile.update({
+                where: { userId },
+                data: {
+                    ...(roleTitle !== undefined && { role: roleTitle }),
+                    ...(specialty !== undefined && { specialty }),
+                    ...(experienceYears !== undefined && { experienceYears }),
+                },
+            });
+        }
+    }
+
+    async getAppointmentsByPsychologistProfileId(profileId: string, limit = 20) {
+        return await db.appointment.findMany({
+            where: { psychologistId: profileId },
+            include: { user: true },
+            orderBy: { scheduledAt: "desc" },
+            take: limit,
+        });
+    }
 }
 
 const psychologistRepository = new PsychologistRepository();
