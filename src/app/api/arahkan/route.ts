@@ -1,6 +1,5 @@
 import { auth } from "@/auth";
 import { errorResponse, successResponse } from "@/lib/response";
-import { seedPsychologists } from "@/lib/seed";
 import userRepository from "@/repositories/user.repository";
 import psychologistService from "@/services/psychologist.service";
 import screeningService from "@/services/screening.service";
@@ -12,9 +11,6 @@ export async function GET() {
   }
 
   try {
-    // Ensure psychologists are seeded in database
-    await seedPsychologists();
-
     const dbUser = await userRepository.getUserProfile(session.user.id);
     if (!dbUser) {
       return errorResponse(404, "User not found");
@@ -43,6 +39,7 @@ export async function GET() {
         imageUrl: p.imageUrl,
         availability: p.availability,
         busyUntil: p.busyUntil || undefined,
+        operationalHours: p.operationalHours,
         tags: p.tags,
       })),
       activeAppointment: activeAppointment ? {
