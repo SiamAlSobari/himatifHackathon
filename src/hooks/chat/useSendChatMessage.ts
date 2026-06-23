@@ -15,6 +15,7 @@ export function useSendChatMessage() {
         headers: {
           "Content-Type": "application/json",
         },
+credentials: "include",
         body: JSON.stringify({ sessionId, message }),
       });
       if (!res.ok) {
