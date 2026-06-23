@@ -5,7 +5,15 @@ export function useChatSession() {
   return useQuery<ChatSessionData>({
     queryKey: ["chat-session"],
     queryFn: async () => {
-      const res = await fetch("/api/ai/session");
+      
+const res = await fetch('/api/ai/session', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  credentials: 'include',
+});
+
       if (!res.ok) {
         throw new Error("Failed to fetch active session");
       }
