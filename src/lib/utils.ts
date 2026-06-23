@@ -6,6 +6,10 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function AIResponseFormatter<T>(jsonStr: string): T {
+  if (!jsonStr || typeof jsonStr !== "string") {
+    throw new Error("AIResponseFormatter received empty or invalid input");
+  }
+
   try {
     // 1. Hapus tag <think>...</think> yang ditutup dengan benar
     let cleanedJson = jsonStr.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
@@ -39,10 +43,17 @@ export function AIResponseFormatter<T>(jsonStr: string): T {
     }
 
     // 5. Parse hasil pembersihan
-    return JSON.parse(cleanedJson) as T;
+    const parsed = JSON.parse(cleanedJson) as T;
+
+    // 6. Validasi minimal: pastikan ada field 'suggestion' atau 'metaData'
+    const obj = parsed as unknown as Record<string, unknown>;
+    if (!obj.suggestion && !obj.metaData && !obj.balasan_ai) {
+      throw new Error("Parsed JSON missing required fields (suggestion/metaData)");
+    }
+
+    return parsed;
   } catch (error) {
-    console.error("Failed to parse JSON. Raw input was:", jsonStr);
-    // Sangat disarankan untuk melempar error asli atau info tambahan untuk debugging
+    console.error("Failed to parse JSON. Raw input was:", jsonStr.substring(0, 500));
     throw new Error(`Invalid JSON format: ${(error as Error).message}`);
   }
 }

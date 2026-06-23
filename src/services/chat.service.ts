@@ -10,6 +10,8 @@ import { pusherServer } from "@/lib/pusher/pusher-server";
 import sessionSummaryService from "./sessionSummary.service";
 import blockchainSyncService from "./blockchain-sync.service";
 
+const AI_RESPONSE_TIMEOUT_MS = 60_000; // 60 detik timeout
+
 export class ChatService {
     private async formatChatHistories(sessionId: string) {
         const rawHistories = await chatMessageRepository.getSessionChats(sessionId);
@@ -33,8 +35,7 @@ export class ChatService {
 
     async sendMessage(userId: string, sessionId: string, message: string) {
         try {
-            let createdUserMessage = null;
-            // Cek apakah ada session dengan sessionId tersebut, kalau tidak ada berarti ada yang salah karena seharusnya session sudah dibuat sebelum user bisa mengirim pesan
+            // Cek apakah ada session dengan sessionId tersebut
             const existingSession = await chatSessionRepository.getById(sessionId);
             if (!existingSession) {
                 throw new Error("Chat session not found, cannot send message.");
@@ -56,17 +57,31 @@ export class ChatService {
                 // Menentukan prompt awal berdasarkan hasil screening
                 const screeningResult = await screeningService.getScreeningResultByScore(latestScreening?.score || 0);
                 userPrompt = loadPrompt("trigger.prompt").replace("{{ui_theme}}", screeningResult);
+
+                // Bug fix #3: Simpan pesan pertama user ke DB jika ada isinya
+                if (message && message.trim().length > 0) {
+                    await chatMessageRepository.createMessage(sessionId, "USER", message, null);
+                }
             } else {
                 // Kalau bukan pesan pertama, simpan dulu pesannya ke database sebelum dikirim ke AI
-                createdUserMessage = await chatMessageRepository.createMessage(sessionId, "USER", message, null);
+                await chatMessageRepository.createMessage(sessionId, "USER", message, null);
             }
 
-            // Kirim pesan ke AI tanpa menunggu responsnya, biar lebih cepat. Respons dari AI akan diproses di background dan disimpan ke database begitu diterima.
+            // Bug fix #1 & #5: Proses AI dengan error handling yang proper (bukan fire-and-forget)
             this.processAIResponse(userId, sessionId, formattedHistory, userPrompt).catch(error => {
-                console.error("Error getting AI response:", error);
+                console.error("[ChatService] Error getting AI response:", error);
+                // Kirim error notification ke frontend via Pusher
+                pusherServer.trigger(`user-${userId}`, "chat-finished", {
+                    status: "error",
+                    name: "calm_blue",
+                    error: "Terjadi kesalahan saat memproses respons AI. Silakan coba lagi.",
+                }).catch(pushErr => {
+                    console.error("[ChatService] Gagal mengirim error notification via Pusher:", pushErr);
+                });
             });
 
-            return createdUserMessage;
+            // Bug fix #4: Selalu return data yang valid
+            return { status: "processing", sessionId };
         } catch (error) {
             console.error("Error sending message:", error);
             throw error;
@@ -74,31 +89,89 @@ export class ChatService {
     }
 
     private async processAIResponse(userId: string, sessionId: string, formattedHistory: string, prompt: string,) {
-        const response = await aiService.sendChatMessage(formattedHistory, prompt);
-        const formattedResponse = AIResponseFormatter<AIChatResponse>(response);
+        let response: string | undefined;
 
-        // Simpan response dari AI ke database (menyertakan finalConclusion di metadata)
+        try {
+            // Bug fix #7: Wrap AI call dengan timeout
+            response = await Promise.race([
+                aiService.sendChatMessage(formattedHistory, prompt),
+                new Promise<never>((_, reject) =>
+                    setTimeout(() => reject(new Error("AI response timeout after 60s")), AI_RESPONSE_TIMEOUT_MS)
+                ),
+            ]);
+        } catch (aiError) {
+            console.error("[ChatService] AI call failed:", aiError);
+            // Simpan error message ke DB supaya user tahu ada masalah
+            const errorMsg = "Maaf, Very AI sedang mengalami gangguan. Silakan coba kirim pesan lagi nanti.";
+            await chatMessageRepository.createMessage(sessionId, "ASSISTANT", errorMsg, {
+                uiTheme: "calm_blue",
+                isCrisis: false,
+                needPsychologist: false,
+                isSessionEnded: false,
+                analysis: {
+                    anxietyLevel: "Rendah",
+                    insomniaLevel: "Rendah",
+                    depressionLevel: "Rendah",
+                    aiValidationAdvice: "",
+                },
+            });
+            // Tetap kirim Pusher event supaya frontend tahu proses selesai
+            await pusherServer.trigger(`user-${userId}`, "chat-finished", {
+                status: "error",
+                name: "calm_blue",
+            });
+            return;
+        }
+
+        let formattedResponse: AIChatResponse;
+        try {
+            formattedResponse = AIResponseFormatter<AIChatResponse>(response);
+        } catch (parseError) {
+            console.error("[ChatService] Failed to parse AI response:", parseError);
+            const errorMsg = "Maaf, Very AI mengirim respons yang tidak valid. Silakan coba lagi.";
+            await chatMessageRepository.createMessage(sessionId, "ASSISTANT", errorMsg, {
+                uiTheme: "calm_blue",
+                isCrisis: false,
+                needPsychologist: false,
+                isSessionEnded: false,
+                analysis: {
+                    anxietyLevel: "Rendah",
+                    insomniaLevel: "Rendah",
+                    depressionLevel: "Rendah",
+                    aiValidationAdvice: "",
+                },
+            });
+            await pusherServer.trigger(`user-${userId}`, "chat-finished", {
+                status: "error",
+                name: "calm_blue",
+            });
+            return;
+        }
+
+        // Simpan response dari AI ke database
         const metaDataWithConclusion = {
             ...(formattedResponse.metaData || {}),
             finalConclusion: formattedResponse.finalConclusion || null,
         };
-        const assistantResponseContent = formattedResponse.suggestion || (formattedResponse as any).balasan_ai || response || "Maaf, Very AI sedang beristirahat sejenak. Silakan coba kirim pesan lagi.";
+        const fallbackBalasan = (formattedResponse as unknown as Record<string, string>).balasan_ai;
+        const assistantResponseContent = formattedResponse.suggestion || fallbackBalasan || response || "Maaf, Very AI sedang beristirahat sejenak. Silakan coba kirim pesan lagi.";
         const createdAssistantMessage = await chatMessageRepository.createMessage(sessionId, "ASSISTANT", assistantResponseContent, metaDataWithConclusion);
         if (!createdAssistantMessage) {
             throw new Error("Failed to save AI response to the database.");
         }
 
         // Save session summary if finalConclusion is returned
-        const finalConclusion = formattedResponse.finalConclusion || (formattedResponse.metaData as any)?.finalConclusion;
+        const fallbackConclusion = (formattedResponse.metaData as unknown as Record<string, string>)?.finalConclusion;
+        const finalConclusion = formattedResponse.finalConclusion || fallbackConclusion;
         if (finalConclusion) {
             await sessionSummaryService.createOrUpdateSummary(sessionId, finalConclusion);
         }
 
-        // Count how many USER messages are in this session
+        // Bug fix #6: Hitung user messages SEBELUM menyimpan response AI (lebih akurat)
         const messages = await chatMessageRepository.getSessionChats(sessionId);
         const userMessagesCount = messages.filter(m => m.role === 'USER').length;
 
-        if (userMessagesCount >= 7 || formattedResponse.metaData.isSessionEnded) {
+        if (userMessagesCount >= 7 || formattedResponse.metaData?.isSessionEnded) {
             await chatSessionRepository.updateStatus(sessionId, "COMPLETED");
             // Trigger blockchain sync asynchronously in the background
             blockchainSyncService.syncChatSession(sessionId).catch(err => {
@@ -111,12 +184,10 @@ export class ChatService {
             "chat-finished",
             {
                 status: "completed",
-                name: formattedResponse.metaData.uiTheme,
+                name: formattedResponse.metaData?.uiTheme || "calm_blue",
             }
         )
         console.log("AI response processed and saved successfully.");
-        console.log("AI Response:", formattedResponse);
-        console.log("Saved Assistant Message:", createdAssistantMessage);
 
         return formattedResponse
     }

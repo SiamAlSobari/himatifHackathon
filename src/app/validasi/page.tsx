@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import ChatPanel from "@/components/chat/ChatPanel";
 import SummarySidebar from "@/components/chat/SummarySidebar";
 import ChatHistorySidebar from "@/components/chat/ChatHistorySidebar";
@@ -48,8 +49,12 @@ export default function ChatPage() {
   // Refetch data using TanStack Query when pusher triggers 'chat-finished'
   useChatNotification(
     session.data?.user?.id,
-    () => {
+    (data) => {
       refetch();
+      // Bug fix #1: Show toast jika AI response gagal
+      if (data?.status === "error") {
+        toast.error(data.error || "Terjadi kesalahan pada AI. Silakan coba lagi.");
+      }
     }
   );
 
