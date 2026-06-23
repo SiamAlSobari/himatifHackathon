@@ -9,6 +9,7 @@ import { authConfig } from "./auth.config"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
+  trustHost: true,
   adapter: PrismaAdapter(db),
   providers: [
     ...(envConfig.GoogleClientId && envConfig.GoogleClientSecret
