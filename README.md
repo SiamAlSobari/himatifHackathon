@@ -2,6 +2,8 @@
 
 *(Sebelumnya dikenal sebagai **Ruang** / **Jembatan Aman**)*
 
+🌐 **Website Resmi:** [https://verimind.web.id](https://verimind.web.id)
+
 ---
 
 <p align="center">
