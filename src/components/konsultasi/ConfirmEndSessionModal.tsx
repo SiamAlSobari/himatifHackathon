@@ -48,14 +48,14 @@ export default function ConfirmEndSessionModal({
           <button
             onClick={onDecline}
             disabled={isDeclining || isConfirming}
-            className="flex-1 py-2.5 border border-slate-200 rounded-xl font-bold text-xs hover:bg-slate-50 transition-colors text-slate-700 cursor-pointer text-center disabled:opacity-50"
+            className="flex-1 py-2.5 border border-slate-200 rounded-xl font-bold text-xs hover:bg-slate-50 transition-colors text-slate-700 cursor-pointer text-center disabled:opacity-50 disabled:pointer-events-none"
           >
             {isDeclining ? "Memproses..." : declineLabel}
           </button>
           <button
             onClick={onConfirm}
             disabled={isConfirming || isDeclining}
-            className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs transition-colors disabled:opacity-50 cursor-pointer text-center shadow-md flex items-center justify-center gap-2"
+            className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs transition-colors disabled:opacity-50 disabled:pointer-events-none cursor-pointer text-center shadow-md flex items-center justify-center gap-2"
           >
             {isConfirming ? (
               <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
