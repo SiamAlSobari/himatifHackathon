@@ -1,4 +1,5 @@
 import chatSessionRepository from "@/repositories/chatSessionRepository";
+import appointmentRepository from "@/repositories/appointment.repository";
 import blockchainSyncService from "./blockchain-sync.service";
 import type { CronJobResponse, CronJobSessionResult } from "@/lib/types/job";
 
@@ -67,6 +68,97 @@ export class CronJobService {
       return {
         success: false,
         message: error.message || "Failed during cron job execution",
+        processedCount: 0,
+        results: [],
+      };
+    }
+  }
+
+  /**
+   * Scans for and retries synchronization for completed AI chat sessions and psychologist appointments that failed to sync.
+   */
+  async syncUnsyncedSessionsAndAppointments(): Promise<CronJobResponse> {
+    try {
+      console.log("CronJobService: Starting sync retry queue for failed sessions and appointments...");
+      
+      const unsyncedSessions = await chatSessionRepository.getUnsyncedCompletedSessions();
+      const unsyncedAppointments = await appointmentRepository.getUnsyncedCompletedAppointments();
+      
+      console.log(`CronJobService: Found ${unsyncedSessions.length} unsynced chat sessions and ${unsyncedAppointments.length} unsynced appointments.`);
+
+      const results: CronJobSessionResult[] = [];
+
+      // 1. Retry Chat Sessions
+      for (const session of unsyncedSessions) {
+        const sessionId = session.id;
+        try {
+          const syncResult = await blockchainSyncService.syncChatSession(sessionId);
+          if (syncResult) {
+            results.push({
+              sessionId,
+              status: "success",
+              ipfsCid: syncResult.ipfsCid,
+              txHash: syncResult.txHash,
+            });
+            console.log(`CronJobService Retry: Successfully synced session ${sessionId} to blockchain.`);
+          } else {
+            results.push({
+              sessionId,
+              status: "failed",
+              error: "Blockchain sync returned null.",
+            });
+          }
+        } catch (err: any) {
+          console.error(`CronJobService Retry: Error syncing session ${sessionId}:`, err);
+          results.push({
+            sessionId,
+            status: "failed",
+            error: err.message || "Unknown error during sync retry",
+          });
+        }
+      }
+
+      // 2. Retry Appointments
+      for (const appt of unsyncedAppointments) {
+        const appointmentId = appt.id;
+        try {
+          const syncResult = await blockchainSyncService.syncAppointmentSession(appointmentId);
+          if (syncResult) {
+            results.push({
+              sessionId: appointmentId,
+              status: "success",
+              ipfsCid: syncResult.ipfsCid,
+              txHash: syncResult.txHash,
+            });
+            console.log(`CronJobService Retry: Successfully synced appointment ${appointmentId} to blockchain.`);
+          } else {
+            results.push({
+              sessionId: appointmentId,
+              status: "failed",
+              error: "Blockchain sync returned null.",
+            });
+          }
+        } catch (err: any) {
+          console.error(`CronJobService Retry: Error syncing appointment ${appointmentId}:`, err);
+          results.push({
+            sessionId: appointmentId,
+            status: "failed",
+            error: err.message || "Unknown error during sync retry",
+          });
+        }
+      }
+
+      return {
+        success: true,
+        message: `Processed ${unsyncedSessions.length} chat sessions and ${unsyncedAppointments.length} appointments.`,
+        processedCount: unsyncedSessions.length + unsyncedAppointments.length,
+        results,
+      };
+    } catch (error: any) {
+      console.error("CronJobService: Unsynced session sync cron job failed:", error);
+      return {
+        success: false,
+        message: error.message || "Failed during sync retry execution",
         processedCount: 0,
         results: [],
       };

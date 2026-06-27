@@ -15,5 +15,16 @@ export async function register() {
         console.error("CronJobService: Scheduled job failed with error:", error);
       }
     });
+
+    // Schedule: Every 30 minutes to retry unsynced completed sessions and appointments
+    cron.schedule("*/30 * * * *", async () => {
+      console.log("CronJobService: Running scheduled retry queue for unsynced sessions and appointments...");
+      try {
+        const result = await cronJobService.syncUnsyncedSessionsAndAppointments();
+        console.log("CronJobService Retry Queue: Scheduled job result:", result);
+      } catch (error) {
+        console.error("CronJobService Retry Queue: Scheduled job failed with error:", error);
+      }
+    });
   }
 }

@@ -35,7 +35,9 @@ export default function TodayConsultationCard({
           </p>
           <p className={`text-xs ${isFinished ? "text-slate-400" : "text-slate-500"}`}>{consultation.clientRole}</p>
           <div className="mt-1 flex items-center gap-1 text-xs text-slate-400">
-            <Video className="h-3.5 w-3.5" />
+            <span className="material-symbols-outlined text-slate-400">
+              chat_bubble
+            </span>
             <span>{consultation.schedule}</span>
           </div>
         </div>

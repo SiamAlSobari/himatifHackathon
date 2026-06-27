@@ -63,10 +63,10 @@ export default function DashboardPsikologPage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="animate-fade-up delay-100 duration-700">
+          <div className="animate-fade-up delay-100 duration-700 min-h-[100px]">
             <TodayConsultationList consultations={data.todayConsultations} />
           </div>
-          <div className="animate-fade-up delay-200 duration-700">
+          <div className="animate-fade-up delay-200 duration-700 min-h-[100px]">
             <ConsultationHistoryTable history={data.consultationHistory} />
           </div>
         </div>
