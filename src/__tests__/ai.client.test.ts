@@ -13,13 +13,16 @@ jest.mock("@/ai/loader", () => ({
 
 jest.mock("@google/genai", () => {
   const mockGenerateContent = jest.fn();
+  const mockGenerateContentStream = jest.fn();
   return {
     GoogleGenAI: jest.fn().mockImplementation(() => ({
       models: {
         generateContent: mockGenerateContent,
+        generateContentStream: mockGenerateContentStream,
       },
     })),
     __mockGenerateContent: mockGenerateContent,
+    __mockGenerateContentStream: mockGenerateContentStream,
   };
 });
 
@@ -43,6 +46,7 @@ import { AIClient } from "@/ai/client";
 describe("AIClient", () => {
   let client: AIClient;
   let mockGenerateContent: jest.Mock;
+  let mockGenerateContentStream: jest.Mock;
   let mockChatCompletionsCreate: jest.Mock;
 
   beforeEach(() => {
@@ -53,12 +57,14 @@ describe("AIClient", () => {
 
     const genai = require("@google/genai");
     mockGenerateContent = genai.__mockGenerateContent;
+    mockGenerateContentStream = genai.__mockGenerateContentStream;
 
     const openai = require("openai");
     mockChatCompletionsCreate = openai.__mockCreate;
 
     mockChatCompletionsCreate.mockReset();
     mockGenerateContent.mockReset();
+    mockGenerateContentStream.mockReset();
 
     client = new AIClient();
   });
@@ -79,6 +85,7 @@ describe("AIClient", () => {
     });
 
     it("should fallback to Groq when primary Gemini fails", async () => {
+      mockGenerateContent.mockPage = jest.fn();
       mockGenerateContent.mockRejectedValueOnce(new Error("Gemini 1 failed"));
       mockChatCompletionsCreate.mockResolvedValue({
         choices: [{ message: { content: "Hello from Groq" } }],
@@ -162,6 +169,90 @@ describe("AIClient", () => {
       expect(callArgs.config.temperature).toBe(0.7);
       expect(callArgs.config.maxOutputTokens).toBe(2048);
       expect(callArgs.config.systemInstruction).toBe("System instruction test");
+    });
+  });
+
+  describe("generateContentStream", () => {
+    it("should call primary model (Gemini Utama) stream first and stream chunks", async () => {
+      mockGenerateContentStream.mockResolvedValue({
+        async *[Symbol.asyncIterator]() {
+          yield { text: "Hello " };
+          yield { text: "from " };
+          yield { text: "Gemini 1 stream" };
+        }
+      });
+
+      const onChunk = jest.fn();
+      const result = await client.generateContentStream("Test prompt", onChunk);
+
+      expect(result).toBe("Hello from Gemini 1 stream");
+      expect(mockGenerateContentStream).toHaveBeenCalledTimes(1);
+      expect(onChunk).toHaveBeenCalledTimes(3);
+      expect(onChunk).toHaveBeenNthCalledWith(1, "Hello ");
+      expect(onChunk).toHaveBeenNthCalledWith(2, "from ");
+      expect(onChunk).toHaveBeenNthCalledWith(3, "Gemini 1 stream");
+    });
+
+    it("should fallback to Groq stream when primary Gemini stream fails", async () => {
+      mockGenerateContentStream.mockRejectedValueOnce(new Error("Gemini 1 stream failed"));
+      mockChatCompletionsCreate.mockResolvedValue({
+        async *[Symbol.asyncIterator]() {
+          yield { choices: [{ delta: { content: "Hello " } }] };
+          yield { choices: [{ delta: { content: "from " } }] };
+          yield { choices: [{ delta: { content: "Groq stream" } }] };
+        }
+      });
+
+      const onChunk = jest.fn();
+      const result = await client.generateContentStream("Test prompt", onChunk);
+
+      expect(result).toBe("Hello from Groq stream");
+      expect(mockGenerateContentStream).toHaveBeenCalledTimes(1);
+      expect(mockChatCompletionsCreate).toHaveBeenCalledTimes(1);
+      expect(onChunk).toHaveBeenCalledTimes(3);
+      expect(onChunk).toHaveBeenNthCalledWith(1, "Hello ");
+      expect(onChunk).toHaveBeenNthCalledWith(2, "from ");
+      expect(onChunk).toHaveBeenNthCalledWith(3, "Groq stream");
+    });
+
+    it("should fallback to Gemini Sekunder stream when primary Gemini and Groq stream fail", async () => {
+      mockGenerateContentStream
+        .mockRejectedValueOnce(new Error("Gemini 1 stream failed")) // Gemini Utama
+        .mockResolvedValueOnce({
+          async *[Symbol.asyncIterator]() {
+            yield { text: "Hello " };
+            yield { text: "from " };
+            yield { text: "Gemini 2 stream" };
+          }
+        }); // Gemini Sekunder
+
+      mockChatCompletionsCreate.mockRejectedValueOnce(new Error("Groq stream failed"));
+
+      const onChunk = jest.fn();
+      const result = await client.generateContentStream("Test prompt", onChunk);
+
+      expect(result).toBe("Hello from Gemini 2 stream");
+      expect(mockGenerateContentStream).toHaveBeenCalledTimes(2);
+      expect(mockChatCompletionsCreate).toHaveBeenCalledTimes(1);
+      expect(onChunk).toHaveBeenCalledTimes(3);
+      expect(onChunk).toHaveBeenNthCalledWith(1, "Hello ");
+      expect(onChunk).toHaveBeenNthCalledWith(2, "from ");
+      expect(onChunk).toHaveBeenNthCalledWith(3, "Gemini 2 stream");
+    });
+
+    it("should throw error when all three streams fail", async () => {
+      mockGenerateContentStream
+        .mockRejectedValueOnce(new Error("Gemini 1 stream failed"))
+        .mockRejectedValueOnce(new Error("Gemini 2 stream failed"));
+
+      mockChatCompletionsCreate.mockRejectedValueOnce(new Error("Groq stream failed"));
+
+      const onChunk = jest.fn();
+      await expect(client.generateContentStream("Test", onChunk)).rejects.toThrow(
+        "AIClient Streaming Total Failure"
+      );
+      expect(mockGenerateContentStream).toHaveBeenCalledTimes(2);
+      expect(mockChatCompletionsCreate).toHaveBeenCalledTimes(1);
     });
   });
 });

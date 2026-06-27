@@ -2,6 +2,7 @@
 jest.mock("@/ai/client", () => ({
   aiClient: {
     generateContent: jest.fn(),
+    generateContentStream: jest.fn(),
   },
 }));
 
@@ -14,6 +15,7 @@ import { aiClient } from "@/ai/client";
 import { loadPrompt } from "@/ai/loader";
 
 const mockGenerateContent = aiClient.generateContent as jest.Mock;
+const mockGenerateContentStream = aiClient.generateContentStream as jest.Mock;
 const mockLoadPrompt = loadPrompt as jest.Mock;
 
 describe("AIService", () => {
@@ -73,6 +75,28 @@ describe("AIService", () => {
       expect(calledWith).toContain("Pesan saya");
       expect(calledWith).not.toContain("{{user_history}}");
       expect(calledWith).not.toContain("{{user_message}}");
+    });
+  });
+
+  describe("sendChatMessageStream", () => {
+    it("should construct prompt and call generateContentStream", async () => {
+      const promptTemplate = "History: {{user_history}}\nMessage: {{user_message}}";
+      mockLoadPrompt.mockReturnValue(promptTemplate);
+      mockGenerateContentStream.mockImplementation((prompt, onChunk) => {
+        onChunk("chunk 1");
+        onChunk("chunk 2");
+        return Promise.resolve("full streamed response");
+      });
+
+      const onChunkMock = jest.fn();
+      const result = await aiService.sendChatMessageStream("AI: Hello\nUser: Hi", "How are you?", onChunkMock);
+
+      expect(mockLoadPrompt).toHaveBeenCalledWith("chat.prompt");
+      expect(mockGenerateContentStream).toHaveBeenCalled();
+      expect(onChunkMock).toHaveBeenCalledTimes(2);
+      expect(onChunkMock).toHaveBeenNthCalledWith(1, "chunk 1");
+      expect(onChunkMock).toHaveBeenNthCalledWith(2, "chunk 2");
+      expect(result).toBe("full streamed response");
     });
   });
 });

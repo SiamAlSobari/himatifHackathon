@@ -89,12 +89,20 @@ export class ChatService {
     }
 
     private async processAIResponse(userId: string, sessionId: string, formattedHistory: string, prompt: string,) {
-        let response: string | undefined;
+        let response: string | undefined = "";
 
         try {
             // Bug fix #7: Wrap AI call dengan timeout
             response = await Promise.race([
-                aiService.sendChatMessage(formattedHistory, prompt),
+                aiService.sendChatMessageStream(formattedHistory, prompt, (chunk) => {
+                    // Send to client in real-time via Pusher
+                    pusherServer.trigger(`user-${userId}`, "chat-chunk", {
+                        sessionId,
+                        chunk,
+                    }).catch(pushErr => {
+                        console.error("[ChatService] Gagal mengirim chunk via Pusher:", pushErr);
+                    });
+                }),
                 new Promise<never>((_, reject) =>
                     setTimeout(() => reject(new Error("AI response timeout after 60s")), AI_RESPONSE_TIMEOUT_MS)
                 ),

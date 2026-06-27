@@ -110,6 +110,67 @@ export class AIClient {
         const errorDetails = errors.map(e => `${e.provider}: ${e.error?.message || e.error}`).join("; ");
         throw new Error(`AIClient Total Failure. All providers failed. Details: [${errorDetails}]`);
     }
+
+    async generateContentStream(prompt: string, onChunk: (text: string) => void): Promise<string> {
+        const providers = this.getActiveProviders();
+        if (providers.length === 0) {
+            throw new Error("AIClient Error: GeminiApiKey tidak ditemukan di envConfig!");
+        }
+
+        const errors: { provider: string; error: any }[] = [];
+
+        for (const config of providers) {
+            try {
+                let fullText = "";
+                if (config.provider === 'gemini') {
+                    const client = this.getGeminiClient(config.apiKey);
+                    const responseStream = await client.models.generateContentStream({
+                        model: config.model,
+                        contents: prompt,
+                        config: {
+                            temperature: this.temperature,
+                            maxOutputTokens: this.maxOutputTokens,
+                            systemInstruction: this.systemInstruction,
+                        }
+                    });
+                    for await (const chunk of responseStream) {
+                        const chunkText = chunk.text || "";
+                        if (chunkText) {
+                            fullText += chunkText;
+                            onChunk(chunkText);
+                        }
+                    }
+                    return fullText;
+                } else if (config.provider === 'groq') {
+                    const client = this.getGroqClient(config.apiKey);
+                    const responseStream = await client.chat.completions.create({
+                        model: config.model,
+                        messages: [
+                            { role: "system", content: this.systemInstruction },
+                            { role: "user", content: prompt },
+                        ],
+                        temperature: this.temperature,
+                        max_tokens: this.maxOutputTokens,
+                        stream: true,
+                    });
+                    for await (const chunk of responseStream) {
+                        const chunkText = chunk.choices[0]?.delta?.content || "";
+                        if (chunkText) {
+                            fullText += chunkText;
+                            onChunk(chunkText);
+                        }
+                    }
+                    return fullText;
+                }
+            } catch (error: any) {
+                console.warn(`[AIClient] Streaming gagal untuk provider ${config.name} (${config.model}): ${error?.message || error}. Mencoba provider berikutnya...`);
+                errors.push({ provider: config.name, error });
+            }
+        }
+
+        const errorDetails = errors.map(e => `${e.provider}: ${e.error?.message || e.error}`).join("; ");
+        throw new Error(`AIClient Streaming Total Failure. All providers failed. Details: [${errorDetails}]`);
+    }
 }
 
 export const aiClient = new AIClient();
