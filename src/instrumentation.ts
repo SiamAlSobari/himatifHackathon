@@ -1,7 +1,8 @@
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    const cron = await import("node-cron");
-    const { default: cronJobService } = await import("@/services/cron-job.service");
+    const getPath = (p: string) => p;
+    const cron = await import(getPath("node-cron"));
+    const cronJobService = (await import(getPath("./services/cron-job.service"))).default;
 
     console.log("CronJobService: Registering node-cron jobs...");
 

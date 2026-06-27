@@ -3,19 +3,36 @@ import { PrismaPg } from "@prisma/adapter-pg"
 import { PrismaClient } from "../../generated/prisma/client"
 import { envConfig } from "./constants/env"
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
+const globalForPrisma = globalThis as unknown as {
+  prisma?: PrismaClient
+}
 
-const pool = new Pool({
-  connectionString: envConfig.DatabaseUrl!,
-  max: process.env.NODE_ENV === "production" ? 4 : 10,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-})
+if (!envConfig.DatabaseUrl) {
+  console.warn("Database connection warning: DATABASE_URL is not defined in the environment variables.");
+}
 
-const adapter = new PrismaPg(pool)
+let db: PrismaClient
 
-export const db = globalForPrisma.prisma ?? new PrismaClient({
-  adapter,
-})
+if (process.env.NODE_ENV === "production") {
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db
+  const adapter = new PrismaPg({
+    connectionString: envConfig.DatabaseUrl,
+    max: 4,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 15000,
+  })
+  db = new PrismaClient({ adapter })
+} else {
+  if (!globalForPrisma.prisma) {
+    const adapter = new PrismaPg({
+      connectionString: envConfig.DatabaseUrl,
+      max: 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 15000, // 15 seconds to support Neon serverless database cold starts
+    })
+    globalForPrisma.prisma = new PrismaClient({ adapter })
+  }
+  db = globalForPrisma.prisma
+}
+
+export { db }
