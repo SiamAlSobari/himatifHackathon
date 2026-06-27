@@ -30,6 +30,7 @@ export default function ChatPage() {
 
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"history" | "chat" | "summary">("chat");
+  const [streamingMessage, setStreamingMessage] = useState<string | null>(null);
 
   // Reset selected history session if active session becomes available
   useEffect(() => {
@@ -46,18 +47,6 @@ export default function ChatPage() {
     }
   }, [data, isLoading, router]);
 
-  // Refetch data using TanStack Query when pusher triggers 'chat-finished'
-  useChatNotification(
-    session.data?.user?.id,
-    (data) => {
-      refetch();
-      // Bug fix #1: Show toast jika AI response gagal
-      if (data?.status === "error") {
-        toast.error(data.error || "Terjadi kesalahan pada AI. Silakan coba lagi.");
-      }
-    }
-  );
-
   const selectedHistorySession = data?.history?.find((s) => s.id === selectedSessionId) || null;
 
   // Determine actual session to display (selected history session, active session, or completed session during cooldown)
@@ -68,6 +57,29 @@ export default function ChatPage() {
     assistantMessages.length > 0
       ? assistantMessages[assistantMessages.length - 1]
       : null;
+
+  // Reset streamingMessage on display session change
+  useEffect(() => {
+    setStreamingMessage(null);
+  }, [displaySession?.id]);
+
+  // Refetch data using TanStack Query when pusher triggers 'chat-finished'
+  useChatNotification(
+    session.data?.user?.id,
+    (data) => {
+      setStreamingMessage(null);
+      refetch();
+      // Bug fix #1: Show toast jika AI response gagal
+      if (data?.status === "error") {
+        toast.error(data.error || "Terjadi kesalahan pada AI. Silakan coba lagi.");
+      }
+    },
+    (chunkData) => {
+      if (chunkData.sessionId === displaySession?.id) {
+        setStreamingMessage((prev) => (prev || "") + chunkData.chunk);
+      }
+    }
+  );
 
   const getThemeFromScore = (score?: number) => {
     if (score === undefined || score === null) return "calm_blue";
@@ -97,6 +109,20 @@ export default function ChatPage() {
       },
     });
   };
+
+  // Auto-create session if history is empty and there's no active session & cooldown is not active
+  useEffect(() => {
+    if (
+      !isLoading &&
+      data &&
+      !data.activeSession &&
+      data.history?.length === 0 &&
+      !createSessionMutation.isPending &&
+      (!data.cooldown || !data.cooldown.active)
+    ) {
+      handleCreateSession();
+    }
+  }, [data, isLoading, createSessionMutation.isPending]);
 
   const themeBg = themeBgMap[activeTheme as keyof typeof themeBgMap] || "bg-slate-50";
 
@@ -147,6 +173,7 @@ export default function ChatPage() {
             refetch={refetch}
             activeTheme={activeTheme}
             selectedHistorySession={selectedHistorySession}
+            streamingMessage={streamingMessage}
           />
         </div>
 
