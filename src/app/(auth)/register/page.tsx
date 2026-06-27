@@ -12,6 +12,7 @@ import {
 import Link from "next/link"
 import Image from "next/image"
 import { RegisterForm } from "./register-form"
+import ChatPreview from "./chat-preview"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -124,31 +125,8 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <div className="space-y-2 max-w-md">
-            <div className="flex items-start gap-2">
-              <div className="h-7 w-7 rounded-full overflow-hidden border-2 border-emerald-300 relative shrink-0">
-                <Image
-                  src="/mommy.jpg"
-                  alt="Very AI"
-                  fill
-                  className="object-cover"
-                  sizes="28px"
-                />
-              </div>
-              <div className="bg-white border border-emerald-200/60 rounded-2xl rounded-bl-md px-3.5 py-2 shadow-sm flex-1">
-                <p className="text-xs text-[#0D1B2A]/80 leading-relaxed">
-                  welcome bestie 🌱 aku Very AI, temen ngobrol lo. cerita aja, ga
-                  ada yang ngehakimin di sini ✨
-                </p>
-              </div>
-            </div>
-            <div className="flex justify-end">
-              <div className="bg-[#1A8A7A] text-white rounded-2xl rounded-br-md px-3.5 py-2 shadow-sm max-w-[80%]">
-                <p className="text-xs leading-relaxed">
-                  makasih Very! yuk mulai ✨
-                </p>
-              </div>
-            </div>
+          <div className="w-full max-w-md">
+            <ChatPreview />
           </div>
 
           <div className="space-y-3 max-w-md">
@@ -232,7 +210,7 @@ export default function RegisterPage() {
               </span>
             </div>
 
-            <div className="bg-white rounded-3xl p-7 md:p-8 border border-black/5 shadow-xl hover-lift shadow-premium animate-fade-up delay-200 duration-700">
+            <div className="bg-white rounded-3xl p-7 md:p-8 border border-black/5 shadow-xl hover-lift shadow-premium animate-fade-up delay-200 duration-700 max-h-[85vh] overflow-y-auto">
               <div className="mb-5">
                 <h1 className="font-serif text-3xl md:text-[2rem] font-bold text-[#0D1B2A] leading-[1.1] mb-1.5">
                   yok mulai di{" "}

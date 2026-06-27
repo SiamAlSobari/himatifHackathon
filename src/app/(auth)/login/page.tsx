@@ -6,6 +6,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { LoginForm } from "./login-form"
+import ChatPreview from "../register/chat-preview"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -71,35 +72,8 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <div className="space-y-2.5 max-w-md animate-fade-up delay-200 duration-700">
-            <div className="flex justify-end hover-scale">
-              <div className="bg-white border border-black/5 rounded-2xl rounded-br-md px-3.5 py-2 shadow-sm max-w-[80%]">
-                <p className="text-xs text-[#0D1B2A]">
-                  hai Very, akhir-akhir ini agak kosong aja 😅
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-2 hover-scale">
-              <div className="h-7 w-7 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-sm shrink-0 shadow-sm animate-bounce">
-                🌙
-              </div>
-              <div className="bg-white border border-rose-200/60 rounded-2xl rounded-bl-md px-3.5 py-2 shadow-sm max-w-[85%]">
-                <p className="text-xs text-[#0D1B2A]/80 leading-relaxed">
-                  dengerin aku ya 🌱 kosong itu berat, tapi lo ga sendirian.
-                  mau cerita dari mana?
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-2 hover-scale">
-              <div className="h-7 w-7 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-sm shrink-0 shadow-sm">
-                🌙
-              </div>
-              <div className="bg-white border border-rose-200/60 rounded-2xl rounded-bl-md px-3.5 py-2 shadow-sm max-w-[85%]">
-                <p className="text-xs text-[#0D1B2A]/80 leading-relaxed">
-                  sini spill aja bestie, aku siap dengerin sampe pagi ✨
-                </p>
-              </div>
-            </div>
+          <div className="w-full max-w-md">
+            <ChatPreview mode="login" />
           </div>
 
           <div className="space-y-3 animate-fade-up delay-250 duration-700">
