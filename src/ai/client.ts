@@ -1,71 +1,114 @@
 import { envConfig } from "@/lib/constants/env";
 import { GoogleGenAI } from "@google/genai";
+import { OpenAI } from "openai";
 import { loadPrompt } from "./loader";
 
+interface ProviderConfig {
+    name: string;
+    provider: 'gemini' | 'groq';
+    model: string;
+    apiKey: string;
+}
+
 export class AIClient {
-    private model = "gemini-3.1-flash-lite";
-    private fallbackModel = "gemini-2.5-flash";
-    private apiKey = envConfig.GeminiApiKey;
     private maxOutputTokens = 2048;
     private temperature = 0.7;
     private systemInstruction = loadPrompt("rootPrompt.prompt") || "You are a helpful assistant that provides accurate and concise information based on the user's query. Always provide relevant and informative responses, and avoid unnecessary details. If you don't know the answer, say you don't know instead of making up information.";
 
-    private client: GoogleGenAI | null = null;
+    private geminiClients: Record<string, GoogleGenAI> = {};
+    private groqClients: Record<string, OpenAI> = {};
 
-    private getClient(): GoogleGenAI {
-        if (!this.client) {
-            if (!this.apiKey) {
-                throw new Error("AIClient Error: GeminiApiKey tidak ditemukan di envConfig!");
-            }
-
-            this.client = new GoogleGenAI({
-                apiKey: this.apiKey,
+    private getGeminiClient(apiKey: string): GoogleGenAI {
+        if (!this.geminiClients[apiKey]) {
+            this.geminiClients[apiKey] = new GoogleGenAI({
+                apiKey: apiKey,
             });
         }
-        return this.client;
+        return this.geminiClients[apiKey];
     }
 
-    async generateContent(prompt: string) {
-        try {
-            const client = this.getClient();
-            const response = await client.models.generateContent({
-                model: this.model,
-                contents: prompt,
-                config: {
-                    temperature: this.temperature,
-                    maxOutputTokens: this.maxOutputTokens,
-                    systemInstruction: this.systemInstruction,
-                }
-            })
-
-            return response?.text;
-        } catch (primaryError) {
-            console.warn(`[AIClient] Model utama (${this.model}) gagal. Mencoba fallback ke ${this.fallbackModel}...`, primaryError);
-            return await this.generateContentWithFallback(prompt, primaryError);
+    private getGroqClient(apiKey: string): OpenAI {
+        if (!this.groqClients[apiKey]) {
+            this.groqClients[apiKey] = new OpenAI({
+                apiKey: apiKey,
+                baseURL: "https://api.groq.com/openai/v1",
+            });
         }
+        return this.groqClients[apiKey];
     }
 
-    async generateContentWithFallback(prompt: string, originalError: any) {
-        try {
-            const client = this.getClient();
-            const response = await client.models.generateContent({
-                model: this.fallbackModel,
-                contents: prompt,
-                config: {
-                    temperature: this.temperature,
-                    maxOutputTokens: this.maxOutputTokens,
-                    systemInstruction: this.systemInstruction,
-                }
-            })
-
-            return response?.text;
-        } catch (fallbackError: any) {
-            console.error("[AIClient] Kedua model gagal mengeksekusi request!");
-            // Lemparkan error gabungan agar tahu persis apa yang rusak di backend
-            throw new Error(
-                `AIClient Total Failure. Primary Error: ${originalError?.message || originalError}. Fallback Error: ${fallbackError?.message || fallbackError}`
-            );
+    private getActiveProviders(): ProviderConfig[] {
+        const configs: ProviderConfig[] = [];
+        if (envConfig.GeminiApiKey) {
+            configs.push({
+                name: "Gemini Utama",
+                provider: "gemini",
+                model: "gemini-3.1-flash-lite",
+                apiKey: envConfig.GeminiApiKey,
+            });
         }
+        if (envConfig.GroqApiKey) {
+            configs.push({
+                name: "Groq Fallback",
+                provider: "groq",
+                model: "llama-3.3-70b-versatile",
+                apiKey: envConfig.GroqApiKey,
+            });
+        }
+        if (envConfig.GeminiApiKey2) {
+            configs.push({
+                name: "Gemini Sekunder",
+                provider: "gemini",
+                model: "gemini-2.5-flash",
+                apiKey: envConfig.GeminiApiKey2,
+            });
+        }
+        return configs;
+    }
+
+    async generateContent(prompt: string): Promise<string | undefined> {
+        const providers = this.getActiveProviders();
+        if (providers.length === 0) {
+            throw new Error("AIClient Error: GeminiApiKey tidak ditemukan di envConfig!");
+        }
+
+        const errors: { provider: string; error: any }[] = [];
+
+        for (const config of providers) {
+            try {
+                if (config.provider === 'gemini') {
+                    const client = this.getGeminiClient(config.apiKey);
+                    const response = await client.models.generateContent({
+                        model: config.model,
+                        contents: prompt,
+                        config: {
+                            temperature: this.temperature,
+                            maxOutputTokens: this.maxOutputTokens,
+                            systemInstruction: this.systemInstruction,
+                        }
+                    });
+                    return response?.text || undefined;
+                } else if (config.provider === 'groq') {
+                    const client = this.getGroqClient(config.apiKey);
+                    const response = await client.chat.completions.create({
+                        model: config.model,
+                        messages: [
+                            { role: "system", content: this.systemInstruction },
+                            { role: "user", content: prompt },
+                        ],
+                        temperature: this.temperature,
+                        max_tokens: this.maxOutputTokens,
+                    });
+                    return response.choices[0]?.message?.content || undefined;
+                }
+            } catch (error: any) {
+                console.warn(`[AIClient] Provider ${config.name} (${config.model}) gagal: ${error?.message || error}. Mencoba provider berikutnya...`);
+                errors.push({ provider: config.name, error });
+            }
+        }
+
+        const errorDetails = errors.map(e => `${e.provider}: ${e.error?.message || e.error}`).join("; ");
+        throw new Error(`AIClient Total Failure. All providers failed. Details: [${errorDetails}]`);
     }
 }
 
