@@ -32,8 +32,6 @@ export const proxy = auth((req) => {
     let dest = "/dashboard"
     if (role === "PSYCHOLOGY") {
       dest = user?.isOnboarded ? "/psikolog" : "/psikolog/onboarding"
-    } else if (!user?.isOnboarded) {
-      dest = "/onboarding"
     }
     return NextResponse.redirect(new URL(dest, req.nextUrl))
   }

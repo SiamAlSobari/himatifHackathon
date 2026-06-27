@@ -48,7 +48,7 @@ export default function Section1() {
 
         {/* CTA */}
         <Link
-          href="/mulai"
+          href="/dashboard"
           className="inline-flex items-center gap-2 bg-foreground hover:bg-primary text-white text-sm font-medium px-7 py-3 rounded-full transition-all duration-300 shadow-lg hover:shadow-primary/30 hover:shadow-xl hover-lift animate-fade-up delay-300 duration-700 group"
         >
           Temukan dirimu

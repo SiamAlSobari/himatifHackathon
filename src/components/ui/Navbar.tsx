@@ -113,15 +113,6 @@ export default function Navbar({ userName, userImage, isOnboarded: propIsOnboard
         )}
 
         <div className="flex flex-1 items-center justify-end gap-4">
-          <div className="relative hidden w-full max-w-xs md:block">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Cari layanan atau artikel..."
-              className="w-full rounded-full border border-slate-200 bg-slate-50 py-2 pl-9 pr-4 text-sm text-slate-600 placeholder:text-slate-400 outline-none transition-colors focus:border-teal-300 focus:bg-white"
-            />
-          </div>
-
           {session?.data?.user ? (
             <>
               <div className="relative">

@@ -17,6 +17,10 @@ export default async function DashboardLayout({
     redirect("/login?callbackUrl=/dashboard")
   }
 
+  if ((session?.user as any).role === "PSYCHOLOGY") {
+    redirect("/psikolog")
+  }
+
   // Guard: harus sudah onboarding dulu sebelum akses dashboard
   const user = await db.user.findUnique({
     where: { id: session.user.id },

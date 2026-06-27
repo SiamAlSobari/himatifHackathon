@@ -21,10 +21,10 @@ export default function Section3() {
           </p>
 
           <Link
-            href="/mulai"
+            href="/dashboard"
             className="inline-flex items-center gap-2 bg-white hover:bg-primary text-foreground hover:text-white text-base font-semibold px-10 py-4 rounded-full transition-all duration-300 shadow-xl hover:shadow-primary/40 hover-lift hover-glow group relative z-10 animate-fade-up delay-300 duration-700"
           >
-            Temukan dirimu
+            Mulai Konsultasi
             <svg
               className="w-4 h-4 group-hover:translate-x-1 transition-transform"
               fill="none"
