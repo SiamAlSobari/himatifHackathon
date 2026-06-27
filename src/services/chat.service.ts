@@ -9,8 +9,9 @@ import chatSessionRepository from "@/repositories/chatSessionRepository";
 import { pusherServer } from "@/lib/pusher/pusher-server";
 import sessionSummaryService from "./sessionSummary.service";
 import blockchainSyncService from "./blockchain-sync.service";
+import { after } from "next/server";
 
-const AI_RESPONSE_TIMEOUT_MS = 60_000; // 60 detik timeout
+const AI_RESPONSE_TIMEOUT_MS = 60_000;
 
 export class ChatService {
     private async formatChatHistories(sessionId: string) {
@@ -67,18 +68,21 @@ export class ChatService {
                 await chatMessageRepository.createMessage(sessionId, "USER", message, null);
             }
 
-            // Bug fix #1 & #5: Proses AI dengan error handling yang proper (bukan fire-and-forget)
-            this.processAIResponse(userId, sessionId, formattedHistory, userPrompt).catch(error => {
-                console.error("[ChatService] Error getting AI response:", error);
-                // Kirim error notification ke frontend via Pusher
-                pusherServer.trigger(`user-${userId}`, "chat-finished", {
-                    status: "error",
-                    name: "calm_blue",
-                    error: "Terjadi kesalahan saat memproses respons AI. Silakan coba lagi.",
-                }).catch(pushErr => {
-                    console.error("[ChatService] Gagal mengirim error notification via Pusher:", pushErr);
+            after(async () => {
+                await this.processAIResponse(userId, sessionId, formattedHistory, userPrompt).catch(error => {
+                    console.error("[ChatService] Error getting AI response:", error);
+                    // Kirim error notification ke frontend via Pusher
+                    pusherServer.trigger(`user-${userId}`, "chat-finished", {
+                        status: "error",
+                        name: "calm_blue",
+                        error: "Terjadi kesalahan saat memproses respons AI. Silakan coba lagi.",
+                    }).catch(pushErr => {
+                        console.error("[ChatService] Gagal mengirim error notification via Pusher:", pushErr);
+                    });
                 });
-            });
+            })
+            // Bug fix #1 & #5: Proses AI dengan error handling yang proper (bukan fire-and-forget)
+
 
             // Bug fix #4: Selalu return data yang valid
             return { status: "processing", sessionId };
