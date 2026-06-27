@@ -4,6 +4,14 @@ import SymptomAnalysis from "./Symptomanalysis";
 import AiSuggestionCard from "./AiSuggestionCard";
 import EmergencyHelpSection from "./Emergencyhelpsection";
 import { ChatMessage, Screening } from "@/lib/types/chat";
+import { useTheme } from "@/components/providers/ThemeProvider";
+
+const textColorMap = {
+  calm_blue: "text-teal-800",
+  warm_yellow: "text-amber-800",
+  alert_orange: "text-orange-850",
+  deep_purple: "text-indigo-850",
+};
 
 interface SummarySidebarProps {
   latestAssistantMessage: ChatMessage | null;
@@ -90,10 +98,13 @@ export default function SummarySidebar({
     latestAssistantMessage?.metaData?.analysis?.aiValidationAdvice ||
     "Ceritakan perasaanmu untuk mendapatkan saran validasi AI.";
 
+  const { theme } = useTheme();
+  const iconColor = textColorMap[theme as keyof typeof textColorMap] || textColorMap.calm_blue;
+
   return (
     <aside className="flex h-full flex-col gap-4 overflow-y-auto rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-center gap-2">
-        <LayoutGrid className="h-5 w-5 text-teal-800" />
+        <LayoutGrid className={`h-5 w-5 ${iconColor}`} />
         <h2 className="text-base font-semibold text-slate-800">
           Ringkasan Kenali
         </h2>

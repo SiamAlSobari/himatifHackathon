@@ -31,7 +31,35 @@ interface ChatPanelProps {
   refetch: () => void;
   activeTheme: string;
   selectedHistorySession?: ChatSessionWithMessages | null;
+  streamingMessage?: string | null;
 }
+
+const themeStylesMap = {
+  calm_blue: {
+    iconBg: "bg-teal-50",
+    iconColor: "text-teal-850",
+    buttonBg: "bg-teal-800 hover:bg-teal-700",
+    loaderColor: "text-teal-800",
+  },
+  warm_yellow: {
+    iconBg: "bg-amber-50",
+    iconColor: "text-amber-850",
+    buttonBg: "bg-amber-800 hover:bg-amber-700",
+    loaderColor: "text-amber-800",
+  },
+  alert_orange: {
+    iconBg: "bg-orange-50",
+    iconColor: "text-orange-850",
+    buttonBg: "bg-orange-800 hover:bg-orange-700",
+    loaderColor: "text-orange-800",
+  },
+  deep_purple: {
+    iconBg: "bg-indigo-50",
+    iconColor: "text-indigo-850",
+    buttonBg: "bg-indigo-800 hover:bg-indigo-700",
+    loaderColor: "text-indigo-850",
+  },
+};
 
 export default function ChatPanel({
   activeSession,
@@ -40,6 +68,7 @@ export default function ChatPanel({
   refetch,
   activeTheme = "calm_blue",
   selectedHistorySession = null,
+  streamingMessage = null,
 }: ChatPanelProps) {
   const session = useSession();
   const createSessionMutation = useCreateChatSession();
@@ -47,6 +76,8 @@ export default function ChatPanel({
   
   const chatContainerRef = useRef<HTMLDivElement>(null);
   
+  const themeStyles = themeStylesMap[activeTheme as keyof typeof themeStylesMap] || themeStylesMap.calm_blue;
+
   // Determine actual session to display (selected history session, active session, or completed session during cooldown)
   const displaySession = selectedHistorySession || activeSession || cooldown?.completedSession || null;
   const messages = displaySession?.chatMessages || [];
@@ -94,16 +125,15 @@ export default function ChatPanel({
     }
   }, [messages, lastSeenCrisisId]);
 
-  // Auto scroll ke bawah setiap ada pesan baru
+  // Auto scroll ke bawah setiap ada pesan baru atau chunk stream baru
   useEffect(() => {
     const container = chatContainerRef.current;
     if (!container) return;
 
-    // Pakai requestAnimationFrame supaya DOM sudah update sebelum scroll
     requestAnimationFrame(() => {
       container.scrollTop = container.scrollHeight;
     });
-  }, [messages.length]);
+  }, [messages.length, pendingUserMessage, streamingMessage]);
 
   // Handle message sending
   const handleSend = (text: string) => {
@@ -123,13 +153,11 @@ export default function ChatPanel({
     });
   };
 
-
-
   // Loading state
   if (isLoading) {
     return (
       <section className="flex h-full flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-8">
-        <Loader2 className="h-10 w-10 animate-spin text-teal-800" />
+        <Loader2 className={`h-10 w-10 animate-spin ${themeStyles.loaderColor}`} />
         <p className="mt-3 text-sm font-semibold text-slate-500">Memuat sesi obrolan...</p>
       </section>
     );
@@ -139,8 +167,8 @@ export default function ChatPanel({
   if (!activeSession && (!cooldown || !cooldown.active)) {
     return (
       <section className="flex h-full flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-teal-50 text-teal-800 shadow-inner">
-          <Bot className="h-8 w-8 animate-pulse text-teal-800" />
+        <div className={`mb-6 flex h-16 w-16 items-center justify-center rounded-full shadow-inner ${themeStyles.iconBg}`}>
+          <Bot className={`h-8 w-8 animate-pulse ${themeStyles.iconColor}`} />
         </div>
         <h3 className="mb-2 text-xl font-bold text-slate-800">
           Mulai Percakapan Baru
@@ -151,7 +179,7 @@ export default function ChatPanel({
         <button
           onClick={handleCreateSession}
           disabled={createSessionMutation.isPending}
-          className="inline-flex items-center gap-2 rounded-xl bg-teal-800 px-6 py-3.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-teal-700 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+          className={`inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-semibold text-white shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 cursor-pointer ${themeStyles.buttonBg}`}
         >
           {createSessionMutation.isPending ? (
             <Loader2 className="h-4 w-4 animate-spin text-white" />
@@ -176,7 +204,7 @@ export default function ChatPanel({
 
       {/* Messages list container */}
       <div ref={chatContainerRef} className="flex-1 space-y-4 overflow-y-auto px-6 py-4 min-h-0">
-        {messages.length === 0 && !pendingUserMessage ? (
+        {messages.length === 0 && !pendingUserMessage && !streamingMessage ? (
           <div className="flex h-full items-center justify-center text-slate-400 text-xs">
             Tidak ada pesan. Mulai obrolan sekarang.
           </div>
@@ -211,19 +239,24 @@ export default function ChatPanel({
                 />
               </div>
             )}
+
+            {/* Streamed content or typing indicator */}
+            {streamingMessage ? (
+              <ChatBubble
+                sender="ai"
+                message={streamingMessage}
+                time={new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              />
+            ) : isAiTyping ? (
+              <ChatBubble
+                sender="ai"
+                message=""
+                time=""
+                isTyping={true}
+              />
+            ) : null}
           </>
         )}
-
-        {/* Typing indicator bubble */}
-        {isAiTyping && (
-          <ChatBubble
-            sender="ai"
-            message=""
-            time=""
-            isTyping={true}
-          />
-        )}
-
       </div>
 
       {/* Footer input area / Cooldown display */}
@@ -262,7 +295,6 @@ export default function ChatPanel({
               </Link>
             </div>
           </div>
-          {/* Render input disabled below cooldown banner to match requirement */}
           <div className="mt-4">
             <ChatInput onSend={handleSend} disabled={true} activeTheme={activeTheme} />
           </div>
