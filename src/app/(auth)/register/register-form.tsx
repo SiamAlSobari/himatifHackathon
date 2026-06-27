@@ -56,7 +56,7 @@ export function RegisterForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-3.5">
       {error && (
         <Alert
           variant="destructive"
@@ -68,7 +68,7 @@ export function RegisterForm() {
         </Alert>
       )}
 
-      <div className="space-y-1.5">
+      <div className="space-y-1">
         <Label
           htmlFor="nama"
           className="text-[#0D1B2A] font-semibold text-[11px] tracking-wider uppercase ml-1"
@@ -83,12 +83,12 @@ export function RegisterForm() {
             type="text"
             placeholder="Nama lengkapmu"
             required
-            className="h-11 pl-11 pr-4 text-sm border-black/15 focus-visible:border-[#1A8A7A] focus-visible:ring-[#1A8A7A]/15 rounded-xl transition-all duration-200"
+            className="h-10 pl-10 pr-4 text-xs border-black/15 focus-visible:border-[#1A8A7A] focus-visible:ring-[#1A8A7A]/15 rounded-xl transition-all duration-200"
           />
         </div>
       </div>
 
-      <div className="space-y-1.5">
+      <div className="space-y-1">
         <Label
           htmlFor="email"
           className="text-[#0D1B2A] font-semibold text-[11px] tracking-wider uppercase ml-1"
@@ -103,12 +103,12 @@ export function RegisterForm() {
             type="email"
             placeholder="nama@email.com"
             required
-            className="h-11 pl-11 pr-4 text-sm border-black/15 focus-visible:border-[#1A8A7A] focus-visible:ring-[#1A8A7A]/15 rounded-xl transition-all duration-200"
+            className="h-10 pl-10 pr-4 text-xs border-black/15 focus-visible:border-[#1A8A7A] focus-visible:ring-[#1A8A7A]/15 rounded-xl transition-all duration-200"
           />
         </div>
       </div>
 
-      <div className="space-y-1.5">
+      <div className="space-y-1">
         <Label
           htmlFor="password"
           className="text-[#0D1B2A] font-semibold text-[11px] tracking-wider uppercase ml-1"
@@ -126,7 +126,7 @@ export function RegisterForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={6}
-            className="h-11 pl-11 pr-11 text-sm border-black/15 focus-visible:border-[#1A8A7A] focus-visible:ring-[#1A8A7A]/15 rounded-xl transition-all duration-200"
+            className="h-10 pl-10 pr-10 text-xs border-black/15 focus-visible:border-[#1A8A7A] focus-visible:ring-[#1A8A7A]/15 rounded-xl transition-all duration-200"
           />
           <button
             type="button"
@@ -146,16 +146,16 @@ export function RegisterForm() {
         </div>
 
         {password.length > 0 && (
-          <div className="mt-2 space-y-1.5 ml-1">
+          <div className="mt-1.5 space-y-1 ml-1">
             {passwordRules.map((rule) => (
               <div
                 key={rule.label}
-                className={`flex items-center gap-1.5 text-[11px] transition-colors ${
+                className={`flex items-center gap-1.5 text-[10px] transition-colors ${
                   rule.met ? "text-[#1A8A7A]" : "text-[#2D3748]/40"
                 }`}
               >
                 <Check
-                  className={`h-3 w-3 transition-opacity ${
+                  className={`h-2.5 w-2.5 transition-opacity ${
                     rule.met ? "opacity-100" : "opacity-30"
                   }`}
                 />
@@ -169,33 +169,33 @@ export function RegisterForm() {
       <Button
         type="submit"
         disabled={loading}
-        className="w-full h-11 bg-[#0D1B2A] hover:bg-[#1A8A7A] text-white rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-[#1A8A7A]/25 font-semibold cursor-pointer flex items-center justify-center gap-2 group/btn"
+        className="w-full h-10 bg-[#0D1B2A] hover:bg-[#1A8A7A] text-white rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-[#1A8A7A]/25 font-semibold text-xs cursor-pointer flex items-center justify-center gap-2 group/btn"
       >
         {loading ? (
           "Membuat akun..."
         ) : (
           <>
             Daftar
-            <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+            <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
           </>
         )}
       </Button>
 
-      <div className="relative my-5">
+      <div className="relative my-3">
         <div className="absolute inset-0 flex items-center">
           <span className="w-full border-t border-black/10" />
         </div>
-        <div className="relative flex justify-center text-xs uppercase font-medium">
-          <span className="bg-white px-3 text-[#2D3748]/50">atau</span>
+        <div className="relative flex justify-center text-[10px] uppercase font-semibold">
+          <span className="bg-white px-3 text-[#2D3748]/40">atau</span>
         </div>
       </div>
 
       <button
         type="button"
-        className="w-full h-11 border border-black/10 bg-white hover:bg-[#F0F4F8] hover:border-[#1A8A7A]/30 text-[#0D1B2A] hover:text-[#1A8A7A] rounded-full transition-all duration-300 hover:shadow-sm flex items-center justify-center gap-2 font-semibold cursor-pointer active:scale-[0.99]"
+        className="w-full h-10 border border-black/10 bg-white hover:bg-[#F0F4F8] hover:border-[#1A8A7A]/30 text-[#0D1B2A] hover:text-[#1A8A7A] rounded-full transition-all duration-300 hover:shadow-sm flex items-center justify-center gap-2 font-semibold text-xs cursor-pointer active:scale-[0.99]"
         onClick={handleGoogle}
       >
-        <svg className="h-4 w-4" viewBox="0 0 24 24">
+        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24">
           <path
             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
             fill="#4285F4"
@@ -216,7 +216,7 @@ export function RegisterForm() {
         <span>Daftar dengan Google</span>
       </button>
 
-      <p className="text-center text-sm text-[#2D3748]/60 mt-4">
+      <p className="text-center text-xs text-[#2D3748]/60 mt-3">
         Sudah punya akun?{" "}
         <Link
           href="/login"
@@ -226,7 +226,7 @@ export function RegisterForm() {
         </Link>
       </p>
 
-      <p className="text-center text-[10px] text-[#2D3748]/40 mt-3 leading-relaxed">
+      <p className="text-center text-[9px] text-[#2D3748]/40 mt-2.5 leading-relaxed">
         Dengan mendaftar, kamu menyetujui{" "}
         <a href="#" className="underline hover:text-[#1A8A7A]">
           Syarat & Ketentuan
