@@ -5,6 +5,8 @@ export const envConfig = {
     NextAuthUrl: process.env.NEXTAUTH_URL,
     DatabaseUrl: process.env.DATABASE_URL,
     GeminiApiKey: process.env.GEMINI_API_KEY,
+    GroqApiKey: process.env.GROQ_API_KEY,
+    GeminiApiKey2: process.env.GEMINI_API_KEY_2,
     OpenaiApiKey: process.env.OPENAI_API_KEY,
     OpenaiBaseUrl: process.env.OPENAI_BASE_URL,
     PusherAppId: process.env.PUSHER_APP_ID,
