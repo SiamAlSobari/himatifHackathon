@@ -156,7 +156,7 @@ export default function KonsultasiClient({
   // Check if session has actually started
   const isAppointmentStarted = activeAppointment
     ? Date.now() >= new Date(activeAppointment.scheduledAt).getTime()
-    : true;
+    : false;
 
   // 4. Picture-in-Picture floating view state
   const [showPiP, setShowPiP] = useState(false);
@@ -209,6 +209,11 @@ export default function KonsultasiClient({
 
   // Handle end session
   const handleEndSession = async () => {
+    if (!isAppointmentStarted) {
+      toast.error("Sesi belum dimulai.");
+      return;
+    }
+
     setIsIncomingRequest(false);
     setEndSessionModalOpen(true);
   };
@@ -298,11 +303,10 @@ export default function KonsultasiClient({
             psychologist={psychologist}
             latestScreeningScore={latestScreening?.score || null}
             complaints={psychologist.tags}
+            isSessionStarted={isAppointmentStarted}
           />
         </div>
       </main>
-
-      {/* Footer is rendered by parent LayoutWrapper */}
 
       {/* Floating Picture-in-Picture (PiP) View */}
       {showPiP && (

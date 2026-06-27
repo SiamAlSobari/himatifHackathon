@@ -131,6 +131,21 @@ class AppointmentRepository {
                 : { psychologistLastActiveAt: lastActiveValue }
         });
     }
+
+    async getUnsyncedCompletedAppointments() {
+        return await db.appointment.findMany({
+            where: {
+                status: AppointmentStatus.COMPLETED,
+                OR: [
+                    { txHash: null },
+                    { ipfsCid: null }
+                ]
+            },
+            select: {
+                id: true
+            }
+        });
+    }
 }
 
 const appointmentRepository = new AppointmentRepository();

@@ -63,14 +63,21 @@ export default function ChatPage() {
     setStreamingMessage(null);
   }, [displaySession?.id]);
 
+  // Clear streaming message only when the refetched messages actually contain the new assistant response
+  useEffect(() => {
+    if (messages.length > 0 && messages[messages.length - 1].role === "ASSISTANT") {
+      setStreamingMessage(null);
+    }
+  }, [messages]);
+
   // Refetch data using TanStack Query when pusher triggers 'chat-finished'
   useChatNotification(
     session.data?.user?.id,
     (data) => {
-      setStreamingMessage(null);
       refetch();
       // Bug fix #1: Show toast jika AI response gagal
       if (data?.status === "error") {
+        setStreamingMessage(null);
         toast.error(data.error || "Terjadi kesalahan pada AI. Silakan coba lagi.");
       }
     },

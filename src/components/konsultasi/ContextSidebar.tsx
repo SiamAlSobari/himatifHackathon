@@ -19,6 +19,7 @@ interface ContextSidebarProps {
   latestScreeningScore: number | null;
   complaints?: string[];
   patientQuote?: string;
+  isSessionStarted?: boolean;
 }
 
 export default function ContextSidebar({
@@ -28,6 +29,7 @@ export default function ContextSidebar({
   latestScreeningScore,
   complaints = ["Insomnia", "Overthinking", "Palpitasi"],
   patientQuote = '"Sering merasa dunia akan berakhir jika melakukan kesalahan kecil."',
+  isSessionStarted,
 }: ContextSidebarProps) {
   // Derive score presentation from screening score (max 12 from constants)
   const scoreVal = latestScreeningScore !== null ? latestScreeningScore : 9;
@@ -62,7 +64,9 @@ export default function ContextSidebar({
         </div>
         <button
           onClick={onEndSession}
-          className="w-full py-3 bg-urgent-bg text-secondary font-bold rounded-lg border border-secondary/20 hover:bg-[#b9003e] hover:text-white transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+          type="button"
+          disabled={!isSessionStarted}
+          className="w-full py-3 bg-urgent-bg text-secondary font-bold rounded-lg border border-secondary/20 hover:bg-[#b9003e] hover:text-white transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
         >
           <span className="material-symbols-outlined text-lg">close</span>
           Akhiri Sesi

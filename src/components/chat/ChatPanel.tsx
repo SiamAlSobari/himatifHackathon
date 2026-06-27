@@ -76,16 +76,23 @@ export default function ChatPanel({
   
   const chatContainerRef = useRef<HTMLDivElement>(null);
   
+  const [optimisticUserMessage, setOptimisticUserMessage] = useState<string | null>(null);
+
   const themeStyles = themeStylesMap[activeTheme as keyof typeof themeStylesMap] || themeStylesMap.calm_blue;
 
   // Determine actual session to display (selected history session, active session, or completed session during cooldown)
   const displaySession = selectedHistorySession || activeSession || cooldown?.completedSession || null;
   const messages = displaySession?.chatMessages || [];
 
+  // Reset optimistic user message once the message is saved in DB list
+  useEffect(() => {
+    if (messages.length > 0 && messages[messages.length - 1].role === "USER") {
+      setOptimisticUserMessage(null);
+    }
+  }, [messages]);
+
   // Get message user is currently sending (for optimistic rendering)
-  const pendingUserMessage = sendMessageMutation.isPending
-    ? sendMessageMutation.variables?.message
-    : null;
+  const pendingUserMessage = optimisticUserMessage;
 
   const isReadOnly = !!selectedHistorySession || displaySession?.status === "COMPLETED" || displaySession?.status === "SEALED";
 
@@ -138,9 +145,14 @@ export default function ChatPanel({
   // Handle message sending
   const handleSend = (text: string) => {
     if (!activeSession) return;
+    setOptimisticUserMessage(text);
     sendMessageMutation.mutate({
       sessionId: activeSession.id,
       message: text,
+    }, {
+      onError: () => {
+        setOptimisticUserMessage(null);
+      }
     });
   };
 

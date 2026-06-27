@@ -95,6 +95,21 @@ export class ChatSessionRepository {
             }
         })
     }
+
+    async getUnsyncedCompletedSessions() {
+        return await db.chatSession.findMany({
+            where: {
+                status: "COMPLETED",
+                OR: [
+                    { txHash: null },
+                    { ipfsCid: null }
+                ]
+            },
+            select: {
+                id: true
+            }
+        })
+    }
 }
 
 export const chatSessionRepository = new ChatSessionRepository();

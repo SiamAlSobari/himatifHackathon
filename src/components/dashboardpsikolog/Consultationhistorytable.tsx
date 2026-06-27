@@ -16,7 +16,7 @@ export default function ConsultationHistoryTable({
   history,
 }: ConsultationHistoryTableProps) {
   return (
-    <section className="rounded-2xl bg-white p-5 border border-slate-100 shadow-premium hover-lift transition-all duration-300 hover:border-primary/20">
+    <section className="rounded-2xl bg-white p-5 border border-slate-100 shadow-premium hover-lift transition-all duration-300 hover:border-primary/20 h-full">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-base font-semibold text-slate-800">
           <History className="h-4 w-4 text-slate-400" />

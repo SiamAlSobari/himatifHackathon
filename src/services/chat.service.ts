@@ -96,16 +96,26 @@ export class ChatService {
         let response: string | undefined = "";
 
         try {
+            let accumulatedRaw = "";
+            let lastCleanLength = 0;
+
             // Bug fix #7: Wrap AI call dengan timeout
             response = await Promise.race([
                 aiService.sendChatMessageStream(formattedHistory, prompt, (chunk) => {
-                    // Send to client in real-time via Pusher
-                    pusherServer.trigger(`user-${userId}`, "chat-chunk", {
-                        sessionId,
-                        chunk,
-                    }).catch(pushErr => {
-                        console.error("[ChatService] Gagal mengirim chunk via Pusher:", pushErr);
-                    });
+                    accumulatedRaw += chunk;
+                    const cleanText = extractSuggestionFromPartialJson(accumulatedRaw);
+                    if (cleanText.length > lastCleanLength) {
+                        const newChunk = cleanText.substring(lastCleanLength);
+                        lastCleanLength = cleanText.length;
+
+                        // Send to client in real-time via Pusher
+                        pusherServer.trigger(`user-${userId}`, "chat-chunk", {
+                            sessionId,
+                            chunk: newChunk,
+                        }).catch(pushErr => {
+                            console.error("[ChatService] Gagal mengirim chunk via Pusher:", pushErr);
+                        });
+                    }
                 }),
                 new Promise<never>((_, reject) =>
                     setTimeout(() => reject(new Error("AI response timeout after 60s")), AI_RESPONSE_TIMEOUT_MS)
@@ -203,6 +213,39 @@ export class ChatService {
 
         return formattedResponse
     }
+}
+
+function extractSuggestionFromPartialJson(accumulatedText: string): string {
+    const trimmed = accumulatedText.trim();
+    if (!trimmed.startsWith("{")) {
+        return accumulatedText;
+    }
+
+    const marker = /"suggestion"\s*:\s*"/i;
+    const match = accumulatedText.match(marker);
+    if (!match || match.index === undefined) {
+        return "";
+    }
+
+    const startIndex = match.index + match[0].length;
+    let content = "";
+    let isEscaped = false;
+    for (let i = startIndex; i < accumulatedText.length; i++) {
+        const char = accumulatedText[i];
+        if (isEscaped) {
+            if (char === "n") content += "\n";
+            else if (char === "t") content += "\t";
+            else content += char;
+            isEscaped = false;
+        } else if (char === "\\") {
+            isEscaped = true;
+        } else if (char === '"') {
+            break;
+        } else {
+            content += char;
+        }
+    }
+    return content;
 }
 
 const chatService = new ChatService();
