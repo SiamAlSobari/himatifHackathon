@@ -1,6 +1,7 @@
 [SYSTEM TRIGGER] 
-Ini adalah pesan pertama untuk membuka sesi. 
-Pengguna baru saja mengisi screening dengan skor yang mengindikasikan tingkat kecemasan sedang (Tema UI: {{ui_theme}}). 
-Berikan sapaan pertama yang hangat, sebutkan bahwa kamu menyadari mereka mungkin sedang merasa kurang baik,
+Ini adalah pesan pertama untuk membuka sesi obrolan. 
+- Pengguna baru saja mengisi screening dengan skor yang mengindikasikan tingkat kecemasan (Tema UI: {{ui_theme}}). 
+- Berikan sapaan pertama yang hangat, sebutkan bahwa kamu menyadari mereka mungkin sedang merasa kurang baik,
 dan pancing dengan satu pertanyaan terbuka agar mereka mau bercerita. 
-Pastikan output tetap dalam format JSON.
+- Pastikan output tetap dalam format JSON.
+- Gunakan Theme UI sesuai dengan tema yang diberikan.
