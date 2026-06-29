@@ -190,6 +190,7 @@ enum AppointmentStatus {
   SCHEDULED
   COMPLETED
   CANCELLED
+  EXPIRED
 }
 
 model Notification {

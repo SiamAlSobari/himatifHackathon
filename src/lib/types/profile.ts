@@ -5,7 +5,7 @@ export interface ConsultationHistoryItem {
   psychologistName: string;
   psychologistInitials: string;
   date: string;
-  status: "Selesai" | "Dibatalkan" | "Berlangsung";
+  status: "Selesai" | "Dibatalkan" | "Berlangsung" | "Kadaluwarsa";
 }
 
 export interface MedicalDocument {

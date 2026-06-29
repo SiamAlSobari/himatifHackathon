@@ -32,11 +32,13 @@ export class ProfileService {
       const formattedDate = `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
 
       // Status translation/mapping
-      let status: "Selesai" | "Dibatalkan" | "Berlangsung" = "Berlangsung";
+      let status: "Selesai" | "Dibatalkan" | "Berlangsung" | "Kadaluwarsa" = "Berlangsung";
       if (appt.status === "COMPLETED") {
         status = "Selesai";
       } else if (appt.status === "CANCELLED" || appt.status === "DECLINED") {
         status = "Dibatalkan";
+      } else if (appt.status === "EXPIRED") {
+        status = "Kadaluwarsa";
       }
 
       return {

@@ -11,6 +11,7 @@ const STATUS_STYLES: Record<PsychologistConsultationHistoryItem["status"], strin
   Selesai:    "bg-emerald-50 text-emerald-600 border border-emerald-100",
   Dijadwalkan:"bg-amber-50  text-amber-600  border border-amber-100",
   Dibatalkan: "bg-rose-50   text-rose-500   border border-rose-100",
+  Kadaluwarsa: "bg-slate-50  text-slate-500  border border-slate-200",
 };
 
 const AVATAR_COLORS = [

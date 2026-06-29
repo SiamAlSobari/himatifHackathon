@@ -27,5 +27,16 @@ export async function register() {
         console.error("CronJobService Retry Queue: Scheduled job failed with error:", error);
       }
     });
+
+    // Schedule: Every 15 minutes to mark stale appointments as EXPIRED
+    cron.schedule("*/15 * * * *", async () => {
+      console.log("CronJobService: Running scheduled job to mark stale appointments as EXPIRED...");
+      try {
+        const result = await cronJobService.expireStaleAppointments();
+        console.log("CronJobService Expire Appointments: Scheduled job result:", result);
+      } catch (error) {
+        console.error("CronJobService Expire Appointments: Scheduled job failed with error:", error);
+      }
+    });
   }
 }

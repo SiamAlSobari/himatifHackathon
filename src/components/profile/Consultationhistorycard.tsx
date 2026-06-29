@@ -14,6 +14,7 @@ const STATUS_STYLES: Record<ConsultationHistoryItem["status"], string> = {
   Selesai: "bg-emerald-50 text-emerald-600 border border-emerald-100",
   Dibatalkan: "bg-rose-50 text-rose-500 border border-rose-100",
   Berlangsung: "bg-amber-50 text-amber-600 border border-amber-100",
+  Kadaluwarsa: "bg-amber-50 text-amber-600 border border-amber-100",
 };
 
 const AVATAR_COLORS = [

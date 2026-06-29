@@ -13,7 +13,7 @@ export interface ConsultationHistoryItem {
   clientName?: string;
   psychologInitials: string;
   date: string;
-  status: "Selesai" | "Dijadwalkan" | "Dibatalkan";
+  status: "Selesai" | "Dijadwalkan" | "Dibatalkan" | "Kadaluwarsa";
 }
 
 export interface ScreeningResult {
