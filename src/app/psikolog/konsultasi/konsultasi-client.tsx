@@ -291,7 +291,11 @@ export default function PsychologistKonsultasiClient({
           ) : (
             <PsychologistChatArea
               clientName={client.name}
-              clientImage={client.image || "https://i.pravatar.cc/80?img=12"}
+              clientImage={client.image || (
+                (client.jenisKelamin === "LAKI_LAKI" || client.jenisKelamin === "male")
+                  ? "https://cdn-icons-png.freepik.com/512/219/219988.png"
+                  : "https://cdn-icons-png.freepik.com/512/219/219969.png"
+              )}
               isOnline={isOnline}
               isTyping={isTyping}
               messages={messages}
@@ -334,7 +338,11 @@ export default function PsychologistKonsultasiClient({
             <img
               className="w-10 h-10 rounded-full object-cover border border-slate-100"
               alt={client.name}
-              src={client.image || "https://i.pravatar.cc/80?img=12"}
+              src={client.image || (
+                (client.jenisKelamin === "LAKI_LAKI" || client.jenisKelamin === "male")
+                  ? "https://cdn-icons-png.freepik.com/512/219/219988.png"
+                  : "https://cdn-icons-png.freepik.com/512/219/219969.png"
+              )}
             />
             <div className="min-w-0 flex-1">
               <p className="text-xs font-bold leading-tight truncate">{client.name}</p>

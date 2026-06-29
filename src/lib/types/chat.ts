@@ -68,4 +68,5 @@ export interface ChatSessionData {
     isOnboarded?: boolean;
     hasScreenedToday?: boolean;
     history: ChatSessionWithMessages[];
+    jenisKelamin?: string | null;
 }

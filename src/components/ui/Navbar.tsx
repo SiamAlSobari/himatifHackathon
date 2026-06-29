@@ -10,6 +10,7 @@ import { useChatSession } from "@/hooks/chat/useChatSession";
 import { useSession } from "next-auth/react";
 import { useNotifications } from "@/hooks/useNotifications";
 import NotificationDropdown from "./NotificationDropdown";
+import { useProfile } from "@/hooks/profile/useProfile";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard" },
@@ -37,8 +38,15 @@ export default function Navbar({ userName, userImage, isOnboarded: propIsOnboard
   const isOnboarded = propIsOnboarded !== undefined ? propIsOnboarded : (data?.isOnboarded ?? true);
   const role = (session?.data?.user as any)?.role;
 
-  const finalUserName = userName || session?.data?.user?.name || "Pengguna";
-  const finalUserImage = userImage || session?.data?.user?.image || "https://i.pravatar.cc/40?img=12";
+  const { data: profile } = useProfile();
+  const finalUserName = userName || profile?.dbUser?.name || session?.data?.user?.name || "Pengguna";
+
+  const gender = profile?.dbUser?.jenisKelamin || data?.jenisKelamin;
+  const placeholder = (gender === "LAKI_LAKI" || gender === "male")
+    ? "https://cdn-icons-png.freepik.com/512/219/219988.png"
+    : "https://cdn-icons-png.freepik.com/512/219/219969.png";
+
+  const finalUserImage = userImage || profile?.dbUser?.image || session?.data?.user?.image || placeholder;
 
   const router = useRouter();
   const profileAction = () => {

@@ -25,14 +25,14 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { name, usia, jenisKelamin, kontakDarurat } = body;
+    const { name, usia, jenisKelamin, kontakDarurat, image } = body;
 
     if (kontakDarurat !== undefined) {
       await profileService.updateUserPhoneNumber(session.user.id, kontakDarurat);
       return successResponse(200, "Nomor telepon berhasil diperbarui", null);
     }
 
-    await profileService.updateUserProfile(session.user.id, { name, usia, jenisKelamin });
+    await profileService.updateUserProfile(session.user.id, { name, usia, jenisKelamin, image });
     return successResponse(200, "Profil berhasil diperbarui", null);
   } catch (error: any) {
     console.error("[/api/profile] POST error:", error);

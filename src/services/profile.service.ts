@@ -113,11 +113,12 @@ export class ProfileService {
     };
   }
 
-  async updateUserProfile(userId: string, data: { name?: string; usia?: number | string; jenisKelamin?: string }) {
+  async updateUserProfile(userId: string, data: { name?: string; usia?: number | string; jenisKelamin?: string; image?: string }) {
     const updatedData: any = {};
     if (data.name !== undefined) updatedData.name = data.name;
     if (data.usia !== undefined) updatedData.usia = typeof data.usia === "string" ? parseInt(data.usia, 10) : data.usia;
     if (data.jenisKelamin !== undefined) updatedData.jenisKelamin = data.jenisKelamin;
+    if (data.image !== undefined) updatedData.image = data.image;
 
     return await userRepository.updateUserProfile(userId, updatedData);
   }
