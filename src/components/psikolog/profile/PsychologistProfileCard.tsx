@@ -8,14 +8,15 @@ interface PsychologistProfileCardProps {
   user: PsychologistProfileUser;
   profile: PsychologistProfileDetails;
   onEdit: () => void;
+  onAvatarClick?: () => void;
 }
 
-export default function PsychologistProfileCard({ user, profile, onEdit }: PsychologistProfileCardProps) {
+export default function PsychologistProfileCard({ user, profile, onEdit, onAvatarClick }: PsychologistProfileCardProps) {
   return (
     <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-premium transition-all duration-300 hover-lift">
       <div className="flex flex-col items-center text-center">
         {/* Avatar */}
-        <div className="relative group cursor-pointer">
+        <div className="relative group cursor-pointer" onClick={onAvatarClick}>
           <div className="absolute inset-0 rounded-full bg-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           <Image
             src={profile.imageUrl || user.image || "https://i.pravatar.cc/160?img=12"}
@@ -24,9 +25,14 @@ export default function PsychologistProfileCard({ user, profile, onEdit }: Psych
             height={96}
             className="h-24 w-24 rounded-full object-cover border-2 border-slate-100 transition-transform duration-500 group-hover:scale-105"
           />
-          <div className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-teal-700 text-white shadow-sm">
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onAvatarClick?.(); }}
+            aria-label="Ubah foto profil"
+            className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-teal-700 text-white shadow-sm hover:scale-110 transition-transform duration-300 cursor-pointer"
+          >
             <Camera className="h-4 w-4" />
-          </div>
+          </button>
         </div>
 
         {/* Name & Role badge */}

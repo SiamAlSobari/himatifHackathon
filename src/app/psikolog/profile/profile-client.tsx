@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { X, User, Briefcase, Award, Send, CheckCircle2, ShieldAlert, Lock, Settings, ChevronRight, ShieldCheck } from "lucide-react";
@@ -18,6 +18,9 @@ import PsychologistPersonalInfoCard from "@/components/psikolog/profile/Psycholo
 import ConsultationTrendsCard from "@/components/psikolog/profile/ConsultationTrendsCard";
 import PsychologistConsultationHistoryCard from "@/components/psikolog/profile/PsychologistConsultationHistoryCard";
 import type { UpdatePsychologistProfilePayload } from "@/lib/types/psychologist-profile";
+import Cropper from "react-easy-crop";
+import { getCroppedImg } from "@/lib/helpers/crop";
+import { useQueryClient } from "@tanstack/react-query";
 
 // ─── Modal: Edit Profile ──────────────────────────────────────────────────────
 function EditProfileModal({
@@ -334,10 +337,77 @@ function AccountSettingsCard({ onUpdatePassword }: { onUpdatePassword: () => voi
 export default function PsychologistProfileClient() {
   const { data, isLoading } = usePsychologistProfile();
   const updateProfile = useUpdatePsychologistProfile();
+  const queryClient = useQueryClient();
 
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [phoneModalOpen, setPhoneModalOpen] = useState(false);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+
+  // Avatar upload / cropper states
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  const onAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.addEventListener("load", () => {
+        setImageSrc(reader.result as string);
+        setCrop({ x: 0, y: 0 });
+        setZoom(1);
+        setCroppedAreaPixels(null);
+        setCropperOpen(true);
+      });
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const onCropComplete = (croppedArea: any, croppedAreaPixels: any) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  };
+
+  const handleAvatarCropSave = async () => {
+    if (imageSrc && croppedAreaPixels) {
+      setIsUploadingAvatar(true);
+      const toastId = toast.loading("Mengunggah foto profil baru...");
+      try {
+        const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
+        if (croppedBlob) {
+          const formData = new FormData();
+          formData.append("imageFile", croppedBlob, "avatar.jpg");
+
+          const res = await fetch("/api/profile/avatar", {
+            method: "POST",
+            body: formData,
+          });
+
+          const json = await res.json();
+          if (!res.ok || !json.success) {
+            throw new Error(json.error || "Gagal mengunggah foto profil.");
+          }
+
+          toast.success("Foto profil berhasil diperbarui!", { id: toastId });
+          setCropperOpen(false);
+          setImageSrc(null);
+          
+          // Invalidate query to refresh profile data
+          queryClient.invalidateQueries({ queryKey: ["psikolog-profile-data"] });
+        } else {
+          throw new Error("Gagal memproses potongan gambar");
+        }
+      } catch (e: any) {
+        console.error(e);
+        toast.error(e.message || "Gagal memotong atau mengunggah gambar.", { id: toastId });
+      } finally {
+        setIsUploadingAvatar(false);
+      }
+    }
+  };
 
   if (isLoading || !data) {
     return (
@@ -359,6 +429,13 @@ export default function PsychologistProfileClient() {
 
   return (
     <main className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8">
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept="image/*"
+        onChange={onAvatarFileChange}
+        className="hidden"
+      />
       {/* ── Upper Grid ── */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Left column */}
@@ -367,6 +444,7 @@ export default function PsychologistProfileClient() {
             user={user}
             profile={profile}
             onEdit={() => setProfileModalOpen(true)}
+            onAvatarClick={() => fileInputRef.current?.click()}
           />
           <AccountSettingsCard onUpdatePassword={() => setPasswordModalOpen(true)} />
         </div>
@@ -415,6 +493,84 @@ export default function PsychologistProfileClient() {
           userEmail={user.email}
           onClose={() => setPasswordModalOpen(false)}
         />
+      )}
+
+      {/* Premium Image Cropper Modal */}
+      {cropperOpen && imageSrc && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col animate-scale-in">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+              <div>
+                <h3 className="font-bold text-base text-slate-800">Sesuaikan Ukuran Foto</h3>
+                <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Seret dan perbesar untuk memposisikan foto wajah Anda.</p>
+              </div>
+              <button
+                onClick={() => { setCropperOpen(false); setImageSrc(null); }}
+                className="text-slate-400 hover:text-slate-600 transition-colors text-xs font-bold cursor-pointer"
+                disabled={isUploadingAvatar}
+              >
+                Tutup
+              </button>
+            </div>
+
+            {/* Cropper Container */}
+            <div className="relative h-64 sm:h-80 bg-slate-900">
+              <Cropper
+                image={imageSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                onCropChange={setCrop}
+                onCropComplete={onCropComplete}
+                onZoomChange={setZoom}
+              />
+            </div>
+
+            {/* Cropper Controls & Footer */}
+            <div className="p-6 bg-slate-50 border-t border-slate-150">
+              <div className="mb-4">
+                <div className="flex justify-between items-center text-[10px] text-slate-500 font-bold mb-1.5">
+                  <span>ZOOM</span>
+                  <span>{Math.round(zoom * 100)}%</span>
+                </div>
+                <input
+                  type="range"
+                  value={zoom}
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  aria-label="Zoom"
+                  onChange={(e) => setZoom(parseFloat(e.target.value))}
+                  className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-teal-750"
+                  disabled={isUploadingAvatar}
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => { setCropperOpen(false); setImageSrc(null); }}
+                  className="flex-1 py-2.5 border border-slate-200 hover:bg-slate-100 bg-white rounded-xl text-xs font-bold text-slate-700 cursor-pointer"
+                  disabled={isUploadingAvatar}
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAvatarCropSave}
+                  className="flex-1 py-2.5 bg-teal-700 hover:bg-teal-650 text-white rounded-xl text-xs font-bold cursor-pointer flex items-center justify-center gap-2"
+                  disabled={isUploadingAvatar}
+                >
+                  {isUploadingAvatar ? (
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  ) : (
+                    "Simpan & Potong"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   );

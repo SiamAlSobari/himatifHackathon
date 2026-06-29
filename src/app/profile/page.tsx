@@ -239,7 +239,7 @@ export default function ProfilePage() {
     const toastId = toast.loading("Mengirim kode verifikasi OTP...");
 
     sendOtpMutation.mutate(rawInput, {
-      onSuccess: (res) => {
+      onSuccess: (res: {formattedPhone: string, mocked: boolean, code: string | null}) => {
         setOtpStep("verify");
         setResendCooldown(60);
         setEditPhone(res.formattedPhone); // Use formatted phone returned from API

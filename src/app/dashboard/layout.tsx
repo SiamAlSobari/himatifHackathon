@@ -27,7 +27,7 @@ export default async function DashboardLayout({
     select: { usia: true, jenisKelamin: true },
   })
 
-  if (!user?.usia || !user?.jenisKelamin) {
+  if (user && !user?.jenisKelamin || !user?.usia) {
     redirect("/onboarding")
   }
 

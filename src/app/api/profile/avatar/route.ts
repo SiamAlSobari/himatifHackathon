@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { errorResponse, successResponse } from "@/lib/response";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import userRepository from "@/repositories/user.repository";
+import { db } from "@/lib/db";
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -24,6 +25,14 @@ export async function POST(request: Request) {
     await userRepository.updateUserProfile(session.user.id, {
       image: imageUrl
     });
+
+    const role = (session.user as any).role;
+    if (role === "PSYCHOLOGY") {
+      await db.psychologistProfile.update({
+        where: { userId: session.user.id },
+        data: { imageUrl: imageUrl }
+      });
+    }
 
     return successResponse(200, "Foto profil berhasil diperbarui", { imageUrl });
   } catch (error: any) {
