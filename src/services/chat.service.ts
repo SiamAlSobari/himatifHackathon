@@ -31,7 +31,10 @@ export class ChatService {
             return acc;
         }, [] as { AI: string; User: string }[]);
 
-        return pairedHistory.map((chat, index) => `--- Turn ${index + 1} ---\nAI: ${chat.AI}\nUser: ${chat.User}`).join('\n\n');
+        return {
+            turn: pairedHistory.length,
+            formattedHistory: pairedHistory.map((chat, index) => `--- Turn ${index + 1} ---\nAI: ${chat.AI}\nUser: ${chat.User}`).join('\n\n')
+        }
     }
 
     async sendMessage(userId: string, sessionId: string, message: string) {
@@ -43,11 +46,16 @@ export class ChatService {
             }
 
             // Format history
-            const formattedHistory = await this.formatChatHistories(sessionId);
+            const { turn, formattedHistory } = await this.formatChatHistories(sessionId);
 
             // Jika ini adalah pesan pertama, kita perlu menentukan prompt awal berdasarkan hasil screening terakhir pengguna
             let userPrompt = message;
-            const isFirstMessage = formattedHistory.length === 0;
+
+            // Check if it is the first message (no chat history)
+            console.log(`turn: ${turn}`);
+            console.log(`formattedHistory: ${formattedHistory}`);
+
+            const isFirstMessage = turn === 0;
             if (isFirstMessage) {
                 // Mendapatkan hasil screening terakhir
                 const latestScreening = await screeningRepository.getLatestScreeningResult(userId);
