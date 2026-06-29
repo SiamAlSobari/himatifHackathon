@@ -24,7 +24,7 @@ export interface PsychologistConsultationHistoryItem {
   clientName: string;
   clientInitials: string;
   date: string;
-  status: "Selesai" | "Dijadwalkan" | "Dibatalkan";
+  status: "Selesai" | "Dijadwalkan" | "Dibatalkan" | "Kadaluwarsa";
 }
 
 export interface PsychologistConsultationTrendItem {

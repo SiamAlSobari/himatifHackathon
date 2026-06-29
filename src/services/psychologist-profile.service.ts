@@ -35,7 +35,8 @@ class PsychologistProfileService {
 
       const status: PsychologistConsultationHistoryItem["status"] =
         appt.status === "COMPLETED" ? "Selesai" :
-        appt.status === "CANCELLED" || appt.status === "DECLINED" ? "Dibatalkan" : "Dijadwalkan";
+        appt.status === "CANCELLED" || appt.status === "DECLINED" ? "Dibatalkan" :
+        appt.status === "EXPIRED" ? "Kadaluwarsa" : "Dijadwalkan";
 
       return { id: appt.id, clientName, clientInitials: initials, date, status };
     });

@@ -11,6 +11,7 @@ import { useCreateChatSession } from "@/hooks/chat/useCreateChatSession";
 import { useSendChatMessage } from "@/hooks/chat/useSendChatMessage";
 import { useSession } from "next-auth/react";
 import { ChatSessionWithMessages } from "@/lib/types/chat";
+import { useProfile } from "@/hooks/profile/useProfile";
 import {
   Dialog,
   DialogContent,
@@ -71,6 +72,7 @@ export default function ChatPanel({
   streamingMessage = null,
 }: ChatPanelProps) {
   const session = useSession();
+  const { data: profile } = useProfile();
   const createSessionMutation = useCreateChatSession();
   const sendMessageMutation = useSendChatMessage();
   
@@ -83,6 +85,12 @@ export default function ChatPanel({
   // Determine actual session to display (selected history session, active session, or completed session during cooldown)
   const displaySession = selectedHistorySession || activeSession || cooldown?.completedSession || null;
   const messages = displaySession?.chatMessages || [];
+
+  const userGender = profile?.dbUser?.jenisKelamin;
+  const userPlaceholder = (userGender === "LAKI_LAKI" || userGender === "male")
+    ? "https://cdn-icons-png.freepik.com/512/219/219988.png"
+    : "https://cdn-icons-png.freepik.com/512/219/219969.png";
+  const finalUserImage = profile?.dbUser?.image || session.data?.user?.image || userPlaceholder;
 
   // Reset optimistic user message once the message is saved in DB list
   useEffect(() => {
@@ -235,7 +243,7 @@ export default function ChatPanel({
                   sender={msg.role === "ASSISTANT" ? "ai" : "user"}
                   message={msg.content}
                   time={formattedTime}
-                  userImage={session.data?.user?.image}
+                  userImage={finalUserImage}
                 />
               );
             })}
@@ -247,7 +255,7 @@ export default function ChatPanel({
                   sender="user"
                   message={pendingUserMessage}
                   time={new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  userImage={session.data?.user?.image}
+                  userImage={finalUserImage}
                 />
               </div>
             )}

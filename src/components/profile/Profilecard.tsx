@@ -9,6 +9,8 @@ interface ProfileCardProps {
   location?: string | null;
   avatarUrl?: string | null;
   onEdit?: () => void;
+  gender?: string | null;
+  onAvatarClick?: () => void;
 }
 
 export default function ProfileCard({
@@ -17,18 +19,24 @@ export default function ProfileCard({
   location,
   avatarUrl,
   onEdit,
+  gender,
+  onAvatarClick,
 }: ProfileCardProps) {
   const subtitleParts = [
     age ? `${age} Tahun` : null,
   ].filter(Boolean);
 
+  const placeholder = (gender === "LAKI_LAKI" || gender === "male")
+    ? "https://cdn-icons-png.freepik.com/512/219/219988.png"
+    : "https://cdn-icons-png.freepik.com/512/219/219969.png";
+
   return (
     <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md">
       <div className="flex flex-col items-center text-center">
-        <div className="relative group cursor-pointer">
+        <div className="relative group cursor-pointer" onClick={onAvatarClick}>
           <div className="absolute inset-0 rounded-full bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse" />
           <Image
-            src={avatarUrl || "https://i.pravatar.cc/160?img=47"}
+            src={avatarUrl || placeholder}
             alt={name}
             width={96}
             height={96}
@@ -36,8 +44,9 @@ export default function ProfileCard({
           />
           <button
             type="button"
+            onClick={(e) => { e.stopPropagation(); onAvatarClick?.(); }}
             aria-label="Ubah foto profil"
-            className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-sm transition-all duration-300 hover:scale-110 active:scale-95"
+            className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-sm transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer"
           >
             <Camera className="h-4 w-4" />
           </button>
@@ -75,4 +84,4 @@ export default function ProfileCard({
       </div>
     </div>
   );
-}
+}

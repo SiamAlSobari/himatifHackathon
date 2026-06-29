@@ -71,7 +71,11 @@ export default function PsychologistSidebar({
             <img
               className="w-20 h-20 rounded-full object-cover border border-slate-100"
               alt={client.name}
-              src={client.image || "https://i.pravatar.cc/80?img=12"}
+              src={client.image || (
+                (client.jenisKelamin === "LAKI_LAKI" || client.jenisKelamin === "male")
+                  ? "https://cdn-icons-png.freepik.com/512/219/219988.png"
+                  : "https://cdn-icons-png.freepik.com/512/219/219969.png"
+              )}
             />
           </div>
         </div>

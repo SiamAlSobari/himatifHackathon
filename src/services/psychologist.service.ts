@@ -307,9 +307,10 @@ export class PsychologistService {
     const consultationHistory = appointments.map((appt) => {
       const apptDate = new Date(appt.scheduledAt);
 
-      const status: "Selesai" | "Dijadwalkan" | "Dibatalkan" =
+      const status: "Selesai" | "Dijadwalkan" | "Dibatalkan" | "Kadaluwarsa" =
         appt.status === "COMPLETED" ? "Selesai" :
-          appt.status === "CANCELLED" ? "Dibatalkan" : "Dijadwalkan";
+          appt.status === "CANCELLED" ? "Dibatalkan" :
+          appt.status === "EXPIRED" ? "Kadaluwarsa" : "Dijadwalkan";
 
       const psychName = profile.user.name || "Psikolog";
       const initials = psychName

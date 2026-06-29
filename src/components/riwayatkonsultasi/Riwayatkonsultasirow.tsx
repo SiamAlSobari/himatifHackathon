@@ -4,6 +4,7 @@ const statusStyles: Record<ConsultationHistoryItem["status"], string> = {
   Selesai: "bg-emerald-100 text-emerald-600",
   Dijadwalkan: "bg-blue-100 text-blue-600",
   Dibatalkan: "bg-rose-100 text-rose-600",
+  Kadaluwarsa: "bg-amber-100 text-amber-600",
 };
 
 interface RiwayatKonsultasiRowProps {

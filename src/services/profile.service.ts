@@ -32,11 +32,13 @@ export class ProfileService {
       const formattedDate = `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
 
       // Status translation/mapping
-      let status: "Selesai" | "Dibatalkan" | "Berlangsung" = "Berlangsung";
+      let status: "Selesai" | "Dibatalkan" | "Berlangsung" | "Kadaluwarsa" = "Berlangsung";
       if (appt.status === "COMPLETED") {
         status = "Selesai";
       } else if (appt.status === "CANCELLED" || appt.status === "DECLINED") {
         status = "Dibatalkan";
+      } else if (appt.status === "EXPIRED") {
+        status = "Kadaluwarsa";
       }
 
       return {
@@ -113,11 +115,12 @@ export class ProfileService {
     };
   }
 
-  async updateUserProfile(userId: string, data: { name?: string; usia?: number | string; jenisKelamin?: string }) {
+  async updateUserProfile(userId: string, data: { name?: string; usia?: number | string; jenisKelamin?: string; image?: string }) {
     const updatedData: any = {};
     if (data.name !== undefined) updatedData.name = data.name;
     if (data.usia !== undefined) updatedData.usia = typeof data.usia === "string" ? parseInt(data.usia, 10) : data.usia;
     if (data.jenisKelamin !== undefined) updatedData.jenisKelamin = data.jenisKelamin;
+    if (data.image !== undefined) updatedData.image = data.image;
 
     return await userRepository.updateUserProfile(userId, updatedData);
   }

@@ -5,6 +5,7 @@ import Section1 from "@/components/landingpage/section1";
 import Section2 from "@/components/landingpage/section2";
 import Section3 from "@/components/landingpage/section3";
 import { AppTheme } from "@/lib/types/theme";
+import { animate } from "animejs";
 
 const THEMES: AppTheme[] = ["calm_blue", "warm_yellow", "alert_orange", "deep_purple"];
 
@@ -53,6 +54,40 @@ export default function LandingClient() {
       });
       const savedTheme = window.sessionStorage.getItem("app-theme") || "calm_blue";
       docRoot.classList.add(`theme-${savedTheme}`);
+    };
+  }, []);
+
+  // Scroll reveal observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            observer.unobserve(entry.target);
+            animate(entry.target, {
+              opacity: [0, 1],
+              translateY: [40, 0],
+              duration: 1000,
+              easing: "easeOutCubic"
+            });
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
+    );
+
+    const timer = setTimeout(() => {
+      const targets = document.querySelectorAll(".scroll-reveal");
+      targets.forEach((el) => {
+        ;(el as HTMLElement).style.opacity = "0";
+        ;(el as HTMLElement).style.transform = "translateY(40px)";
+        observer.observe(el);
+      });
+    }, 150);
+
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
     };
   }, []);
 

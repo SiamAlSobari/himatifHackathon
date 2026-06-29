@@ -43,6 +43,18 @@ body {
   transition: background-color 0.5s ease, color 0.5s ease;
 }
 
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  background-image: 
+    linear-gradient(to right, color-mix(in srgb, var(--primary) 3.5%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--primary) 3.5%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+}
+
 @theme {
   --color-surface-container-low: #eff4ff;
   --color-surface: var(--surface);
@@ -558,3 +570,24 @@ body, header, main, footer, section, div, aside, nav, button, input, select, tex
 .origin-left {
   transform-origin: left;
 }
+
+/* Wiggle and Float combined animation for premium looping chat badges */
+@keyframes wiggle-float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-5px) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-5px) rotate(3deg);
+  }
+}
+
+.animate-wiggle-float {
+  animation: wiggle-float 5s ease-in-out infinite;
+}
+

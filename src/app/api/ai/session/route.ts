@@ -56,7 +56,7 @@ export async function GET(request: Request) {
         const latestScreening = await screeningRepository.getLatestScreeningResult(userId);
         const user = await db.user.findUnique({
             where: { id: userId },
-            select: { isOnboarded: true }
+            select: { isOnboarded: true, jenisKelamin: true }
         });
 
         let cooldown = null;
@@ -106,7 +106,8 @@ export async function GET(request: Request) {
             latestScreening,
             isOnboarded: user?.isOnboarded ?? false,
             hasScreenedToday,
-            history
+            history,
+            jenisKelamin: user?.jenisKelamin
         });
     } catch (error) {
         console.error("Error in chat session route:", error);

@@ -105,6 +105,11 @@ export default function ChatArea({
                 initialTxHash={appointment.txHash}
               />
             </>
+          ) : appointment.status === "EXPIRED" ? (
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-600 border border-amber-100 text-xs font-semibold">
+              <ShieldAlert className="h-3.5 w-3.5" />
+              Kadaluwarsa
+            </div>
           ) : (
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-600 border border-rose-100 text-xs font-semibold">
               <XCircle className="h-3.5 w-3.5" />

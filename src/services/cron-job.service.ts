@@ -2,6 +2,7 @@ import chatSessionRepository from "@/repositories/chatSessionRepository";
 import appointmentRepository from "@/repositories/appointment.repository";
 import blockchainSyncService from "./blockchain-sync.service";
 import type { CronJobResponse, CronJobSessionResult } from "@/lib/types/job";
+import { db } from "@/lib/db";
 
 export class CronJobService {
   /**
@@ -70,6 +71,74 @@ export class CronJobService {
         message: error.message || "Failed during cron job execution",
         processedCount: 0,
         results: [],
+      };
+    }
+  }
+
+  /**
+   * Automatically marks stale/expired appointments as EXPIRED if they have passed their active slot (e.g. 30 minutes since scheduled time).
+   */
+  async expireStaleAppointments(): Promise<CronJobResponse> {
+    try {
+      console.log("CronJobService: Starting check for stale appointments...");
+
+      // 1. Calculate cutoff time (30 minutes ago)
+      const cutoff = new Date(Date.now() - 30 * 60 * 1000);
+
+      // 2. Find appointments with status PENDING, APPROVED, or SCHEDULED that are past the cutoff
+      const staleAppointments = await db.appointment.findMany({
+        where: {
+          status: {
+            in: ["PENDING", "APPROVED", "SCHEDULED"]
+          },
+          scheduledAt: {
+            lt: cutoff
+          }
+        },
+        select: {
+          id: true
+        }
+      });
+
+      console.log(`CronJobService: Found ${staleAppointments.length} stale appointments to mark as EXPIRED.`);
+
+      const results: CronJobSessionResult[] = [];
+
+      if (staleAppointments.length > 0) {
+        const appointmentIds = staleAppointments.map((a) => a.id);
+        await db.appointment.updateMany({
+          where: {
+            id: {
+              in: appointmentIds
+            }
+          },
+          data: {
+            status: "EXPIRED"
+          }
+        });
+
+        for (const apptId of appointmentIds) {
+          results.push({
+            sessionId: apptId,
+            status: "success"
+          });
+        }
+        console.log(`CronJobService: Successfully marked ${appointmentIds.length} appointments as EXPIRED.`);
+      }
+
+      return {
+        success: true,
+        message: `Processed ${staleAppointments.length} stale appointments.`,
+        processedCount: staleAppointments.length,
+        results
+      };
+    } catch (error: any) {
+      console.error("CronJobService: Expire stale appointments cron job failed:", error);
+      return {
+        success: false,
+        message: error.message || "Failed during cron job execution",
+        processedCount: 0,
+        results: []
       };
     }
   }
