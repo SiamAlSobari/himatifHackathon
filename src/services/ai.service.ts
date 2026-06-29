@@ -20,10 +20,13 @@ export class AIService {
         }
     }
 
-    async sendChatMessageStream(chatHistory: string, prompt: string, onChunk: (text: string) => void) {
+    async sendChatMessageStream(chatHistory: string, prompt: string, turnCount: number, onChunk: (text: string) => void) {
         try {
             const raw = loadPrompt("chat.prompt");
-            const finalPrompt = raw.replace("{{user_history}}", chatHistory).replace("{{user_message}}", prompt);
+            const finalPrompt = raw
+                .replace("{{user_history}}", chatHistory)
+                .replace("{{user_message}}", prompt)
+                .replace("{{turn_count}}", turnCount.toString())
 
             const response = await aiClient.generateContentStream(finalPrompt, onChunk);
             if (!response) {

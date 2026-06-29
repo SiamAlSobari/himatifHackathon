@@ -31,7 +31,10 @@ export class ChatService {
             return acc;
         }, [] as { AI: string; User: string }[]);
 
-        return pairedHistory.map((chat, index) => `--- Turn ${index + 1} ---\nAI: ${chat.AI}\nUser: ${chat.User}`).join('\n\n');
+        return {
+            turn: pairedHistory.length,
+            formattedHistory: pairedHistory.map((chat, index) => `--- Turn ${index + 1} ---\nAI: ${chat.AI}\nUser: ${chat.User}`).join('\n\n')
+        }
     }
 
     async sendMessage(userId: string, sessionId: string, message: string) {
@@ -43,11 +46,16 @@ export class ChatService {
             }
 
             // Format history
-            const formattedHistory = await this.formatChatHistories(sessionId);
+            const { turn, formattedHistory } = await this.formatChatHistories(sessionId);
 
             // Jika ini adalah pesan pertama, kita perlu menentukan prompt awal berdasarkan hasil screening terakhir pengguna
             let userPrompt = message;
-            const isFirstMessage = formattedHistory.length === 0;
+
+            console.log(`turn: ${turn}`);
+            console.log(`formattedHistory: ${formattedHistory}`);
+
+            // Check if it is the first message (no chat history)
+            const isFirstMessage = turn === 0;
             if (isFirstMessage) {
                 // Mendapatkan hasil screening terakhir
                 const latestScreening = await screeningRepository.getLatestScreeningResult(userId);
@@ -69,7 +77,7 @@ export class ChatService {
             }
 
             after(async () => {
-                await this.processAIResponse(userId, sessionId, formattedHistory, userPrompt).catch(error => {
+                await this.processAIResponse(userId, sessionId, formattedHistory, userPrompt, turn).catch(error => {
                     console.error("[ChatService] Error getting AI response:", error);
                     // Kirim error notification ke frontend via Pusher
                     pusherServer.trigger(`user-${userId}`, "chat-finished", {
@@ -92,7 +100,7 @@ export class ChatService {
         }
     }
 
-    private async processAIResponse(userId: string, sessionId: string, formattedHistory: string, prompt: string,) {
+    private async processAIResponse(userId: string, sessionId: string, formattedHistory: string, prompt: string, turnCount: number) {
         let response: string | undefined = "";
 
         try {
@@ -101,7 +109,7 @@ export class ChatService {
 
             // Bug fix #7: Wrap AI call dengan timeout
             response = await Promise.race([
-                aiService.sendChatMessageStream(formattedHistory, prompt, (chunk) => {
+                aiService.sendChatMessageStream(formattedHistory, prompt, turnCount, (chunk) => {
                     accumulatedRaw += chunk;
                     const cleanText = extractSuggestionFromPartialJson(accumulatedRaw);
                     if (cleanText.length > lastCleanLength) {

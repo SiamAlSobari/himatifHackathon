@@ -108,17 +108,6 @@ export default function BookingModal({
     ? psychologist.operationalHours
     : ["09:00", "10:00", "13:00", "14:30", "16:00", "17:00"]
 
-  // Get friendly clinical biography based on name/role
-  const getBiography = (name: string) => {
-    if (name.includes("Aris")) {
-      return "Dr. Aris Setiawan adalah seorang psikolog klinis senior dengan pengalaman lebih dari 12 tahun. Spesialisasi beliau adalah penanganan trauma psikologis berat, PTSD, dan pendampingan krisis emosional. Menggunakan pendekatan kognitif perilaku (CBT) dan EMDR untuk membantu pemulihan pasien secara mendalam."
-    }
-    if (name.includes("Sarah")) {
-      return "Dr. Sarah Wijaya adalah seorang dokter spesialis kedokteran jiwa (psikiater) dengan pengalaman 8 tahun. Beliau berfokus pada diagnosis dan manajemen klinis untuk gangguan kecemasan, depresi, gangguan tidur kronis (insomnia), dan mood swing. Pendekatan beliau mengkombinasikan psikofarmakoterapi dan psikoterapi suportif."
-    }
-    return "Dika Pratama adalah konselor sebaya tersertifikasi yang berfokus pada pendampingan kesehatan mental remaja dan dewasa awal. Memiliki pengalaman 5 tahun mendampingi tantangan overthinking, tekanan akademik, konflik relasi sosial, dan adaptasi fase hidup baru."
-  }
-
   const isProfileMode = mode === "profile"
 
   const titleColor = titleColorMap[theme] || titleColorMap.calm_blue
@@ -213,14 +202,46 @@ export default function BookingModal({
               </div>
             )}
 
-            {/* Biography */}
+            {/* Status Ketersediaan */}
+            {(psychologist.availability || psychologist.busyUntil) && (
+              <div className="pb-2">
+                <span className={`block text-[10px] font-bold uppercase tracking-wider mb-1.5 ${textDarkColor}`}>
+                  Status Ketersediaan
+                </span>
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100/50 space-y-1.5">
+                  {psychologist.availability && (
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[16px] text-teal-600" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                      <span className="text-xs text-slate-700 font-semibold">{psychologist.availability}</span>
+                    </div>
+                  )}
+                  {psychologist.busyUntil && (
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[16px] text-amber-500" style={{ fontVariationSettings: "'FILL' 1" }}>schedule</span>
+                      <span className="text-xs text-slate-700 font-semibold">Sibuk hingga {psychologist.busyUntil}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Jam Kerja */}
             <div className="pb-2">
               <span className={`block text-[10px] font-bold uppercase tracking-wider mb-1.5 ${textDarkColor}`}>
-                Tentang Spesialis
+                Jam Kerja (Tersedia)
               </span>
-              <p className="text-xs text-slate-600 font-medium leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-100/50">
-                {getBiography(psychologist.name)}
-              </p>
+              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100/50">
+                <div className="grid grid-cols-3 gap-2">
+                  {timeSlots.map((time) => (
+                    <div
+                      key={time}
+                      className="py-1.5 text-center bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 shadow-sm"
+                    >
+                      {time} WIB
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Interactive Rating Component */}
