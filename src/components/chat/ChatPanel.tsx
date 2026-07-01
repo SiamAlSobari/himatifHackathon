@@ -81,6 +81,7 @@ export default function ChatPanel({
   const chatContainerRef = useRef<HTMLDivElement>(null);
   
   const [optimisticUserMessage, setOptimisticUserMessage] = useState<string | null>(null);
+  const [expectedUserMessagesCount, setExpectedUserMessagesCount] = useState<number | null>(null);
   const [localCreating, setLocalCreating] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const resetSessionMutation = useResetChatSession();
@@ -99,16 +100,20 @@ export default function ChatPanel({
 
   // Reset optimistic user message once the message is saved in DB list
   useEffect(() => {
-    if (optimisticUserMessage) {
-      const hasMessage = messages.some(
-        (m) => m.role === "USER" && m.content === optimisticUserMessage
-      );
-      const lastIsAssistant = messages.length > 0 && messages[messages.length - 1].role === "ASSISTANT";
-      if (hasMessage || lastIsAssistant) {
+    if (optimisticUserMessage && expectedUserMessagesCount !== null) {
+      const currentUserMessagesCount = messages.filter((m) => m.role === "USER").length;
+      if (currentUserMessagesCount >= expectedUserMessagesCount) {
         setOptimisticUserMessage(null);
+        setExpectedUserMessagesCount(null);
       }
     }
-  }, [messages, optimisticUserMessage]);
+  }, [messages, optimisticUserMessage, expectedUserMessagesCount]);
+
+  // Reset optimistic message state when switching sessions
+  useEffect(() => {
+    setOptimisticUserMessage(null);
+    setExpectedUserMessagesCount(null);
+  }, [displaySession?.id]);
 
   // Get message user is currently sending (for optimistic rendering)
   const pendingUserMessage = optimisticUserMessage;
@@ -164,6 +169,11 @@ export default function ChatPanel({
   // Handle message sending
   const handleSend = (text: string) => {
     if (!activeSession) return;
+
+    // Track how many USER messages we expect in the list
+    const currentUserMessagesCount = messages.filter((m) => m.role === "USER").length;
+    setExpectedUserMessagesCount(currentUserMessagesCount + 1);
+
     setOptimisticUserMessage(text);
     sendMessageMutation.mutate({
       sessionId: activeSession.id,
@@ -171,6 +181,7 @@ export default function ChatPanel({
     }, {
       onError: () => {
         setOptimisticUserMessage(null);
+        setExpectedUserMessagesCount(null);
       }
     });
   };
