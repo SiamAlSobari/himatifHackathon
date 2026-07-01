@@ -5,7 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { animate, stagger } from "animejs";
 
-export default function Section1() {
+interface Section1Props {
+  onCtaClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+}
+
+export default function Section1({ onCtaClick }: Section1Props) {
   useEffect(() => {
     // Set initial styles for animation targets to avoid flash
     const elements = document.querySelectorAll(".anime-hero-reveal");
@@ -67,6 +71,7 @@ export default function Section1() {
         <div className="anime-hero-reveal">
           <Link
             href="/dashboard"
+            onClick={onCtaClick}
             className="inline-flex items-center gap-2 bg-foreground hover:bg-primary text-white text-sm font-medium px-7 py-3 rounded-full transition-all duration-300 shadow-lg hover:shadow-primary/30 hover:shadow-xl hover-lift group"
           >
             Temukan dirimu
