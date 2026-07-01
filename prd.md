@@ -143,6 +143,9 @@ Ruang menyediakan **onboarding bertingkat** yang lembut:
 - **Penutupan Sesi:**
   - AI menghasilkan **ringkasan kondisi** (≤ 200 kata) tersimpan otomatis.
   - CTA: *"Mau lanjut cerita sesi baru?"* atau *"Lihat opsi ngobrol dengan psikolog"*.
+- **Reset Sesi (Restart Percakapan):**
+  - **Alur Kerja:** Pengguna mengklik tombol "Reset Sesi" di bagian header percakapan -> Konfirmasi via modal pop-up -> Menghapus seluruh riwayat pesan obrolan & ringkasan sesi saat ini -> Memicu kembali sapaan awal AI (*first chat*) dari awal -> Obrolan dapat dilanjutkan kembali.
+  - **Batasan/Constraints:** Fitur ini hanya berlaku maksimal 1 kali per sesi obrolan. Hanya dapat digunakan ketika status sesi obrolan masih aktif (`ACTIVE`) dan belum terintegrasi dengan blockchain (tidak memiliki `txHash` atau `ipfsCid`).
 
 ### 6.4 Konsultasi Psikolog
 - **Daftar Psikolog:** foto, spesialisasi, rating, jadwal.

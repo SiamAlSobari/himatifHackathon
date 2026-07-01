@@ -280,6 +280,11 @@
   - [x] Kirim CID ke smart contract dan simpan `txHash` serta `ipfsCid` ke database ✅
 - [x] Tampilkan tautan IPFS dan Polygonscan Transaction Hash di UI user & dashboard psikolog via lencana verifikasi ✅
 - [x] Tambahkan mekanisme manual sync / retry button ("Restart") pada modal verifikasi jika terjadi kegagalan transaksi di latar belakang ✅
+- [x] **Fitur Reset Sesi Chat AI**:
+  - [x] Tambah field `hasBeenReset` di model `ChatSession` di `schema.prisma` & migrasi database ✅
+  - [x] Implementasi backend service `resetChatSession` (menghapus pesan & summary serta memicu sapaan pembuka AI dalam satu transaksi database) ✅
+  - [x] Tambah API endpoint `PUT /api/ai/session` untuk memproses reset sesi ✅
+  - [x] Tambah custom hook `useResetChatSession` dan tombol "Reset Sesi" di `ChatHeader.tsx` beserta modal konfirmasi di `ChatPanel.tsx` ✅
 
 ### Final Polish & Rehearsal (Jum, 26/06)
 - [x] Uji coba menyeluruh (End-to-End Test) alur chat AI -> Pinata -> Blockchain -> DB ✅
