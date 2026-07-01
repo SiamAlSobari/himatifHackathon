@@ -208,6 +208,29 @@ classDiagram
 
 ---
 
+## 📐 Diagram Alur Aplikasi
+
+### Use Case Diagram (Per Actor)
+
+| Actor | File | Format |
+|-------|------|--------|
+| 👤 **User (Pengguna)** | [`diagram/case/actor-user.md`](diagram/case/actor-user.md) | PlantUML — render di [plantuml.com](https://www.plantuml.com/plantuml/uml/) |
+| 🧑‍⚕️ **Psikolog** | [`diagram/case/actor-psikolog.md`](diagram/case/actor-psikolog.md) | PlantUML — render di [plantuml.com](https://www.plantuml.com/plantuml/uml/) |
+
+### System Flowchart (Mermaid — Render Native di GitHub)
+
+| # | Sistem | File | Deskripsi |
+|---|--------|------|-----------|
+| 01 | 🔐 **Auth System** | [`diagram/system/01-auth-flow.md`](diagram/system/01-auth-flow.md) | Register, Login, Reset Password, OTP |
+| 02 | 📋 **Screening System** | [`diagram/system/02-screening-flow.md`](diagram/system/02-screening-flow.md) | Scoring, Theme Mapping, Dynamic Theming |
+| 03 | 🤖 **AI Chat System** | [`diagram/system/03-ai-chat-flow.md`](diagram/system/03-ai-chat-flow.md) | Gemini Streaming, Session Sealing, Summary |
+| 04 | 📅 **Booking System** | [`diagram/system/04-booking-flow.md`](diagram/system/04-booking-flow.md) | Cari Psikolog, Booking, Approve/Decline |
+| 05 | 💬 **Realtime Chat** | [`diagram/system/05-realtime-chat-flow.md`](diagram/system/05-realtime-chat-flow.md) | Pusher Chat User ↔ Psikolog |
+| 06 | ⛓️ **Blockchain System** | [`diagram/system/06-blockchain-flow.md`](diagram/system/06-blockchain-flow.md) | IPFS Pinata, Polygon, Verifikasi |
+| 07 | 🔔 **Notification System** | [`diagram/system/07-notification-flow.md`](diagram/system/07-notification-flow.md) | Pusher Events, Cron Reminder |
+
+---
+
 ## 📜 Spesifikasi Smart Contract (`SessionRegistry.sol`)
 
 Smart contract ditulis menggunakan Solidity compiler `v0.8.20` dan di-deploy ke **Polygon Amoy Testnet**.
