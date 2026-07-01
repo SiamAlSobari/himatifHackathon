@@ -3,6 +3,7 @@ import screeningRepository from "@/repositories/screening.repository";
 import appointmentRepository from "@/repositories/appointment.repository";
 import screeningService from "./screening.service";
 import { ConsultationHistoryItem } from "@/lib/types/profile";
+import { getJakartaDateComponents } from "@/lib/utils";
 
 export class ProfileService {
   async getProfileData(userId: string) {
@@ -27,9 +28,9 @@ export class ProfileService {
         .slice(0, 2);
 
       // Date formatting
-      const date = new Date(appt.scheduledAt);
+      const dateComponents = getJakartaDateComponents(appt.scheduledAt);
       const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
-      const formattedDate = `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+      const formattedDate = `${dateComponents.day} ${months[dateComponents.month]} ${dateComponents.year}`;
 
       // Status translation/mapping
       let status: "Selesai" | "Dibatalkan" | "Berlangsung" | "Kadaluwarsa" = "Berlangsung";
@@ -59,9 +60,9 @@ export class ProfileService {
     );
 
     const wellnessTrends = sortedScreenings.map((s) => {
-      const date = new Date(s.createdAt);
-      const day = date.toLocaleDateString("id-ID", { weekday: "short" });
-      const dateStr = `${date.getDate()}/${date.getMonth() + 1}`;
+      const dateComponents = getJakartaDateComponents(s.createdAt);
+      const day = s.createdAt.toLocaleDateString("id-ID", { timeZone: "Asia/Jakarta", weekday: "short" });
+      const dateStr = `${dateComponents.day}/${dateComponents.month + 1}`;
       
       // Calculate wellness score (higher is better, max score in DASS/screening is 21)
       const wellnessScore = Math.max(0, Math.min(100, Math.round(((21 - s.score) / 21) * 100)));

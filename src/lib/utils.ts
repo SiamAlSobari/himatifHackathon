@@ -57,3 +57,40 @@ export function AIResponseFormatter<T>(jsonStr: string): T {
     throw new Error(`Invalid JSON format: ${(error as Error).message}`);
   }
 }
+
+/**
+ * Returns date components (year, month, day, hour, minute) in Asia/Jakarta (WIB) timezone
+ */
+export function getJakartaDateComponents(date: Date) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    hour12: false,
+  }).formatToParts(date);
+  const map = Object.fromEntries(parts.map(p => [p.type, p.value]));
+  return {
+    year: parseInt(map.year),
+    month: parseInt(map.month) - 1, // 0-indexed month
+    day: parseInt(map.day),
+    hour: parseInt(map.hour === "24" ? "00" : map.hour),
+    minute: parseInt(map.minute),
+  };
+}
+
+/**
+ * Formats a date in Asia/Jakarta (WIB) locale with specified options
+ */
+export function formatToJakartaString(
+  date: Date,
+  options: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit" }
+): string {
+  return date.toLocaleString("id-ID", {
+    timeZone: "Asia/Jakarta",
+    ...options,
+  });
+}
+
