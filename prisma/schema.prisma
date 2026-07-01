@@ -99,6 +99,7 @@ model ChatSession {
   sessionSummary SessionSummary?
   ipfsCid        String?         // CID IPFS untuk riwayat chat AI
   txHash         String?         // Hash transaksi blockchain
+  hasBeenReset   Boolean         @default(false)
 }
 
 enum ChatSessionStatus {

@@ -2,7 +2,8 @@
 
 import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
-import { Bot, Plus, Clock, HeartHandshake, Loader2, AlertTriangle } from "lucide-react";
+import { Bot, Plus, Clock, HeartHandshake, Loader2, AlertTriangle, RotateCcw } from "lucide-react";
+import { toast } from "sonner";
 import ChatHeader from "./ChatHeader";
 import DateDivider from "./Datedivider";
 import ChatBubble from "./ChatBubble";
@@ -12,6 +13,7 @@ import { useSendChatMessage } from "@/hooks/chat/useSendChatMessage";
 import { useSession } from "next-auth/react";
 import { ChatSessionWithMessages } from "@/lib/types/chat";
 import { useProfile } from "@/hooks/profile/useProfile";
+import { useResetChatSession } from "@/hooks/chat/useResetChatSession";
 import {
   Dialog,
   DialogContent,
@@ -79,6 +81,9 @@ export default function ChatPanel({
   const chatContainerRef = useRef<HTMLDivElement>(null);
   
   const [optimisticUserMessage, setOptimisticUserMessage] = useState<string | null>(null);
+  const [localCreating, setLocalCreating] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const resetSessionMutation = useResetChatSession();
 
   const themeStyles = themeStylesMap[activeTheme as keyof typeof themeStylesMap] || themeStylesMap.calm_blue;
 
@@ -172,9 +177,32 @@ export default function ChatPanel({
 
   // Handle creating new session
   const handleCreateSession = () => {
+    setLocalCreating(true);
     createSessionMutation.mutate(undefined, {
-      onSuccess: () => {
-        refetch();
+      onSuccess: async () => {
+        await refetch();
+        setLocalCreating(false);
+      },
+      onError: () => {
+        setLocalCreating(false);
+      },
+    });
+  };
+
+  const handleResetSession = () => {
+    setShowResetConfirm(true);
+  };
+
+  const handleConfirmReset = () => {
+    if (!activeSession) return;
+    setShowResetConfirm(false);
+    resetSessionMutation.mutate(activeSession.id, {
+      onSuccess: async () => {
+        await refetch();
+        toast.success("Sesi chat berhasil diulang dari awal!");
+      },
+      onError: (err: any) => {
+        toast.error(err.message || "Gagal mereset sesi chat");
       },
     });
   };
@@ -204,10 +232,10 @@ export default function ChatPanel({
         </p>
         <button
           onClick={handleCreateSession}
-          disabled={createSessionMutation.isPending}
+          disabled={createSessionMutation.isPending || localCreating}
           className={`inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-semibold text-white shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 cursor-pointer ${themeStyles.buttonBg}`}
         >
-          {createSessionMutation.isPending ? (
+          {createSessionMutation.isPending || localCreating ? (
             <Loader2 className="h-4 w-4 animate-spin text-white" />
           ) : (
             <Plus className="h-4 w-4" />
@@ -226,6 +254,9 @@ export default function ChatPanel({
         ipfsCid={displaySession?.ipfsCid}
         txHash={displaySession?.txHash}
         status={displaySession?.status}
+        hasBeenReset={displaySession?.hasBeenReset}
+        onResetSession={handleResetSession}
+        isResetting={resetSessionMutation.isPending}
       />
 
       {/* Messages list container */}
@@ -361,6 +392,36 @@ export default function ChatPanel({
               className="w-full py-2.5 border border-red-300 text-red-700 hover:bg-red-100/50 font-medium rounded-lg active:scale-95 transition-all cursor-pointer"
             >
               Tutup Peringatan
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
+        <DialogContent className="border-slate-200 bg-white p-6 text-center max-w-sm sm:max-w-md shadow-2xl rounded-2xl outline-none">
+          <DialogHeader className="flex flex-col items-center">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-50 text-amber-600 border border-amber-100 shadow-inner">
+              <RotateCcw className="h-6 w-6 animate-pulse" />
+            </div>
+            <DialogTitle className="text-lg font-bold text-slate-800 leading-tight">
+              Reset Sesi Percakapan?
+            </DialogTitle>
+            <DialogDescription className="mt-2 text-xs text-slate-500 leading-relaxed font-medium">
+              Tindakan ini akan menghapus seluruh riwayat pesan pada sesi aktif saat ini dan mengulang sesi kembali dari awal. **Fitur ini hanya dapat digunakan 1 kali per sesi.** Apakah Anda yakin?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-6 flex gap-3">
+            <button
+              onClick={() => setShowResetConfirm(false)}
+              className="flex-1 py-2.5 border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold text-xs rounded-xl active:scale-95 transition-all cursor-pointer"
+            >
+              Batalkan
+            </button>
+            <button
+              onClick={handleConfirmReset}
+              className={`flex-1 py-2.5 text-white font-semibold text-xs rounded-xl active:scale-95 transition-all shadow-md cursor-pointer flex justify-center items-center gap-1.5 ${themeStyles.buttonBg}`}
+            >
+              Ya, Reset Sesi
             </button>
           </div>
         </DialogContent>

@@ -114,3 +114,25 @@ export async function GET(request: Request) {
         return errorResponse(500, "Internal Server Error" + (error instanceof Error ? `: ${error.message}` : ""));
     }
 }
+
+export async function PUT(request: Request) {
+    const session = await auth();
+    const userId = session?.user?.id;
+    if (!userId) {
+        return errorResponse(401, "Unauthorized");
+    }
+
+    try {
+        const body = await request.json().catch(() => ({}));
+        const { sessionId } = body;
+        if (!sessionId) {
+            return errorResponse(400, "sessionId harus disertakan");
+        }
+
+        const result = await chatSessionService.resetChatSession(userId, sessionId);
+        return successResponse(200, "Sesi berhasil direset", result);
+    } catch (error: any) {
+        console.error("Error in reset session route:", error);
+        return errorResponse(500, error.message || "Internal Server Error");
+    }
+}

@@ -111,7 +111,7 @@ export default function ScreeningDetailPage() {
             </button>
             <h1 className="text-base font-bold text-slate-800 tracking-tight flex items-center gap-2">
               <ClipboardList className="h-5 w-5 text-primary" />
-              Riwayat Kenali
+              Riwayat Screening
             </h1>
           </div>
 
@@ -193,7 +193,7 @@ export default function ScreeningDetailPage() {
                     Detail Hasil Screening ({formatDate(selectedScreening.createdAt)})
                   </h2>
                   <p className="text-[10px] text-slate-400 font-medium mt-0.5">
-                    ID Transaksi: {selectedScreening.id}
+                    ID Screening: {selectedScreening.id}
                   </p>
                 </div>
               </div>

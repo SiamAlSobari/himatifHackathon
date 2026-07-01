@@ -1,4 +1,4 @@
-import { Bot, MoreVertical } from "lucide-react";
+import { Bot, MoreVertical, RotateCcw, Loader2 } from "lucide-react";
 import VerificationBadge from "./VerificationBadge";
 
 const headerAvatarColorMap = {
@@ -14,6 +14,9 @@ interface ChatHeaderProps {
   ipfsCid?: string | null;
   txHash?: string | null;
   status?: string;
+  hasBeenReset?: boolean;
+  onResetSession?: () => void;
+  isResetting?: boolean;
 }
 
 export default function ChatHeader({
@@ -22,6 +25,9 @@ export default function ChatHeader({
   ipfsCid,
   txHash,
   status,
+  hasBeenReset,
+  onResetSession,
+  isResetting,
 }: ChatHeaderProps) {
   const avatarBg = headerAvatarColorMap[activeTheme as keyof typeof headerAvatarColorMap] || "bg-teal-900";
   const isFinished = status === "COMPLETED" || status === "SEALED" || !!(ipfsCid || txHash);
@@ -42,6 +48,22 @@ export default function ChatHeader({
       </div>
 
       <div className="flex items-center gap-3">
+        {sessionId && !isFinished && !hasBeenReset && (
+          <button
+            onClick={onResetSession}
+            disabled={isResetting}
+            title="Reset Percakapan"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-600 hover:text-slate-800 text-xs font-semibold disabled:opacity-50 transition-all cursor-pointer shadow-sm hover:shadow active:scale-95"
+          >
+            {isResetting ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <RotateCcw className="h-3.5 w-3.5" />
+            )}
+            Reset Sesi
+          </button>
+        )}
+
         {sessionId && isFinished && (
           <VerificationBadge
             sessionId={sessionId}
