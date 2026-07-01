@@ -94,10 +94,16 @@ export default function ChatPanel({
 
   // Reset optimistic user message once the message is saved in DB list
   useEffect(() => {
-    if (messages.length > 0 && messages[messages.length - 1].role === "USER") {
-      setOptimisticUserMessage(null);
+    if (optimisticUserMessage) {
+      const hasMessage = messages.some(
+        (m) => m.role === "USER" && m.content === optimisticUserMessage
+      );
+      const lastIsAssistant = messages.length > 0 && messages[messages.length - 1].role === "ASSISTANT";
+      if (hasMessage || lastIsAssistant) {
+        setOptimisticUserMessage(null);
+      }
     }
-  }, [messages]);
+  }, [messages, optimisticUserMessage]);
 
   // Get message user is currently sending (for optimistic rendering)
   const pendingUserMessage = optimisticUserMessage;
