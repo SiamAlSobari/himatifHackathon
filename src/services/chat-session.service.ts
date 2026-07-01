@@ -1,4 +1,6 @@
 import chatSessionRepository from "@/repositories/chatSessionRepository";
+import { db } from "@/lib/db";
+import chatService from "./chat.service";
 
 export class ChatSessionService {
     async getUserChatSessions(userId: string) {
@@ -32,6 +34,52 @@ export class ChatSessionService {
         }
     }
 
+    async resetChatSession(userId: string, sessionId: string) {
+        try {
+            const session = await chatSessionRepository.getById(sessionId);
+            if (!session) {
+                throw new Error("Sesi tidak ditemukan");
+            }
+
+            if (session.userId !== userId) {
+                throw new Error("Unauthorized");
+            }
+
+            if (session.status !== "ACTIVE") {
+                throw new Error("Sesi ini sudah tidak aktif");
+            }
+
+            if (session.hasBeenReset) {
+                throw new Error("Sesi ini sudah pernah direset sebelumnya");
+            }
+
+            if (session.txHash || session.ipfsCid) {
+                throw new Error("Sesi ini sudah terintegrasi dengan blockchain");
+            }
+
+            // Hapus semua pesan chat dan ringkasan sesi, lalu set hasBeenReset menjadi true
+            await db.$transaction([
+                db.chatMessage.deleteMany({
+                    where: { sessionId }
+                }),
+                db.sessionSummary.deleteMany({
+                    where: { chatSessionId: sessionId }
+                }),
+                db.chatSession.update({
+                    where: { id: sessionId },
+                    data: { hasBeenReset: true }
+                })
+            ]);
+
+            // Pemicu sapaan awal AI (First chat dari AI)
+            await chatService.sendMessage(userId, sessionId, "");
+
+            return { success: true };
+        } catch (error) {
+            console.error("Error resetting chat session:", error);
+            throw error;
+        }
+    }
 }
 
 const chatSessionService = new ChatSessionService();

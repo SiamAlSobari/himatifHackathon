@@ -29,6 +29,7 @@ export interface ChatSession {
     updatedAt: Date | string;
     ipfsCid?: string | null;
     txHash?: string | null;
+    hasBeenReset?: boolean;
 }
 
 export interface ChatSessionWithMessages extends ChatSession {
