@@ -3,6 +3,7 @@ import psychologistRepository from "@/repositories/psychologist.repository";
 import screeningRepository from "@/repositories/screening.repository";
 import screeningService from "./screening.service";
 import { ActivityRecommendation } from "@/lib/types/dashboard";
+import { getJakartaDateComponents } from "@/lib/utils";
 
 export class UserService {
   async resolveLoginDestination(userId: string): Promise<string> {
@@ -223,20 +224,29 @@ export class UserService {
     
     const formatAppointmentDate = (scheduledAt: Date): string => {
       const date = new Date(scheduledAt);
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const tomorrow = new Date(today);
+      
+      const nowJakarta = getJakartaDateComponents(now);
+      const dateJakarta = getJakartaDateComponents(date);
+
+      const today = new Date(nowJakarta.year, nowJakarta.month, nowJakarta.day);
+      const tomorrow = new Date(nowJakarta.year, nowJakarta.month, nowJakarta.day);
       tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const targetDate = new Date(dateJakarta.year, dateJakarta.month, dateJakarta.day);
       
-      const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-      const timeStr = date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }).replace(".", ":");
-      
+      const timeStr = date.toLocaleTimeString("id-ID", {
+        timeZone: "Asia/Jakarta",
+        hour: "2-digit",
+        minute: "2-digit"
+      }).replace(".", ":");
+
       if (targetDate.getTime() === today.getTime()) {
         return `Hari ini, ${timeStr}`;
       } else if (targetDate.getTime() === tomorrow.getTime()) {
         return `Besok, ${timeStr}`;
       } else {
         const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
-        return `${date.getDate()} ${months[date.getMonth()]}, ${timeStr}`;
+        return `${dateJakarta.day} ${months[dateJakarta.month]}, ${timeStr}`;
       }
     };
 

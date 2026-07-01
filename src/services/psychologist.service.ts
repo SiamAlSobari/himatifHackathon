@@ -68,6 +68,7 @@ export class PsychologistService {
       const clientUser = await userRepository.getUserById(userId)
       const clientName = clientUser?.name || clientUser?.email || "Seorang pengguna"
       const scheduledTimeStr = new Date(scheduledAt).toLocaleString("id-ID", {
+        timeZone: "Asia/Jakarta",
         dateStyle: "medium",
         timeStyle: "short"
       })
@@ -298,7 +299,7 @@ export class PsychologistService {
         clientName: appt.user.name || appt.user.email || "Klien",
         clientRole: appt.user.usia ? `Pasien · ${appt.user.usia} Tahun` : "Pasien",
         clientImage: appt.user.image || "https://i.pravatar.cc/150",
-        schedule: `Sesi Chat · ${apptTime.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`,
+        schedule: `Sesi Chat · ${apptTime.toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit" })}`,
         status,
       };
     });
@@ -325,7 +326,7 @@ export class PsychologistService {
         psychologName: psychName,
         clientName: appt.user.name || appt.user.email || "Klien",
         psychologInitials: initials,
-        date: apptDate.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }),
+        date: apptDate.toLocaleDateString("id-ID", { timeZone: "Asia/Jakarta", day: "numeric", month: "short", year: "numeric" }),
         status,
       };
     });
@@ -389,6 +390,7 @@ export class PsychologistService {
     if (action === "ACCEPT") {
       const psychologistName = profile.user.name || "Psikolog";
       const scheduledTimeStr = new Date(updated.scheduledAt).toLocaleString("id-ID", {
+        timeZone: "Asia/Jakarta",
         dateStyle: "medium",
         timeStyle: "short"
       });

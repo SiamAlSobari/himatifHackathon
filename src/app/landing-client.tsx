@@ -1,16 +1,37 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Section1 from "@/components/landingpage/section1";
 import Section2 from "@/components/landingpage/section2";
 import Section3 from "@/components/landingpage/section3";
 import { AppTheme } from "@/lib/types/theme";
 import { animate } from "animejs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { AlertCircle } from "lucide-react";
 
 const THEMES: AppTheme[] = ["calm_blue", "warm_yellow", "alert_orange", "deep_purple"];
 
 export default function LandingClient() {
+  const router = useRouter();
   const [localTheme, setLocalTheme] = useState<AppTheme>("calm_blue");
+  const [isDisclaimerOpen, setIsDisclaimerOpen] = useState(false);
+
+  const handleCtaClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    setIsDisclaimerOpen(true);
+  };
+
+  const handleAcceptDisclaimer = () => {
+    setIsDisclaimerOpen(false);
+    router.push("/dashboard");
+  };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -135,9 +156,54 @@ export default function LandingClient() {
         </div>
       </div>
 
-      <Section1 />
+      <Section1 onCtaClick={handleCtaClick} />
       <Section2 />
-      <Section3 />
+      <Section3 onCtaClick={handleCtaClick} />
+
+      <Dialog open={isDisclaimerOpen} onOpenChange={setIsDisclaimerOpen}>
+        <DialogContent className="sm:max-w-md max-w-[calc(100%-2rem)] bg-white rounded-3xl border border-slate-100 shadow-premium p-6 outline-none">
+          <DialogHeader className="flex flex-row items-center gap-4 border-b border-slate-50 pb-4">
+            <div className="h-10 w-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+              <AlertCircle className="h-5 w-5" />
+            </div>
+            <DialogTitle className="text-lg font-bold text-slate-800">
+              Persetujuan & Batasan Layanan
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-4 text-sm text-slate-600 leading-relaxed space-y-3 font-medium">
+            <p>
+              Sebelum melanjutkan perjalanan refleksi Anda bersama kami, mohon pahami bahwa:
+            </p>
+            <ul className="list-disc pl-5 space-y-2 text-xs">
+              <li>
+                <strong className="text-slate-700">Very AI bisa salah</strong> dalam melakukan analisis awal atau asesmen emosi Anda.
+              </li>
+              <li>
+                Platform ini <strong className="text-slate-700">tidak bertujuan menggantikan</strong> diagnosis medis klinis, psikolog, psikiater, maupun tindakan penanganan krisis darurat.
+              </li>
+              <li>
+                Jika Anda berada dalam situasi darurat atau memiliki dorongan membahayakan diri sendiri, harap segera menghubungi hotline darurat medis atau psikolog profesional berlisensi terdekat.
+              </li>
+            </ul>
+          </div>
+
+          <DialogFooter className="flex flex-col-reverse sm:flex-row justify-end gap-2.5 pt-4 border-t border-slate-50">
+            <button
+              onClick={() => setIsDisclaimerOpen(false)}
+              className="w-full sm:w-auto px-5 py-2.5 rounded-full border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-bold transition-all duration-200 cursor-pointer"
+            >
+              Batalkan
+            </button>
+            <button
+              onClick={handleAcceptDisclaimer}
+              className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-primary hover:bg-primary/95 text-white text-xs font-bold shadow-md hover:shadow-primary/30 transition-all duration-200 hover-lift cursor-pointer"
+            >
+              Saya Mengerti & Setuju
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

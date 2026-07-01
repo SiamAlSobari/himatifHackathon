@@ -2,9 +2,13 @@
 
 import React from "react";
 import Link from "next/link";
-import { AlertCircle, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
-export default function Section3() {
+interface Section3Props {
+  onCtaClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+}
+
+export default function Section3({ onCtaClick }: Section3Props) {
   return (
     <section id="validasi" className="bg-background py-24 px-6 transition-colors duration-500">
       <div className="max-w-4xl mx-auto space-y-12">
@@ -25,26 +29,12 @@ export default function Section3() {
 
           <Link
             href="/dashboard"
+            onClick={onCtaClick}
             className="inline-flex items-center gap-2 bg-white hover:bg-primary text-foreground hover:text-white text-base font-semibold px-10 py-4 rounded-full transition-all duration-300 shadow-xl hover:shadow-primary/40 hover-lift hover-glow group relative z-10"
           >
             Mulai Konsultasi
             <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
           </Link>
-        </div>
-
-        {/* Disclaimer Banner */}
-        <div className="rounded-2xl border border-amber-100 bg-amber-50/50 p-6 shadow-sm flex items-start gap-4 scroll-reveal">
-          <div className="h-10 w-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
-            <AlertCircle className="h-5 w-5" />
-          </div>
-          <div className="space-y-1.5">
-            <h4 className="text-sm font-bold text-amber-800">
-              Peringatan & Batasan Layanan (Disclaimer)
-            </h4>
-            <p className="text-xs text-amber-700/90 leading-relaxed font-medium">
-              Very AI bisa salah dalam melakukan asesmen dan tidak bertujuan menggantikan diagnosis medis klinis, psikolog, psikiater, maupun tindakan penanganan krisis. Jika Anda berada dalam situasi darurat atau memiliki dorongan untuk membahayakan diri sendiri, harap segera menghubungi psikolog berlisensi kami atau hotline darurat medis terdekat.
-            </p>
-          </div>
         </div>
 
       </div>
