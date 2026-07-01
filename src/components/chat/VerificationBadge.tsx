@@ -24,6 +24,7 @@ import {
   CheckCircle2,
   HelpCircle,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface VerificationBadgeProps {
   sessionId?: string;
@@ -155,11 +156,13 @@ export default function VerificationBadge({
       if (resData.data?.txHash) {
         setCurrentTxHash(resData.data.txHash);
       }
+      toast.success("Berhasil menyinkronkan ke blockchain.");
       await refetch();
       setIsOpen(false);
     } catch (err) {
-      console.error(err);
-      setSyncError((err as Error).message);
+      const errorMessage = (err instanceof Error && err.message) || "Gagal menyinkronkan ke blockchain.";
+      toast.error(errorMessage);
+      setSyncError(errorMessage);
     } finally {
       setIsSyncing(false);
     }
